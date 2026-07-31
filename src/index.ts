@@ -1,50 +1,37 @@
-import { createServer } from "node:http";
-import { toWebReq } from "./toWeb";
-import { createHash } from "node:crypto";
-import { handleActiveSocket } from "./handle";
-
-const server = createServer();
-const guid = "258EAFA5-E914-47DA-95CA-C5AB0DC85B11"
+import uWS from 'uWebSockets.js'
 
 
 
-server.addListener("request", (req, res) => {
-  res.writeHead(200);
-  res.end("HTTP Server OK");
-});
+const app = uWS.App()
 
-server.addListener("upgrade", (req, socket, head) => {
-  const webReq = toWebReq(req);
-  const clientKey = webReq.headers.get("sec-websocket-key");
 
-  // Validate request
-  if (!clientKey || webReq.headers.get("upgrade")?.toLowerCase() !== "websocket") {
-    socket.write("HTTP/1.1 400 Bad Request\r\n\r\n");
-    socket.destroy();
-    return;
+
+app.ws('/ws', {
+  maxPayloadLength: 16 * 1024,
+  idleTimeout: 30,
+
+  open: (ws) => {
+    console.log('Client connected!')
+    ws.subscribe('global-room')
+  },
+
+  message: (ws, message, isBinary) => {
+    const payload = Buffer.from(message).toString('utf-8')
+
+    app.publish('global-room', JSON.stringify({
+      type: 'PATCH',
+      html: `<div>Updated: ${payload}</div>`
+    }))
+  },
+
+  close: (ws) => {
+    console.log('Client disconnected')
   }
+})
 
-  const acceptKey = createHash("sha1")
-    .update(clientKey + guid)
-    .digest("base64");
-
-  // 2. Build HTTP 101 Response
-  const headers = [
-    "HTTP/1.1 101 Switching Protocols",
-    "Upgrade: websocket",
-    "Connection: Upgrade",
-    `Sec-WebSocket-Accept: ${acceptKey}`,
-    "\r\n" // Crucial empty line to mark end of HTTP response
-  ].join("\r\n");
-
-  socket.write(headers);
-
-
-  handleActiveSocket(socket, head)
-
-
-});
-
-server.listen(3000, () => {
-  console.log('Server running on http://127.0.0.1:3000');
-});
+app.listen(3000, (token) => {
+  if (token) {
+    console.log('Server running on http://localhost:3000')
+    console.log('WebSocket running on ws://localhost:3000/ws')
+  }
+})
