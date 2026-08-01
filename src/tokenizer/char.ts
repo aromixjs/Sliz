@@ -1,0 +1,69 @@
+export const CharCodes = {
+  // ==>> Whitespace
+  Space: 32,
+  Tab: 9,
+  LineFeed: 10,
+  CarriageReturn: 13,
+  // ==>> Quotes
+  SingleQuote: 39,
+  DoubleQuote: 34,
+  Backtick: 96,
+
+  // ==>> Grouping
+  OpenParen: 40,
+  CloseParen: 41,
+  OpenBracket: 91,
+  CloseBracket: 93,
+  OpenBrace: 123,
+  CloseBrace: 125,
+  // ==>> Operators
+  Plus: 43,
+  Minus: 45,
+  Asterisk: 42,
+  Slash: 47,
+  Percent: 37,
+  Equals: 61,
+  LessThan: 60,
+  GreaterThan: 62,
+  Ampersand: 38,
+  Pipe: 124,
+  Caret: 94,
+  ExclamationMark: 33,
+  QuestionMark: 63,
+  // ==>> Punctuation
+  Comma: 44,
+  Colon: 58,
+  Semicolon: 59,
+  DollarSign: 36,
+  Underscore: 95,
+  Backslash: 92,
+  Dot: 46,
+  AtSign: 64,
+  Tilde: 126, // ~
+  // ==>> Digits
+  Zero: 48,
+  Nine: 57,
+  // ==>> Letters
+  UpperA: 65,
+  UpperZ: 90,
+  LowerA: 97,
+  LowerZ: 122,
+} as const;
+
+export function IsWhiteSpace(code: number) {
+  return code === CharCodes.Space || code === CharCodes.Tab ||
+    code === CharCodes.LineFeed || code === CharCodes.CarriageReturn;
+}
+
+export function IsDigit(code: number) {
+  return code >= CharCodes.Zero && code <= CharCodes.Nine;
+}
+
+export function IsAlpha(code: number) {
+  return (code >= CharCodes.LowerA && code <= CharCodes.LowerZ) ||
+    (code >= CharCodes.UpperA && code <= CharCodes.UpperZ);
+}
+
+export function isAlphaNumeric(code: number) {
+  return IsAlpha(code) || IsDigit(code);
+}

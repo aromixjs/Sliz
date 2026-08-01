@@ -1,48 +1,61 @@
-import uWS from 'uWebSockets.js'
+import { CharCodes } from "./tokenizer/char";
+import { Tokenizer } from "./tokenizer/tokenizer";
+import { TokenKind } from "./tokenizer/tokens";
+
+const tokenizer = new Tokenizer()
 
 
-
-
-
-
-
-const app = uWS.App()
-
-app.post('/sa',(res,req)=>{
-
+tokenizer.register({
+   kind: TokenKind.TEMPLATE_START,
+   match(ctx) {
+      if (ctx.slice(ctx.cursor, ctx.cursor + 3) === '~T"') {
+         return { kind: this.kind, value: '~T"', length: 3 }
+      }
+      return null
+   }
 })
 
-app.ws('/ws', {
-  maxPayloadLength: 16 * 1024,
-  idleTimeout: 30,
 
-  open: (ws) => {
-    console.log('Client connected!')
-    ws.subscribe('global-room')
+tokenizer.register({
+   kind: TokenKind.DOT,
+   match(ctx) {
+      return ctx.peekCode() === CharCodes.Dot ? { kind: this.kind, value: '.', length: 1 } : null
+   },
+})
 
-  },
 
-  message: (ws, message, isBinary) => {
 
-    const view = new DataView(message)
 
-    
-    const payload = Buffer.from(message).toString('utf-8')
 
-    app.publish('global-room', JSON.stringify({
-      type: 'PATCH',
-      html: `<div>Updated: ${payload}</div>`
-    }))
-  },
 
-  close: (ws) => {
-    console.log('Client disconnected')
+const code = `
+const userId = prop(v.string())
+let filter = state<'all' | 'active' | 'done'>('all')
+
+async function deleteTodo(payload: { id: string }) {
+  await db.todos.delete(payload.id)
+}
+
+function setFilter(payload: { value: typeof filter }) {
+  filter = payload.value
+}
+
+const items = await db.todos.list(userId, filter)
+
+~T"
+<button .click={setFilter} .value="active">Active</button>
+<ul>
+  .for(item of items) {
+    <li>{item.text} <button .click={deleteTodo} .id={item.id}>×</button></li>
   }
-})
+</ul>
+.if(items.length === 0) {
+  <p>No items</p>
+}
+"T~
+`
 
-app.listen(3000, (token) => {
-  if (token) {
-    console.log('Server running on http://localhost:3000')
-    console.log('WebSocket running on ws://localhost:3000/ws')
-  }
-})
+const data =tokenizer.tokenize(code)
+
+
+console.log(data);
