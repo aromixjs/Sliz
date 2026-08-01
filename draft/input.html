@@ -1,0 +1,8 @@
+<script server>
+  const userId = obs("10");
+
+  function save() {
+    userId.update((old) => old++);
+  }
+</script>
+<button rpc:click="save"></button>

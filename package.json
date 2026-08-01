@@ -52,6 +52,7 @@
     "vitest": "^4.1.6"
   },
   "dependencies": {
+    "msgpackr": "^2.0.5",
     "uWebSockets.js": "github:uNetworking/uWebSockets.js#v20.69.0"
   }
 }
