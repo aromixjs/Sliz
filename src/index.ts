@@ -8,10 +8,10 @@ const tokenizer = new Tokenizer()
 tokenizer.register({
    kind: TokenKind.TEMPLATE_START,
    match(ctx) {
-      if (ctx.slice(ctx.cursor, ctx.cursor + 3) === '~T"') {
-         return { kind: this.kind, value: '~T"', length: 3 }
+
+      if (ctx.source.slice(ctx.cursor, ctx.cursor + 3) === '~T"') {
+         return { kind: this.kind, value: '~T"' }
       }
-      return null
    }
 })
 
@@ -19,7 +19,25 @@ tokenizer.register({
 tokenizer.register({
    kind: TokenKind.DOT,
    match(ctx) {
-      return ctx.peekCode() === CharCodes.Dot ? { kind: this.kind, value: '.', length: 1 } : null
+      if (ctx.source.charCodeAt(ctx.cursor) === CharCodes.Dot) {
+         return {
+            kind: this.kind,
+            value: '.'
+         }
+      }
+   },
+})
+
+
+
+tokenizer.register({
+   kind: TokenKind.TEMPLATE_END,
+   match(ctx) {
+
+      if (ctx.source.slice(ctx.cursor, ctx.cursor + 3) === '"T~') {
+         return { kind: this.kind, value: '"T~' }
+      }
+
    },
 })
 
@@ -27,22 +45,7 @@ tokenizer.register({
 
 
 
-
-const code = `
-const userId = prop(v.string())
-let filter = state<'all' | 'active' | 'done'>('all')
-
-async function deleteTodo(payload: { id: string }) {
-  await db.todos.delete(payload.id)
-}
-
-function setFilter(payload: { value: typeof filter }) {
-  filter = payload.value
-}
-
-const items = await db.todos.list(userId, filter)
-
-~T"
+const code = `~T"
 <button .click={setFilter} .value="active">Active</button>
 <ul>
   .for(item of items) {
@@ -55,7 +58,7 @@ const items = await db.todos.list(userId, filter)
 "T~
 `
 
-const data =tokenizer.tokenize(code)
+const data = tokenizer.tokenize(code)
 
 
 console.log(data);

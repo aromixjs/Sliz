@@ -49,21 +49,3 @@ export const CharCodes = {
   LowerA: 97,
   LowerZ: 122,
 } as const;
-
-export function IsWhiteSpace(code: number) {
-  return code === CharCodes.Space || code === CharCodes.Tab ||
-    code === CharCodes.LineFeed || code === CharCodes.CarriageReturn;
-}
-
-export function IsDigit(code: number) {
-  return code >= CharCodes.Zero && code <= CharCodes.Nine;
-}
-
-export function IsAlpha(code: number) {
-  return (code >= CharCodes.LowerA && code <= CharCodes.LowerZ) ||
-    (code >= CharCodes.UpperA && code <= CharCodes.UpperZ);
-}
-
-export function isAlphaNumeric(code: number) {
-  return IsAlpha(code) || IsDigit(code);
-}
