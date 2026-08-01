@@ -4,7 +4,6 @@ import { Token, TokenKind } from "./tokens";
 export class Tokenizer {
   private matchers: TokenMatcher[] = [];
 
-  // registration order = precedence order
   register(matcher: TokenMatcher) {
     this.matchers.push(matcher);
   }
@@ -13,17 +12,13 @@ export class Tokenizer {
     const tokens: Token[] = [];
     let cursor = 0;
     while (cursor < source.length) {
-
       const match = this.matchers.map((m) => m.match({
         source,
         cursor
       })).filter(m => !!m)
 
       tokens.push(...match)
-
-
       cursor++;
-
     }
 
     tokens.push({

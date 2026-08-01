@@ -1,4 +1,4 @@
-export const CharCodes = {
+export const Char = {
   // ==>> Whitespace
   Space: 32,
   Tab: 9,

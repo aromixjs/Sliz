@@ -1,6 +1,6 @@
-import { CharCodes } from "./tokenizer/char";
-import { Tokenizer } from "./tokenizer/tokenizer";
-import { TokenKind } from "./tokenizer/tokens";
+import { Char } from "../lib/tokenizer/char";
+import { Tokenizer } from "../lib/tokenizer/tokenizer";
+import { TokenKind } from "../lib/tokenizer/tokens";
 
 const tokenizer = new Tokenizer()
 
@@ -18,8 +18,8 @@ tokenizer.register({
 
 tokenizer.register({
    kind: TokenKind.DOT,
-   match(ctx) {
-      if (ctx.source.charCodeAt(ctx.cursor) === CharCodes.Dot) {
+   match({ source, cursor }) {
+      if (source.charCodeAt(cursor) === Char.Dot && source.charCodeAt(cursor - 1) !== Char.Space) {
          return {
             kind: this.kind,
             value: '.'
@@ -52,7 +52,7 @@ const code = `~T"
     <li>{item.text} <button .click={deleteTodo} .id={item.id}>×</button></li>
   }
 </ul>
-.if(items.length === 0) {
+ .if(items.length === 0) {
   <p>No items</p>
 }
 "T~
