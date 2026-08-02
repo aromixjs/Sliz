@@ -1,4 +1,4 @@
-import { Token, TokenKind } from "./tokens";
+import { Token } from "./tokens";
 
 export interface LexerContext {
   readonly source: string;
@@ -6,6 +6,5 @@ export interface LexerContext {
 }
 
 export interface TokenMatcher {
-  kind: TokenKind;
-  match(ctx: LexerContext): Token | void;
+  match(ctx: LexerContext): Token | undefined;
 }

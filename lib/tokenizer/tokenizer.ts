@@ -1,29 +1,47 @@
 import { TokenMatcher } from "./context";
-import { Token, TokenKind } from "./tokens";
+import { SyntaxKind, Token } from "./tokens";
 
 export class Tokenizer {
   private matchers: TokenMatcher[] = [];
 
   register(matcher: TokenMatcher) {
     this.matchers.push(matcher);
+    return this;
   }
 
   tokenize(source: string): Token[] {
     const tokens: Token[] = [];
     let cursor = 0;
-    while (cursor < source.length) {
-      const match = this.matchers.map((m) => m.match({
-        source,
-        cursor
-      })).filter(m => !!m)
 
-      tokens.push(...match)
-      cursor++;
+    while (cursor < source.length) {
+      const context = {
+        source,
+        cursor,
+      };
+
+      let token: Token | undefined;
+      for (const matcher of this.matchers) {
+        token = matcher.match(context);
+        if (token) break;
+      }
+
+      if (!token) {
+        token = {
+          kind: SyntaxKind.Unknown,
+          start: cursor,
+          end: cursor + 1,
+          value: source[cursor],
+        };
+      }
+
+      tokens.push(token);
+      cursor = token.end;
     }
 
     tokens.push({
-      kind: TokenKind.EOF,
-      value: null,
+      kind: SyntaxKind.EndOfFileToken,
+      start: cursor,
+      end: cursor,
     });
     return tokens;
   }

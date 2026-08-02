@@ -1,49 +1,41 @@
 import { Char } from "../lib/tokenizer/char";
 import { Tokenizer } from "../lib/tokenizer/tokenizer";
-import { TokenKind } from "../lib/tokenizer/tokens";
+import { SyntaxKind } from "../lib/tokenizer/tokens";
 
-const tokenizer = new Tokenizer()
-
-
-tokenizer.register({
-   kind: TokenKind.TEMPLATE_START,
-   match(ctx) {
-
-      if (ctx.source.slice(ctx.cursor, ctx.cursor + 3) === '~T"') {
-         return { kind: this.kind, value: '~T"' }
-      }
-   }
-})
-
+const tokenizer = new Tokenizer();
 
 tokenizer.register({
-   kind: TokenKind.DOT,
-   match({ source, cursor }) {
-      if (source.charCodeAt(cursor) === Char.Dot && source.charCodeAt(cursor - 1) !== Char.Space) {
-         return {
-            kind: this.kind,
-            value: '.'
-         }
-      }
-   },
-})
-
-
+  kind: SyntaxKind.TemplateStartToken,
+  match(ctx) {
+    if (ctx.source.slice(ctx.cursor, ctx.cursor + 3) === '~T"') {
+      return { kind: this.kind, value: '~T"' };
+    }
+  },
+});
 
 tokenizer.register({
-   kind: TokenKind.TEMPLATE_END,
-   match(ctx) {
+  kind: SyntaxKind.DotToken,
+  match({ source, cursor }) {
+    if (
+      source.charCodeAt(cursor) === Char.Dot &&
+      source.charCodeAt(cursor - 1) !== Char.Space
+    ) {
+      return {
+        kind: this.kind,
+        value: ".",
+      };
+    }
+  },
+});
 
-      if (ctx.source.slice(ctx.cursor, ctx.cursor + 3) === '"T~') {
-         return { kind: this.kind, value: '"T~' }
-      }
-
-   },
-})
-
-
-
-
+tokenizer.register({
+  kind: SyntaxKind.TemplateEndToken,
+  match(ctx) {
+    if (ctx.source.slice(ctx.cursor, ctx.cursor + 3) === '"T~') {
+      return { kind: this.kind, value: '"T~' };
+    }
+  },
+});
 
 const code = `~T"
 <button .click={setFilter} .value="active">Active</button>
@@ -56,9 +48,8 @@ const code = `~T"
   <p>No items</p>
 }
 "T~
-`
+`;
 
-const data = tokenizer.tokenize(code)
-
+const data = tokenizer.tokenize(code);
 
 console.log(data);

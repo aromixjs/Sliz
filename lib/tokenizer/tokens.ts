@@ -1,14 +1,24 @@
-export enum TokenKind {
-  TS_CHUNK,
-  TEMPLATE_START, // ~T"
-  TEMPLATE_END, // "T~
-  DOT,
-
-  EOF,
+export enum SyntaxKind {
+  Unknown,
+  EndOfFileToken,
+  TsCodeToken,
+  TemplateStartToken, // ~T"
+  TemplateEndToken, // "T~
+  OpenTagToken, // <
+  CloseTagToken, // </
+  TagEndToken, // >
+  SelfCloseTagToken, // />
+  OpenExpressionToken, // {
+  CloseExpressionToken, // }
+  DirectiveToken, // .if, .for, etc.
+  EqualsToken, // =
+  IdentifierToken,
+  TextToken,
+  TsExpressionToken,
 }
-
-
-export interface Token<Kind extends TokenKind = TokenKind> {
-  kind: Kind;
-  value: string | null;
+export interface Token {
+  kind: SyntaxKind;
+  start: number;
+  end: number;
+  value?: string;
 }

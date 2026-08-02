@@ -16,5 +16,10 @@
     "jsx": "preserve",
     "types": ["node", "vitest/globals"]
   },
-  "include": ["src/**/*.ts", "src/**/*.d.ts", "playground/**/*.ts","lib/**/*.ts"]
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.d.ts",
+    "playground/**/*.ts",
+    "lib/**/*.ts"
+  ]
 }
