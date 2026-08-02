@@ -1,19 +1,25 @@
 export enum SyntaxKind {
   Unknown,
   EndOfFileToken,
-  TsCodeToken,
-  TemplateStartToken, // ~T"
-  TemplateEndToken, // "T~
+  // SFC blocks
+  ServerScriptStartToken,   // <script server>
+  DefaultScriptStartToken,  // <script>
+  ScriptEndToken,           // </script>
+
+  ViewStartToken,           // <view>
+  ViewEndToken,             // </view>
+
   OpenTagToken, // <
   CloseTagToken, // </
   TagEndToken, // >
   SelfCloseTagToken, // />
   OpenExpressionToken, // {
   CloseExpressionToken, // }
-  DirectiveToken, // .if, .for, etc.
-  EqualsToken, // =
   IdentifierToken,
+  AttributeNameToken,
+  EqualsToken, // =
   TextToken,
+  DirectiveToken, // .if, .for, etc.
   TsExpressionToken,
 }
 export interface Token {

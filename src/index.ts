@@ -1,28 +1,32 @@
 import { Tokenizer } from "@lib/tokenizer/tokenizer";
-import { TemplateEnd } from "./matchers/TemplateEnd";
-import {TemplateStart} from './matchers/TemplateStart'
+import { ServerStartMatcher } from "./matchers/ServerScript";
 
 
 
 const tokenizer = new Tokenizer();
 
-tokenizer.register(new TemplateStart);
-tokenizer.register(new TemplateEnd)
+tokenizer.register(new ServerStartMatcher)
 
 
 
 
-const code = `~T"
-<button .click={setFilter} .value="active">Active</button>
-<ul>
-  .for(item of items) {
-    <li>{item.text} <button .click={deleteTodo} .id={item.id}>×</button></li>
-  }
-</ul>
- .if(items.length === 0) {
-  <p>No items</p>
+const code = `<server>
+const user = await getUser();
+
+async function updateName(name) {
+    await db.users.update(user.id, { name });
 }
-"T~
+</server>
+
+<view>
+    <div>
+        Hello {user.name}
+    </div>
+
+    <button client:click="edit">
+        Edit
+    </button>
+</view>
 `;
 
 const data = tokenizer.tokenize(code);
