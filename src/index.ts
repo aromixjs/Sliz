@@ -1,18 +1,21 @@
 import { Tokenizer } from "@lib/tokenizer/tokenizer";
-import { ServerStartMatcher } from "./matchers/ServerScript";
+import { ServerStartMatcher } from "./matchers/ServerStart";
+import { ServerCodeMatcher } from "./matchers/ServerCode";
 
 
 
 const tokenizer = new Tokenizer();
 
 tokenizer.register(new ServerStartMatcher)
-
+tokenizer.register(new ServerCodeMatcher)
 
 
 
 const code = `<server>
 const user = await getUser();
-
+const myName = "user"
+const username = 'name1'
+const backtick=\`data\`
 async function updateName(name) {
     await db.users.update(user.id, { name });
 }

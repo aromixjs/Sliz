@@ -5,7 +5,7 @@ export enum SyntaxKind {
   ServerScriptStartToken,   // <script server>
   DefaultScriptStartToken,  // <script>
   ScriptEndToken,           // </script>
-
+  ServerCodeToken, 
   ViewStartToken,           // <view>
   ViewEndToken,             // </view>
 
