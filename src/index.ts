@@ -4,7 +4,7 @@ import { Tokenizer } from "@lib/tokenizer/tokenizer";
 
 
 
-const tokenizer = new Tokenizer().register(new ServerStartMatcher).register(new ServerCodeMatcher).register(new ServerEndMatcher).register(new HtmlChunkMatcher)
+const tokenizer = new Tokenizer([new ServerStartMatcher(), new ServerCodeMatcher(), new ServerEndMatcher(), new HtmlChunkMatcher()])
 
 
 const code = `<server>
@@ -16,13 +16,12 @@ async function updateName(name) {
     await db.users.update(user.id, { name });
 }
 
-const data=obs<typeof User>('data')
+const data = await loadData()
 
 </server>
-<view>
 <div .when={user}>
 Hello {user.name}
-</view>`;
+</div>`;
 
 const token = tokenizer.tokenize(code)
 // const parser = new Parser();

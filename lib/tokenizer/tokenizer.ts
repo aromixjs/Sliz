@@ -8,24 +8,15 @@ import {
 } from "./types";
 
 export class Tokenizer {
-  private matchers: TokenMatcher[] = [];
-  private mode = LexerMode.Root;
-
-  register(matcher: TokenMatcher) {
-    this.matchers.push(matcher);
-    return this;
-  }
+  constructor(private readonly matchers: TokenMatcher[]) {}
 
   tokenize(source: string): Token[] {
     const tokens: Token[] = [];
+    let mode = LexerMode.Root;
     let cursor = 0;
 
     while (cursor < source.length) {
-      const context: LexerContext = {
-        source,
-        cursor,
-        mode: this.mode,
-      };
+      const context: LexerContext = { source, cursor, mode };
 
       let result: MatchResult | undefined;
       for (const matcher of this.matchers) {
@@ -49,7 +40,7 @@ export class Tokenizer {
       cursor = result.nextCursor;
 
       if (result.nextMode !== undefined) {
-        this.mode = result.nextMode;
+        mode = result.nextMode;
       }
     }
 

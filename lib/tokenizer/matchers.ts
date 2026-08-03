@@ -91,6 +91,57 @@ export class ServerCodeMatcher extends BaseMatcher implements TokenMatcher {
       return position;
    }
 
+   private skipTemplate(source: string, start: number) {
+      let position = start + 1;
+      while (position < source.length) {
+         const code = source.charCodeAt(position);
+         if (code === Char.Backslash) {
+            position += 2;
+            continue;
+         }
+         if (code === Char.Backtick) {
+            return position + 1;
+         }
+         if (
+            code === Char.Dollar &&
+            source.charCodeAt(position + 1) === Char.OpenBrace
+         ) {
+            position = this.skipBraceExpression(source, position + 2);
+            continue;
+         }
+         position++;
+      }
+      return position;
+   }
+
+   private skipBraceExpression(source: string, start: number) {
+      let position = start;
+      let depth = 1;
+      while (position < source.length) {
+         const code = source.charCodeAt(position);
+         if (code === Char.Backslash) {
+            position += 2;
+            continue;
+         }
+         if (code === Char.SingleQuote || code === Char.DoubleQuote) {
+            position = this.skipString(source, position);
+            continue;
+         }
+         if (code === Char.Backtick) {
+            position = this.skipTemplate(source, position);
+            continue;
+         }
+         if (code === Char.OpenBrace) {
+            depth++;
+         } else if (code === Char.CloseBrace) {
+            depth--;
+            if (depth === 0) return position + 1;
+         }
+         position++;
+      }
+      return position;
+   }
+
    private skipLineComment(source: string, start: number) {
       let position = start + 2;
       while (
@@ -214,7 +265,11 @@ export class ServerCodeMatcher extends BaseMatcher implements TokenMatcher {
          const code = source.charCodeAt(position);
 
          if (this.isQuote(code)) {
-            position = this.skipString(source, position);
+            if (code === Char.Backtick) {
+               position = this.skipTemplate(source, position);
+            } else {
+               position = this.skipString(source, position);
+            }
             continue;
          }
 
@@ -258,9 +313,6 @@ export class ServerCodeMatcher extends BaseMatcher implements TokenMatcher {
       };
    }
 }
-
-
-
 
 export class HtmlChunkMatcher extends BaseMatcher implements TokenMatcher {
 

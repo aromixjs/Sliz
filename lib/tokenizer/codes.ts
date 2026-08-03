@@ -29,6 +29,7 @@ export const Char = {
   Caret: 94,
   Plus: 43,
   Minus: 45,
+  Dollar: 36,
   UpperA: 65,
   UpperZ: 90,
   LowerA: 97,

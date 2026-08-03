@@ -2,47 +2,58 @@ import * as htmlParser from "htmlparser2";
 import { ElementNode, Node } from "./types";
 
 export class Parser {
-  private readonly stack: ElementNode[] = [];
+  private stack: ElementNode[] = [];
   private root: Node[] = [];
 
-  private htmlParser = new htmlParser.Parser({
-    onopentag: (name, attributes) => {
-      const node: ElementNode = {
-        type: "element",
-        tag: name,
-        attributes,
-        children: [],
-      };
+  private htmlParser: htmlParser.Parser;
 
-      // attach to parent
-      const parent = this.stack.at(-1);
+  constructor() {
+    this.htmlParser = this.createHtmlParser();
+  }
 
-      if (parent) {
-        parent.children.push(node);
-      } else {
-        this.root.push(node);
-      }
+  private createHtmlParser() {
+    return new htmlParser.Parser({
+      onopentag: (name, attributes) => {
+        const node: ElementNode = {
+          type: "element",
+          tag: name,
+          attributes,
+          children: [],
+        };
 
-      // current element
-      this.stack.push(node);
-    },
-    ontext: (text) => {
-      // ignore whitespace only
-      if (!text.trim()) return;
+        const parent = this.stack.at(-1);
 
-      const parent = this.stack.at(-1);
-      if (!parent) return;
+        if (parent) {
+          parent.children.push(node);
+        } else {
+          this.root.push(node);
+        }
 
-      parent.children.push({
-        type: "text",
-        value: text,
-      });
-    },
+        this.stack.push(node);
+      },
+      ontext: (text) => {
+        if (!text.trim()) return;
 
-    onclosetag: () => {
-      this.stack.pop();
-    },
-  });
+        const parent = this.stack.at(-1);
+        if (!parent) return;
+
+        parent.children.push({
+          type: "text",
+          value: text,
+        });
+      },
+
+      onclosetag: () => {
+        this.stack.pop();
+      },
+    });
+  }
+
+  reset() {
+    this.stack = [];
+    this.root = [];
+    this.htmlParser = this.createHtmlParser();
+  }
 
   write(content: string) {
     this.htmlParser.write(content);

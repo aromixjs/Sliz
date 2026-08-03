@@ -30,6 +30,8 @@
     "src/**/*.ts",
     "src/**/*.d.ts",
     "playground/**/*.ts",
-    "lib/**/*.ts"
+    "lib/**/*.ts",
+    "tests/**/*.ts",
+    "demo/**/*.ts"
   ]
 }
