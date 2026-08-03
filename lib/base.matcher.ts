@@ -1,4 +1,5 @@
 import { Char } from "./ascii.codes";
+import { LexerContext, LexerMode } from "./tokenizer";
 
 export class BaseMatcher {
 
@@ -35,7 +36,9 @@ export class BaseMatcher {
       return true;
    }
 
-
+   isView(ctx: LexerContext) {
+      return ctx.mode === LexerMode.View;
+   }
 
 
 }

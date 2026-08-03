@@ -1,26 +1,36 @@
 export enum SyntaxKind {
-  Unknown,
-  EndOfFileToken,
-  // SFC blocks
-  ServerStartToken,   // <server>
-  ServerEndToken,     // </server>
-  ServerCodeToken, 
-  ViewStartToken,           // <view>
-  ViewEndToken,             // </view>
+  Unknown = "Unknown",
+  EndOfFileToken = "EndOfFileToken",
 
-  OpenTagToken, // <
-  CloseTagToken, // </
-  TagEndToken, // >
-  SelfCloseTagToken, // />
-  OpenExpressionToken, // {
-  CloseExpressionToken, // }
-  IdentifierToken,
-  AttributeNameToken,
-  EqualsToken, // =
-  TextToken,
-  DirectiveToken, // .if, .for, etc.
-  TsExpressionToken,
+  // SFC
+  ServerStartToken = "ServerStartToken",
+  ServerEndToken = "ServerEndToken",
+  ServerCodeToken = "ServerCodeToken",
+  ViewStartToken = "ViewStartToken",
+  ViewEndToken = "ViewEndToken",
+
+  // HTML
+  OpenTagToken = "OpenTagToken",
+  CloseTagToken = "CloseTagToken",
+  TagEndToken = "TagEndToken",
+  SelfCloseTagToken = "SelfCloseTagToken",
+
+  IdentifierToken = "IdentifierToken",
+  AttributeNameToken = "AttributeNameToken",
+  EqualsToken = "EqualsToken",
+
+  // Expressions
+  OpenExpressionToken = "OpenExpressionToken",
+  CloseExpressionToken = "CloseExpressionToken",
+  TsExpressionToken = "TsExpressionToken",
+
+  // directives
+  DotToken = "DotToken",
+
+  // content
+  TextToken = "TextToken",
 }
+
 export interface Token {
   kind: SyntaxKind;
   start: number;

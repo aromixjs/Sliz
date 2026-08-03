@@ -2,7 +2,9 @@ import { Token } from "./tokens";
 export enum LexerMode {
   Root,
   Server,
-  View
+  View,
+  Expression,
+  Tag
 }
 
 export interface LexerContext {
