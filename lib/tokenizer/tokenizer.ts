@@ -1,10 +1,15 @@
-import { LexerContext, LexerMode, MatchResult, TokenMatcher } from "./context";
-import { SyntaxKind, Token } from "./tokens";
+import {
+  LexerContext,
+  LexerMode,
+  MatchResult,
+  SyntaxKind,
+  Token,
+  TokenMatcher,
+} from "./types";
 
 export class Tokenizer {
   private matchers: TokenMatcher[] = [];
   private mode = LexerMode.Root;
-
 
   register(matcher: TokenMatcher) {
     this.matchers.push(matcher);
@@ -16,11 +21,10 @@ export class Tokenizer {
     let cursor = 0;
 
     while (cursor < source.length) {
-
       const context: LexerContext = {
         source,
         cursor,
-        mode: this.mode
+        mode: this.mode,
       };
 
       let result: MatchResult | undefined;
@@ -28,7 +32,6 @@ export class Tokenizer {
         result = matcher.match(context);
         if (result) break;
       }
-
 
       if (!result) {
         result = {
@@ -38,7 +41,7 @@ export class Tokenizer {
             end: cursor + 1,
             value: source[cursor],
           },
-          nextCursor: cursor + 1
+          nextCursor: cursor + 1,
         };
       }
 
