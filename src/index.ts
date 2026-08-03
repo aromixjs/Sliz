@@ -1,6 +1,7 @@
 import { Tokenizer } from "@lib/tokenizer/tokenizer";
 import { ServerStartMatcher } from "./matchers/ServerStart";
 import { ServerCodeMatcher } from "./matchers/ServerCode";
+import { ServerEndMatcher } from "./matchers/ServerEnd";
 
 
 
@@ -8,6 +9,7 @@ const tokenizer = new Tokenizer();
 
 tokenizer.register(new ServerStartMatcher)
 tokenizer.register(new ServerCodeMatcher)
+tokenizer.register(new ServerEndMatcher)
 
 
 

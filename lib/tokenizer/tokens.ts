@@ -2,9 +2,8 @@ export enum SyntaxKind {
   Unknown,
   EndOfFileToken,
   // SFC blocks
-  ServerScriptStartToken,   // <script server>
-  DefaultScriptStartToken,  // <script>
-  ScriptEndToken,           // </script>
+  ServerStartToken,   // <server>
+  ServerEndToken,     // </server>
   ServerCodeToken, 
   ViewStartToken,           // <view>
   ViewEndToken,             // </view>

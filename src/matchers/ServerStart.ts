@@ -26,7 +26,7 @@ export class ServerStartMatcher extends BaseMatcher implements TokenMatcher {
 
       return {
          token: {
-            kind: SyntaxKind.ServerScriptStartToken,
+            kind: SyntaxKind.ServerStartToken,
             start: cursor,
             end: position + 1,
             value: source.slice(cursor, position + 1),

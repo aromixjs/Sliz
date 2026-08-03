@@ -9,7 +9,7 @@ export class ServerCodeMatcher extends BaseMatcher implements TokenMatcher {
 
       const end = ctx.source.indexOf("</server>", ctx.cursor);
 
-      if (end === -1) return;
+      if (end === -1 || end === ctx.cursor) return;
 
         return {
             token: {
@@ -20,7 +20,7 @@ export class ServerCodeMatcher extends BaseMatcher implements TokenMatcher {
             },
 
             nextCursor: end,
-            nextMode: LexerMode.Root,
+            nextMode: LexerMode.Server,
         };
     }
 
