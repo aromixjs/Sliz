@@ -1,9 +1,9 @@
 import {
-  HtmlChunkMatcher,
-  ServerCodeMatcher,
-  ServerEndMatcher,
-  ServerStartMatcher,
-} from "../lib/tokenizer/matchers";
+    HtmlChunkMatcher,
+    ServerCodeMatcher,
+    ServerEndMatcher,
+    ServerStartMatcher,
+} from "../lib/matchers";
 import { Tokenizer } from "../lib/tokenizer/tokenizer";
 import { Token } from "../lib/tokenizer/types";
 

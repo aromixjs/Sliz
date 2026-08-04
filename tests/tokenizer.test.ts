@@ -1,12 +1,12 @@
-import { describe, expect, it } from "vitest";
 import {
-  HtmlChunkMatcher,
-  ServerCodeMatcher,
-  ServerEndMatcher,
-  ServerStartMatcher,
-} from "@lib/tokenizer/matchers";
+    HtmlChunkMatcher,
+    ServerCodeMatcher,
+    ServerEndMatcher,
+    ServerStartMatcher,
+} from "@lib/matchers";
 import { Tokenizer } from "@lib/tokenizer/tokenizer";
 import { SyntaxKind } from "@lib/tokenizer/types";
+import { describe, expect, it } from "vitest";
 
 const {
   Unknown,

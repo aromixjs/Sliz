@@ -1,4 +1,4 @@
-import { Parser } from "../lib/parser/parser";
+import { Parser } from "../lib/html.parser";
 import { Node } from "../lib/parser/types";
 
 function printTree(nodes: Node[], indent = "") {

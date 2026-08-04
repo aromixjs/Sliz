@@ -1,5 +1,5 @@
+import { Parser } from "@lib/html.parser";
 import { describe, expect, it } from "vitest";
-import { Parser } from "@lib/parser/parser";
 
 describe("parser basics", () => {
   it("returns an empty array for empty input", () => {

@@ -1,8 +1,8 @@
-import { Parser } from "@lib/parser/parser";
-import { PreProcessor } from "@lib/preprocessor/preprocessor";
-import { HtmlChunkMatcher, ServerCodeMatcher, ServerEndMatcher, ServerStartMatcher } from "@lib/tokenizer/matchers";
-import { Tokenizer } from "@lib/tokenizer/tokenizer";
-import { SyntaxKind } from "@lib/tokenizer/types";
+import { PreProcessResult, processExpressions } from "@lib/expression.preprocessor";
+import { parseHtml } from "@lib/html.parser";
+import { htmlChunk, serverCode, serverEnd, serverStart } from "@lib/matchers";
+import { tokenize, TokenKind } from "@lib/tokernizer";
+
 const code = `<server>
 const user = await getUser();
 const myName = "user"
@@ -19,24 +19,29 @@ const data = await loadData()
 Hello {user.name}
 </div>`;
 
-const tokenizer = new Tokenizer([new ServerStartMatcher(), new ServerCodeMatcher(), new ServerEndMatcher(), new HtmlChunkMatcher()])
-const tokens = tokenizer.tokenize(code)
-const parser = new Parser();
-const preprocessor = new PreProcessor()
+const tokens = tokenize({
+    matchers: [serverStart, serverCode, serverEnd, htmlChunk],
+    source: code
+})
+
+const parser = parseHtml()
+const processedResults: PreProcessResult[] = []
 for (const token of tokens) {
 
-    if (token.kind === SyntaxKind.HtmlToken) {
-        const chunk = preprocessor.process(token)
-        console.log(chunk);
-        
-        if (chunk.value) parser.write(chunk.value)
+    if (token.kind === TokenKind.HtmlToken) {
+        const result = processExpressions(token)
+        processedResults.push(result)
+        if (result.token.value) {
+            parser.write(result.token.value)
+        }
     }
 }
 const htmlAst = parser.end()
-console.log(preprocessor.expressions);
-console.log(preprocessor.errors);
 
 
-console.dir(tokens, { depth: null });
-console.dir(htmlAst, { depth: null });
 
+console.dir({
+    tokens,
+    htmlAst,
+    processedResults
+}, { depth: null });

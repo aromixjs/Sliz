@@ -1,10 +1,10 @@
-import { Parser } from "../lib/parser/parser";
+import { Parser } from "../lib/html.parser";
 import {
-  HtmlChunkMatcher,
-  ServerCodeMatcher,
-  ServerEndMatcher,
-  ServerStartMatcher,
-} from "../lib/tokenizer/matchers";
+    HtmlChunkMatcher,
+    ServerCodeMatcher,
+    ServerEndMatcher,
+    ServerStartMatcher,
+} from "../lib/matchers";
 import { Tokenizer } from "../lib/tokenizer/tokenizer";
 
 const tokenizer = new Tokenizer([
