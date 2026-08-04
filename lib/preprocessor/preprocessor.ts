@@ -1,18 +1,8 @@
 import { Char } from "@lib/tokenizer/codes";
 import { Token } from "@lib/tokenizer/types";
-
-export interface ExtractedExpression {
-   id: string;
-   source: string;
-   start: number;
-   end: number;
-}
+import { ExtractedExpression, PreProcessError } from "./types";
 
 
-export interface PreProcessError {
-   message: string;
-   start: number;
-}
 
 const PLACEHOLDER_OPEN = "\uE000";  // Private-Use-Area sentinels — never
 const PLACEHOLDER_CLOSE = "\uE001"; // occur in real source, inert to HTML
