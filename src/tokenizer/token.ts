@@ -9,7 +9,7 @@ export enum SyntaxKind {
    Html = "Html",
 }
 
-export enum LexerMode {
+export enum TokenizerMode {
    Root,
    Server,
 }
@@ -21,22 +21,17 @@ export interface Token {
    value?: string;
 }
 
-export interface LexerContext {
+
+
+// Matcher Types
+export interface TokenizerContext {
    readonly source: string;
    readonly cursor: number;
-   readonly mode: LexerMode;
+   readonly mode: TokenizerMode;
 }
-
 export interface MatchResult {
    token: Token;
    nextCursor: number;
-   nextMode?: LexerMode;
+   nextMode: TokenizerMode;
 }
-
-
-export type Matcher = (ctx: LexerContext) => Maybe<MatchResult>
-export interface TokenizeInput {
-   matchers: Matcher[]
-   source: string
-}
-
+export type Matcher = (ctx: TokenizerContext) => Maybe<MatchResult>

@@ -1,18 +1,17 @@
 import { Maybe } from "../types/maybe";
-import { LexerContext, LexerMode, MatchResult, SyntaxKind, Token, TokenizeInput } from "./token";
+import matchers from "./matchers";
+import { MatchResult, SyntaxKind, Token, TokenizerContext, TokenizerMode } from "./token";
 
-export function tokenize(input: TokenizeInput) {
+export function tokenize(source: string) {
    const tokens: Token[] = [];
-   let mode = LexerMode.Root;
+   let mode = TokenizerMode.Root;
    let cursor = 0;
-   const { source, matchers } = input
 
    while (cursor < source.length) {
-
-      const context: LexerContext = { source, cursor, mode };
+      const context: TokenizerContext = { source, cursor, mode };
       let result: Maybe<MatchResult>;
 
-      for (const matcher of matchers) {
+      for (const [key,matcher] of Object.entries(matchers)) {
          result = matcher(context);
          if (result) break;
       }
@@ -27,15 +26,13 @@ export function tokenize(input: TokenizeInput) {
                value: source[cursor],
             },
             nextCursor: cursor + 1,
+            nextMode: mode
          };
       }
 
       tokens.push(result.token);
+      mode = result.nextMode;
       cursor = result.nextCursor;
-
-      if (result.nextMode !== undefined) {
-         mode = result.nextMode;
-      }
    }
 
    tokens.push({

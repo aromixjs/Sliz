@@ -48,5 +48,19 @@ export default {
       }
 
       return true
+   },
+
+
+   word(source: string, position: number, word: string) {
+      if (position + word.length > source.length) {
+         return false;
+      }
+
+      for (let i = 0; i < word.length; i++) {
+         if (source.charCodeAt(position + i) !== word.charCodeAt(i)) {
+            return false;
+         }
+      }
+      return true;
    }
 }

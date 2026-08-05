@@ -2,7 +2,7 @@ import { writeFileSync } from "node:fs";
 import { generate } from "../src/codegen";
 import { ExtractedExpression, PreProcessError, PreProcessResult, processExpressions } from "../src/parser/expression.preprocessor";
 import { parseHtml } from "../src/parser/html.parser";
-import { htmlChunk, serverCode, serverEnd, serverStart } from "../src/tokenizer/matcher/matchers";
+import { htmlChunk, serverCode, serverEnd, serverStart } from "../src/tokenizer/matchers";
 import { tokenize, TokenKind } from "../src/tokernizer";
 import { transform } from "../src/transform/transformer";
 
