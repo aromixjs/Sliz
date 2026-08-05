@@ -1,7 +1,7 @@
-import char from "./common/char";
-import { Token } from "./tokernizer";
-import * as skip from './common/skip';
 import { randomUUID } from "node:crypto";
+import char from "../scanner/char";
+import * as skip from '../scanner/skip';
+import { Token } from "./tokernizer";
 
 export interface ExtractedExpression {
    id: string;

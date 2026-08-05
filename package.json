@@ -48,11 +48,10 @@
     "@types/node": "^22.10.2",
     "beachball": "^2.65.5",
     "tsup": "^8.3.5",
-    "typescript": "^5.7.2",
     "vitest": "^4.1.6"
   },
   "dependencies": {
-    "htmlparser2": "^12.0.0",
-    "uWebSockets.js": "github:uNetworking/uWebSockets.js#v20.69.0"
+    "typescript": "^5.9.3",
+    "htmlparser2": "^12.0.0"
   }
 }

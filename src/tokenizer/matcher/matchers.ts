@@ -1,7 +1,7 @@
 
-import char from "./common/char";
-import * as match from "./common/match";
-import * as skip from './common/skip';
+import char from "../../scanner/char";
+import * as skip from '../../scanner/skip';
+import * as match from "./match";
 import { LexerMode, Matcher, TokenKind } from "./tokernizer";
 
 

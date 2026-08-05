@@ -1,5 +1,5 @@
-import { ExtractedExpression, PreProcessError, PreProcessResult } from "./expression.preprocessor";
-import { Node } from "./html.parser";
+import { ExtractedExpression, PreProcessError, PreProcessResult } from "../parser/expression.preprocessor";
+import { Node } from "../parser/html.parser";
 
 export type TransformedNode = TextNode | ElementNode | ConditionalNode
 

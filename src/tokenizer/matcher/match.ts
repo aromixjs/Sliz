@@ -1,5 +1,5 @@
-import char from "./char";
-import * as skip from './skip'
+import char from "../../scanner/char";
+import * as skip from '../../scanner/skip';
 
 export function word(source: string, cursor: number, word: string): boolean {
    if (cursor + word.length > source.length) {

@@ -1,5 +1,5 @@
-import { ExtractedExpression } from "./expression.preprocessor";
-import { TransformedNode } from "./transformer";
+import { ExtractedExpression } from "./parser/expression.preprocessor";
+import { TransformedNode } from "./transform/transformer";
 
 export function generate(nodes: TransformedNode[], expressions: Map<string, ExtractedExpression>) {
 
