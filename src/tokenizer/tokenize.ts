@@ -1,8 +1,10 @@
+import { CompilerContext } from "../pipeline/context";
 import { Maybe } from "../types/maybe";
 import matchers from "./matchers";
 import { MatchResult, SyntaxKind, Token, TokenizerContext, TokenizerMode } from "./token";
 
-export function tokenize(source: string) {
+export function tokenize(context: CompilerContext) {
+   const { source, diagnostics } = context;
    const tokens: Token[] = [];
    let mode = TokenizerMode.Root;
    let cursor = 0;
@@ -11,7 +13,7 @@ export function tokenize(source: string) {
       const context: TokenizerContext = { source, cursor, mode };
       let result: Maybe<MatchResult>;
 
-      for (const [key,matcher] of Object.entries(matchers)) {
+      for (const [key, matcher] of Object.entries(matchers)) {
          result = matcher(context);
          if (result) break;
       }
