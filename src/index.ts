@@ -2,7 +2,9 @@ import { PreProcessResult, processExpressions } from "@lib/expression.preprocess
 import { parseHtml } from "@lib/html.parser";
 import { htmlChunk, serverCode, serverEnd, serverStart } from "@lib/matchers";
 import { tokenize, TokenKind } from "@lib/tokernizer";
+import { transform } from "@lib/transformer";
 
+console.time()
 const code = `<server>
 const user = await getUser();
 const myName = "user"
@@ -39,9 +41,13 @@ for (const token of tokens) {
 const htmlAst = parser.end()
 
 
-
+const transformedAst = transform(htmlAst, processedResults)
 console.dir({
     tokens,
     htmlAst,
-    processedResults
+    processedResults,
+    transformedAst
 }, { depth: null });
+
+
+console.timeEnd()
