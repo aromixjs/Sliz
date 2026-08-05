@@ -1,8 +1,10 @@
-import { PreProcessResult, processExpressions } from "@lib/expression.preprocessor";
+import { generate } from "@lib/codegen";
+import { ExtractedExpression, PreProcessError, PreProcessResult, processExpressions } from "@lib/expression.preprocessor";
 import { parseHtml } from "@lib/html.parser";
 import { htmlChunk, serverCode, serverEnd, serverStart } from "@lib/matchers";
 import { tokenize, TokenKind } from "@lib/tokernizer";
 import { transform } from "@lib/transformer";
+import { writeFile, writeFileSync } from "node:fs";
 
 console.time()
 const code = `<server>
@@ -42,12 +44,42 @@ const htmlAst = parser.end()
 
 
 const transformedAst = transform(htmlAst, processedResults)
+
+
+const expressions = new Map<string, ExtractedExpression>()
+const errors: PreProcessError[] = []
+
+for (const result of processedResults) {
+    for (const [id, expr] of result.expressions) {
+        expressions.set(id, expr)
+    }
+    errors.push(...result.errors)
+}
+
+
+
+const body = generate(transformedAst.ast, expressions)
+function wrapRender(body: string, stateVars: string[]): string {
+    const destructure = stateVars.length ? `const { ${stateVars.join(', ')} } = state;\n` : '';
+    return `function render(state, props) {\n${destructure}let html = '';\n${body}return html;\n}`;
+}
+
+
+
+const source = wrapRender(body, ['user'])
+
 console.dir({
     tokens,
     htmlAst,
     processedResults,
-    transformedAst
+    transformedAst,
+    body,
+    source
 }, { depth: null });
 
 
 console.timeEnd()
+
+
+
+writeFileSync('output.js', source, { encoding: 'utf8' })

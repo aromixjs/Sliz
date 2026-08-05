@@ -1,7 +1,7 @@
 import { ExtractedExpression, PreProcessError, PreProcessResult } from "./expression.preprocessor";
 import { Node } from "./html.parser";
 
-type TransformedNode = TextNode | ElementNode | ConditionalNode
+export type TransformedNode = TextNode | ElementNode | ConditionalNode
 
 interface TextNode {
    type: 'text',
