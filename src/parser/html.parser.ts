@@ -1,6 +1,5 @@
 import { Parser } from "htmlparser2";
 
-
 export type Node =
   | ElementNode
   | TextNode;
@@ -17,12 +16,9 @@ export interface TextNode {
   value: string;
 }
 
-
-
-
 export function parseHtml() {
-  const stack: ElementNode[] = []
-  const root: Node[] = []
+  const stack: ElementNode[] = [];
+  const root: Node[] = [];
   const htmlParser = new Parser({
     onopentag: (name, attributes) => {
       const node: ElementNode = {
@@ -59,8 +55,6 @@ export function parseHtml() {
     },
   });
 
-
-
   return {
     write(content: string) {
       htmlParser.write(content);
@@ -69,12 +63,6 @@ export function parseHtml() {
     end() {
       htmlParser.end();
       return root;
-    }
-
-
-  }
-
-
-
-
+    },
+  };
 }
