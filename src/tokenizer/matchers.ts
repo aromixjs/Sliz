@@ -1,127 +1,109 @@
 import char from "../scanner/char";
 import is from "../scanner/is";
-import skip from "../scanner/skip";
-import { Matcher, SyntaxKind, TokenizerMode } from "./token";
+import { Matcher, State, SyntaxKind } from "./token";
 
-// Matches <server>
-function serverTagOpen(source: string, position: number) {
-  if (source.charCodeAt(position) !== char.lessThan) {
-    return undefined;
+export const lessThan: Matcher = (c) => {
+  const { source, cursor, state } = c;
+
+  if (state !== State.Text) {
+    return;
   }
 
-  let localPosition = position + 1;
-  localPosition = skip.whiteSpace(source, localPosition);
-  const isServerWord = is.word(source, localPosition, "server");
-
-  if (!isServerWord) {
-    return undefined;
-  }
-
-  localPosition += "server".length;
-  localPosition = skip.whiteSpace(source, localPosition);
-
-  if (source.charCodeAt(localPosition) !== char.greaterThan) {
-    return undefined;
-  }
-  return localPosition + 1;
-}
-
-// Matches </server>
-function serverTagClose(source: string, position: number) {
-  if (source.charCodeAt(position) !== char.lessThan) {
-    return undefined;
-  }
-
-  let localPosition = position + 1;
-  localPosition = skip.whiteSpace(source, localPosition);
-
-  if (source.charCodeAt(localPosition) !== char.slash) {
-    return undefined;
-  }
-  localPosition++;
-  localPosition = skip.whiteSpace(source, localPosition);
-  const isServerWord = is.word(source, localPosition, "server");
-
-  if (!isServerWord) {
-    return undefined;
-  }
-  localPosition += "server".length;
-  localPosition = skip.whiteSpace(source, localPosition);
-
-  if (source.charCodeAt(localPosition) !== char.greaterThan) {
-    return undefined;
-  }
-  return localPosition + 1;
-}
-
-
-
-export const tagOpen: Matcher = (c) => {
-  const { source, cursor, mode } = c
-
-  if (mode !== TokenizerMode.Root) {
-    return
-  }
-
-  const current = source.charCodeAt(cursor)
-  const next = source.charCodeAt(cursor + 1)
+  const current = source.charCodeAt(cursor);
+  const next = source.charCodeAt(cursor + 1);
 
   if (current !== char.lessThan || !is.alpha(next)) {
-    return
+    return;
   }
 
-
-    return {
+  return {
     token: {
       kind: SyntaxKind.LessThan,
       start: cursor,
       end: cursor + 1,
-      value: '<'
+      value: "<",
     },
     nextCursor: cursor + 1,
-    nextMode: TokenizerMode.Root
-  }
-  
+    nextState: State.BeforeOpeningTagName,
+  };
+};
 
+export const lessThanSlash: Matcher = (c) => {
+  const { source, cursor, state } = c;
+  if (state !== State.Text) return;
 
-}
-
-
-
-export const closingTagOpen:Matcher=(c)=>{
-
-  const { source, cursor, mode } = c
-
-  if (mode !== TokenizerMode.Root) return
-
-    const current = source.charCodeAt(cursor)
-  const next = source.charCodeAt(cursor + 1)
-  const afterNext = source.charCodeAt(cursor + 2)
-
+  const current = source.charCodeAt(cursor);
+  const next = source.charCodeAt(cursor + 1);
+  const afterNext = source.charCodeAt(cursor + 2);
 
   if (
     current !== char.lessThan ||
     next !== char.slash ||
     !is.alpha(afterNext)
   ) {
-    return
+    return;
   }
-
 
   return {
     token: {
       kind: SyntaxKind.LessThanSlash,
       start: cursor,
       end: cursor + 2,
-      value: '</',
+      value: "</",
     },
     nextCursor: cursor + 2,
-    nextMode: TokenizerMode.Root,
+    nextState: State.BeforeClosingTagName,
+  };
+};
+
+export const tagName: Matcher = (c) => {
+  const { source, cursor, state } = c;
+
+  const isOpening = state === State.BeforeOpeningTagName;
+  const isClosing = state === State.BeforeClosingTagName;
+
+  if (!isOpening && !isClosing) {
+    return;
   }
 
+  let end = cursor;
 
+  while (end < source.length) {
+    const code = source.charCodeAt(end);
 
-}
+    if (
+      is.whitespace(code) || code === char.greaterThan || code === char.slash
+    ) {
+      break;
+    }
+
+    end++;
+  }
+
+  if (isOpening) {
+    return {
+      token: {
+        kind: SyntaxKind.TagName,
+        start: cursor,
+        end,
+        value: source.slice(cursor, end),
+      },
+      nextCursor: end,
+      nextState: State.AfterOpeningTagName,
+    };
+  } else if (isClosing) {
+    return {
+      token: {
+        kind: SyntaxKind.TagName,
+        start: cursor,
+        end,
+        value: source.slice(cursor, end),
+      },
+      nextCursor: end,
+      nextState: State.AfterClosingTagName,
+    };
+  }
+};
 
 // export const serverStart: Matcher = (ctx) => {
 //   const { source, cursor, mode } = ctx;

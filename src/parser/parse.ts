@@ -1,11 +1,9 @@
 import { Parser } from "htmlparser2";
 import { ElementNode, HtmlAstParser, Node } from "./types";
 
-
 export function parse(): HtmlAstParser {
   let stack: ElementNode[] = [];
   let root: Node[] = [];
-
 
   const pushNode = (node: Node) => {
     const parent = stack.at(-1);
@@ -15,7 +13,6 @@ export function parse(): HtmlAstParser {
       root.push(node);
     }
   };
-
 
   const htmlParser = new Parser({
     onopentag: (name, attributes) => {
@@ -29,8 +26,6 @@ export function parse(): HtmlAstParser {
       stack.push(node);
     },
     onclosetag: () => {
-
-      
       stack.pop();
     },
     ontext: (text) => {

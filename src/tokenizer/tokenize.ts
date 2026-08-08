@@ -1,23 +1,23 @@
 import { CompilerContext } from "../pipeline/context";
 import { Maybe } from "../types/maybe";
-import { closingTagOpen, tagOpen } from "./matchers";
+import { lessThan, lessThanSlash, tagName } from "./matchers";
 import {
   MatchResult,
+  State,
   SyntaxKind,
   Token,
   TokenizerContext,
-  TokenizerMode,
 } from "./token";
 
 export function tokenize(context: CompilerContext) {
   const { source } = context;
   const tokens: Token[] = [];
-  let mode = TokenizerMode.Root;
-  const matchers = [tagOpen,closingTagOpen];
+  let state = State.Text;
+  const matchers = [lessThan, lessThanSlash,tagName];
   let cursor = 0;
 
   while (cursor < source.length) {
-    const context: TokenizerContext = { source, cursor, mode };
+    const context: TokenizerContext = { source, cursor, state };
     let result: Maybe<MatchResult>;
 
     for (const matcher of matchers) {
@@ -26,23 +26,19 @@ export function tokenize(context: CompilerContext) {
     }
 
     if (!result) {
-      // result = {
-      //   token: {
-      //     kind: SyntaxKind.Unknown,
-      //     start: cursor,
-      //     end: cursor + 1,
-      //     value: source[cursor],
-      //   },
-      //   nextCursor: cursor + 1,
-      //   nextMode: mode,
-      // };
-      cursor++
-    continue
+      result = {
+        token: {
+          kind: SyntaxKind.Unknown,
+          start: cursor,
+          end: cursor + 1,
+          value: source[cursor],
+        },
+        nextCursor: cursor + 1,
+        nextState: state,
+      };
     }
-
-
     tokens.push(result.token);
-    mode = result.nextMode;
+    state = result.nextState;
     cursor = result.nextCursor;
   }
 
@@ -50,6 +46,7 @@ export function tokenize(context: CompilerContext) {
     kind: SyntaxKind.EndOfFile,
     start: cursor,
     end: cursor,
+    value: source[cursor],
   });
   return tokens;
 }
