@@ -1,5 +1,6 @@
 import char from "../scanner/char";
 import is from "../scanner/is";
+import skip from "../scanner/skip";
 import { Matcher, State, SyntaxKind } from "./token";
 
 export const lessThan: Matcher = (c) => {
@@ -103,6 +104,79 @@ export const tagName: Matcher = (c) => {
       nextState: State.AfterClosingTagName,
     };
   }
+};
+
+export const attributeName: Matcher = (c) => {
+  const { source, cursor, state } = c;
+
+  if (state !== State.AfterOpeningTagName) {
+    return;
+  }
+
+  let start = skip.whiteSpace(source, cursor);
+  if (start >= source.length) {
+    return;
+  }
+
+  const first = source.charCodeAt(start);
+
+  if (
+    first === char.greaterThan ||
+    first === char.slash
+  ) {
+    return;
+  }
+  let end = start;
+
+  while (end < source.length) {
+    const code = source.charCodeAt(end);
+
+    if (!is.attributeName(code)) {
+      break;
+    }
+
+    end++;
+  }
+
+  if (end === start) {
+    return;
+  }
+
+  return {
+    token: {
+      kind: SyntaxKind.AttributeName,
+      start,
+      end,
+      value: source.slice(start, end),
+    },
+    nextCursor: end,
+    nextState: State.AfterAttributeName,
+  };
+};
+
+export const attributeEquals: Matcher = (c) => {
+  const { source, cursor, state } = c;
+
+  if (state !== State.AfterAttributeName) {
+    return;
+  }
+
+  const start = skip.whiteSpace(source, cursor);
+
+  if (source.charCodeAt(start) !== char.equals) {
+    return;
+  }
+
+  return {
+    token: {
+      kind: SyntaxKind.Equals,
+      start,
+      end: start + 1,
+      value: "=",
+    },
+    nextCursor: start + 1,
+    nextState: State.BeforeAttributeValue,
+  };
 };
 
 // export const serverStart: Matcher = (ctx) => {

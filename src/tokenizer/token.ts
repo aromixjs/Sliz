@@ -1,19 +1,27 @@
-import { Maybe } from "../types/maybe";
+import { type Maybe } from "../types/maybe";
 
 export enum SyntaxKind {
   LessThan = "LessThan",
   LessThanSlash = "LessThanSlash",
   TagName = "TagName",
+  AttributeName = "AttributeName",
+  Equals = "Equals",
+
   Unknown = "Unknown",
   EndOfFile = "EndOfFile",
 }
 
 export enum State {
   Text = "Text",
+
   BeforeOpeningTagName = "BeforeOpeningTagName",
   BeforeClosingTagName = "BeforeClosingTagName",
+
   AfterOpeningTagName = "AfterOpeningTagName",
   AfterClosingTagName = "AfterClosingTagName",
+
+  AfterAttributeName = "AfterAttributeName",
+  BeforeAttributeValue = "BeforeAttributeValue",
 }
 
 export interface Token {

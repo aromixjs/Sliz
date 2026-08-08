@@ -34,4 +34,6 @@ export default {
   upperZ: 90,
   lowerA: 97,
   lowerZ: 122,
+  underscore: 95,
+  dot: 46,
 };

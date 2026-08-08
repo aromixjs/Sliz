@@ -1,7 +1,7 @@
 import { compile } from "../src";
 import { SyntaxKind } from "../src/tokenizer/token";
 
-const code = `<server>
+const code = `<server lang="ts">
 const user = await getUser();
 const myName = "user"
 const username = 'name1'
@@ -22,4 +22,6 @@ const output = compile({
   source: code,
   diagnostics: [],
 });
-console.dir(output.tokens.filter(i=>i.kind !== SyntaxKind.Unknown), { depth: null });
+console.dir(output.tokens.filter((i) => i.kind !== SyntaxKind.Unknown), {
+  depth: null,
+});

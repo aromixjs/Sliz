@@ -49,16 +49,13 @@ export default {
     return true;
   },
 
-  word(source: string, position: number, word: string) {
-    if (position + word.length > source.length) {
-      return false;
-    }
+  identifierStart(code: number) {
+    return this.alpha(code) || code === char.underscore || code === char.dollar;
+  },
 
-    for (let i = 0; i < word.length; i++) {
-      if (source.charCodeAt(position + i) !== word.charCodeAt(i)) {
-        return false;
-      }
-    }
-    return true;
+  attributeName(code: number) {
+    return (code > char.space && code !== char.equals &&
+      code !== char.greaterThan && code !== char.doubleQuote &&
+      code !== char.singleQuote && code !== char.slash);
   },
 };
