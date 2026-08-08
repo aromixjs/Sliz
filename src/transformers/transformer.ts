@@ -1,4 +1,4 @@
-import { Node } from "../parser/html.parser";
+import { Node } from "../parser/parse";
 import {
   ExtractedExpression,
   PreProcessError,

@@ -1,6 +1,6 @@
 import { CompilerContext } from "../pipeline/context";
 import { Maybe } from "../types/maybe";
-import { html, serverCode, serverEnd, serverStart } from "./matchers";
+import { closingTagOpen, tagOpen } from "./matchers";
 import {
   MatchResult,
   SyntaxKind,
@@ -13,7 +13,7 @@ export function tokenize(context: CompilerContext) {
   const { source } = context;
   const tokens: Token[] = [];
   let mode = TokenizerMode.Root;
-  const matchers = [serverStart, serverEnd, serverCode, html];
+  const matchers = [tagOpen,closingTagOpen];
   let cursor = 0;
 
   while (cursor < source.length) {
@@ -26,17 +26,20 @@ export function tokenize(context: CompilerContext) {
     }
 
     if (!result) {
-      result = {
-        token: {
-          kind: SyntaxKind.Unknown,
-          start: cursor,
-          end: cursor + 1,
-          value: source[cursor],
-        },
-        nextCursor: cursor + 1,
-        nextMode: mode,
-      };
+      // result = {
+      //   token: {
+      //     kind: SyntaxKind.Unknown,
+      //     start: cursor,
+      //     end: cursor + 1,
+      //     value: source[cursor],
+      //   },
+      //   nextCursor: cursor + 1,
+      //   nextMode: mode,
+      // };
+      cursor++
+    continue
     }
+
 
     tokens.push(result.token);
     mode = result.nextMode;
