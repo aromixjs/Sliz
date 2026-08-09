@@ -1,5 +1,5 @@
 export default {
-   name: "dynamic tag names",
+   name: "10 - dynamic tag names",
    expected: "valid",
    source: String.raw`<div>
     {(() => {

@@ -1,5 +1,5 @@
 export default {
-   name: "ugly whitespace",
+   name: "11 - ugly whitespace",
    expected: "valid",
    source: String.raw`   <server    lang = "ts"   >
 const     foo      =      "bar"

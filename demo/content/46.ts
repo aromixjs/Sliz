@@ -1,5 +1,7 @@
 export default {
-   name: "invalid unfinished attribute string",
+   name: "46 - invalid expression",
    expected: "invalid",
-   source: String.raw`<div class="hello></div>`,
+   source: String.raw`<div>
+    {user.name
+</div>`,
 }

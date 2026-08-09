@@ -1,15 +1,15 @@
 export default {
-   name: "mixed content patterns",
+   name: "63 - event handlers complex",
    expected: "valid",
-   source: String.raw`<div>
-    Text before
-    <span>element</span>
-    text between
-    <br>
-    text after
-    <!-- comment -->
-    more text
-    <strong>bold</strong>
-    final text
+   source: String.raw`<button .onclick={() => handleClick()}>Click</button>
+<button .onclick={handleClick}>Click</button>
+<button .onclick={(e) => handleClick(e)}>Click</button>
+<button .onclick={handleClick.bind(null, arg)}>Click</button>
+
+<input .oninput={(e) => setValue(e.target.value)}>
+<input .onkeydown={(e) => { if (e.key === 'Enter') submit(); }}>
+
+<div .onmouseover={() => setHover(true)} .onmouseout={() => setHover(false)}>
+    Hover me
 </div>`,
 }

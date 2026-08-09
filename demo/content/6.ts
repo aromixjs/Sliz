@@ -1,5 +1,5 @@
 export default {
-   name: "attribute value edge cases",
+   name: "6 - attribute value edge cases",
    expected: "stress",
    source: String.raw`<div
     a=""

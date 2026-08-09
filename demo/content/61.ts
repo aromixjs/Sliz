@@ -1,12 +1,19 @@
 export default {
-   name: "html entities",
+   name: "61 - boolean attributes",
    expected: "valid",
-   source: String.raw`<div>
-    &amp; &lt; &gt; &quot; &apos;
-    &#65; &#x41;
-    &nbsp; &copy; &reg; &trade;
-    &hearts; &clubs; &diams;
-    &Alpha; &Beta; &Gamma;
-    &alpha; &beta; &gamma;
-</div>`,
+   source: String.raw`<input disabled>
+<input disabled />
+<input disabled="disabled">
+<input ?disabled={isDisabled}>
+
+<button disabled aria-disabled="true">Click</button>
+
+<div hidden></div>
+<div ?hidden={isVisible}>Content</div>
+
+<details open>
+    <summary>Open by default</summary>
+</details>
+
+<video autoplay controls muted></video>`,
 }

@@ -1,9 +1,12 @@
 export default {
-   name: "nested mismatched braces",
-   expected: "invalid",
+   name: "60 - html entities",
+   expected: "valid",
    source: String.raw`<div>
-    {foo({ bar: { baz: 1 } })}
-    {arr.map(x => x.map(y => y))}
-    {obj={ nested: { deep: { deeper: 1 } }}}
+    &amp; &lt; &gt; &quot; &apos;
+    &#65; &#x41;
+    &nbsp; &copy; &reg; &trade;
+    &hearts; &clubs; &diams;
+    &Alpha; &Beta; &Gamma;
+    &alpha; &beta; &gamma;
 </div>`,
 }

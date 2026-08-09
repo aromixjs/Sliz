@@ -1,14 +1,25 @@
 export default {
-   name: "complex template literals in expressions",
+   name: "65 - deeply nested elements",
    expected: "stress",
    source: String.raw`<div>
-    {\`hello \${user.name}\`}
-    {\`nested \${foo(\`inner \${bar}\`)} end\`}
-    {\`multi
-line
-template\`}
-    {\`<div>\${content}</div>\`}
-    {\`</server>\`}
-    {\`</style>\`}
+    <div>
+        <div>
+            <div>
+                <div>
+                    <div>
+                        <div>
+                            <div>
+                                <div>
+                                    <div>
+                                        <div>Level 10</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>`,
 }

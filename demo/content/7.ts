@@ -1,5 +1,5 @@
 export default {
-   name: "css complex selectors",
+   name: "7 - css complex selectors",
    expected: "stress",
    source: String.raw`<style>
 [data-attr="value"] {

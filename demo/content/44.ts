@@ -1,9 +1,8 @@
 export default {
-   name: "invalid server block",
+   name: "44 - invalid style block",
    expected: "invalid",
-   source: String.raw`<server>
-const user = await getUser();
-const data = {
-    foo: 1,
+   source: String.raw`<style>
+body {
+    color: red;
 `,
 }

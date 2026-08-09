@@ -1,27 +1,35 @@
 export default {
-   name: "css closing tag lookalikes",
-   expected: "stress",
-   source: String.raw`<style>
-.foo::before {
-    content: "</style>";
-}
+   name: "55 - deep html nesting",
+   expected: "valid",
+   source: String.raw`<main>
+    <section>
+        <div>
+            <article>
+                <header>
+                    <div>
+                        <span>
+                            <strong>
+                                Deep content
+                            </strong>
+                        </span>
+                    </div>
+                </header>
 
-.bar {
-    background-image: url("</style>");
-}
+                <div>
+                    <p>
+                        Paragraph
+                    </p>
 
-.baz {
-    content: '<div>';
-}
-
-/* </style> */
-
-.foo {
-    --value: "</style>";
-}
-</style>
-
-<div>
-    after style
-</div>`,
+                    <ul>
+                        <li>One</li>
+                        <li>Two</li>
+                        <li>
+                            <span>Three</span>
+                        </li>
+                    </ul>
+                </div>
+            </article>
+        </div>
+    </section>
+</main>`,
 }

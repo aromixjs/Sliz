@@ -1,6 +1,6 @@
 
 ==========
-text outside root 0 
+1 - text outside root 0 
 expected: invalid
 ==========
 Tokens (10):
@@ -67,7 +67,7 @@ Tokens (10):
 ]
 
 ==========
-multiple root elements 1 
+2 - multiple root elements 1 
 expected: invalid
 ==========
 Tokens (16):
@@ -170,7 +170,7 @@ Tokens (16):
 ]
 
 ==========
-complex css 2 
+3 - complex css 2 
 expected: stress
 ==========
 Tokens (16):
@@ -273,7 +273,7 @@ Tokens (16):
 ]
 
 ==========
-invalid html structure 3 
+4 - invalid html structure 3 
 expected: invalid
 ==========
 Tokens (40):
@@ -520,7 +520,7 @@ Tokens (40):
 ]
 
 ==========
-empty expressions 4 
+5 - empty expressions 4 
 expected: valid
 ==========
 Tokens (19):
@@ -641,7 +641,7 @@ Tokens (19):
 ]
 
 ==========
-attribute value edge cases 5 
+6 - attribute value edge cases 5 
 expected: stress
 ==========
 Tokens (49):
@@ -942,7 +942,7 @@ Tokens (49):
 ]
 
 ==========
-css complex selectors 6 
+7 - css complex selectors 6 
 expected: stress
 ==========
 Tokens (16):
@@ -1045,7 +1045,7 @@ Tokens (16):
 ]
 
 ==========
-many attributes 7 
+8 - many attributes 7 
 expected: valid
 ==========
 Tokens (40):
@@ -1292,7 +1292,7 @@ Tokens (40):
 ]
 
 ==========
-lexer nightmare 8 
+9 - lexer nightmare 8 
 expected: stress
 ==========
 Tokens (8):
@@ -1347,7 +1347,7 @@ Tokens (8):
 ]
 
 ==========
-dynamic tag names 9 
+10 - dynamic tag names 9 
 expected: valid
 ==========
 Tokens (24):
@@ -1498,7 +1498,7 @@ Tokens (24):
 ]
 
 ==========
-ugly whitespace 10 
+11 - ugly whitespace 10 
 expected: valid
 ==========
 Tokens (34):
@@ -1709,7 +1709,7 @@ Tokens (34):
 ]
 
 ==========
-list rendering edge cases 11 
+12 - list rendering edge cases 11 
 expected: stress
 ==========
 Tokens (44):
@@ -1980,284 +1980,7 @@ Tokens (44):
 ]
 
 ==========
-fragment syntax 12 
-expected: valid
-==========
-Tokens (45):
-[
-  {
-    "kind": "Unknown",
-    "start": 0,
-    "end": 1,
-    "value": "<"
-  },
-  {
-    "kind": "Text",
-    "start": 1,
-    "end": 7,
-    "value": ">\n    "
-  },
-  {
-    "kind": "LessThan",
-    "start": 7,
-    "end": 8,
-    "value": "<"
-  },
-  {
-    "kind": "TagName",
-    "start": 8,
-    "end": 11,
-    "value": "div"
-  },
-  {
-    "kind": "GreaterThan",
-    "start": 11,
-    "end": 12,
-    "value": ">"
-  },
-  {
-    "kind": "Text",
-    "start": 12,
-    "end": 17,
-    "value": "First"
-  },
-  {
-    "kind": "LessThanSlash",
-    "start": 17,
-    "end": 19,
-    "value": "</"
-  },
-  {
-    "kind": "TagName",
-    "start": 19,
-    "end": 22,
-    "value": "div"
-  },
-  {
-    "kind": "GreaterThan",
-    "start": 22,
-    "end": 23,
-    "value": ">"
-  },
-  {
-    "kind": "Text",
-    "start": 23,
-    "end": 28,
-    "value": "\n    "
-  },
-  {
-    "kind": "LessThan",
-    "start": 28,
-    "end": 29,
-    "value": "<"
-  },
-  {
-    "kind": "TagName",
-    "start": 29,
-    "end": 32,
-    "value": "div"
-  },
-  {
-    "kind": "GreaterThan",
-    "start": 32,
-    "end": 33,
-    "value": ">"
-  },
-  {
-    "kind": "Text",
-    "start": 33,
-    "end": 39,
-    "value": "Second"
-  },
-  {
-    "kind": "LessThanSlash",
-    "start": 39,
-    "end": 41,
-    "value": "</"
-  },
-  {
-    "kind": "TagName",
-    "start": 41,
-    "end": 44,
-    "value": "div"
-  },
-  {
-    "kind": "GreaterThan",
-    "start": 44,
-    "end": 45,
-    "value": ">"
-  },
-  {
-    "kind": "Text",
-    "start": 45,
-    "end": 46,
-    "value": "\n"
-  },
-  {
-    "kind": "Unknown",
-    "start": 46,
-    "end": 47,
-    "value": "<"
-  },
-  {
-    "kind": "Text",
-    "start": 47,
-    "end": 51,
-    "value": "/>\n\n"
-  },
-  {
-    "kind": "Unknown",
-    "start": 51,
-    "end": 52,
-    "value": "<"
-  },
-  {
-    "kind": "Text",
-    "start": 52,
-    "end": 58,
-    "value": ">\n    "
-  },
-  {
-    "kind": "ExpressionStart",
-    "start": 58,
-    "end": 59,
-    "value": "{"
-  },
-  {
-    "kind": "Expression",
-    "start": 59,
-    "end": 116,
-    "value": "items.map(item => <span key={item.id}>{item.name}</span>)"
-  },
-  {
-    "kind": "ExpressionEnd",
-    "start": 116,
-    "end": 117,
-    "value": "}"
-  },
-  {
-    "kind": "Text",
-    "start": 117,
-    "end": 118,
-    "value": "\n"
-  },
-  {
-    "kind": "Unknown",
-    "start": 118,
-    "end": 119,
-    "value": "<"
-  },
-  {
-    "kind": "Text",
-    "start": 119,
-    "end": 123,
-    "value": "/>\n\n"
-  },
-  {
-    "kind": "Unknown",
-    "start": 123,
-    "end": 124,
-    "value": "<"
-  },
-  {
-    "kind": "Text",
-    "start": 124,
-    "end": 130,
-    "value": ">\n    "
-  },
-  {
-    "kind": "ExpressionStart",
-    "start": 130,
-    "end": 131,
-    "value": "{"
-  },
-  {
-    "kind": "Expression",
-    "start": 131,
-    "end": 166,
-    "value": "condition && <div>Conditional</div>"
-  },
-  {
-    "kind": "ExpressionEnd",
-    "start": 166,
-    "end": 167,
-    "value": "}"
-  },
-  {
-    "kind": "Text",
-    "start": 167,
-    "end": 172,
-    "value": "\n    "
-  },
-  {
-    "kind": "LessThan",
-    "start": 172,
-    "end": 173,
-    "value": "<"
-  },
-  {
-    "kind": "TagName",
-    "start": 173,
-    "end": 176,
-    "value": "div"
-  },
-  {
-    "kind": "GreaterThan",
-    "start": 176,
-    "end": 177,
-    "value": ">"
-  },
-  {
-    "kind": "Text",
-    "start": 177,
-    "end": 183,
-    "value": "Always"
-  },
-  {
-    "kind": "LessThanSlash",
-    "start": 183,
-    "end": 185,
-    "value": "</"
-  },
-  {
-    "kind": "TagName",
-    "start": 185,
-    "end": 188,
-    "value": "div"
-  },
-  {
-    "kind": "GreaterThan",
-    "start": 188,
-    "end": 189,
-    "value": ">"
-  },
-  {
-    "kind": "Text",
-    "start": 189,
-    "end": 190,
-    "value": "\n"
-  },
-  {
-    "kind": "Unknown",
-    "start": 190,
-    "end": 191,
-    "value": "<"
-  },
-  {
-    "kind": "Text",
-    "start": 191,
-    "end": 193,
-    "value": "/>"
-  },
-  {
-    "kind": "EndOfFile",
-    "start": 193,
-    "end": 193
-  }
-]
-
-==========
-xss injection attempts 13 
+13 - xss injection attempts 12 
 expected: invalid
 ==========
 Tokens (24):
@@ -2408,7 +2131,7 @@ Tokens (24):
 ]
 
 ==========
-invalid self closing on non void 14 
+14 - invalid self closing on non void 13 
 expected: invalid
 ==========
 Tokens (40):
@@ -2655,7 +2378,7 @@ Tokens (40):
 ]
 
 ==========
-self closing tags 15 
+15 - self closing tags 14 
 expected: valid
 ==========
 Tokens (48):
@@ -2950,7 +2673,7 @@ Tokens (48):
 ]
 
 ==========
-script injection in html 16 
+16 - script injection in html 15 
 expected: invalid
 ==========
 Tokens (73):
@@ -3395,7 +3118,7 @@ Tokens (73):
 ]
 
 ==========
-style injection attempts 17 
+17 - style injection attempts 16 
 expected: invalid
 ==========
 Tokens (33):
@@ -3600,7 +3323,7 @@ Tokens (33):
 ]
 
 ==========
-server complex imports 18 
+18 - server complex imports 17 
 expected: stress
 ==========
 Tokens (8):
@@ -3655,7 +3378,7 @@ Tokens (8):
 ]
 
 ==========
-invalid attribute names 19 
+19 - invalid attribute names 18 
 expected: invalid
 ==========
 Tokens (31):
@@ -3848,7 +3571,7 @@ Tokens (31):
 ]
 
 ==========
-server async patterns 20 
+20 - server async patterns 19 
 expected: stress
 ==========
 Tokens (8):
@@ -3903,7 +3626,7 @@ Tokens (8):
 ]
 
 ==========
-invalid server syntax 21 
+21 - invalid server syntax 20 
 expected: invalid
 ==========
 Tokens (11):
@@ -3976,7 +3699,7 @@ Tokens (11):
 ]
 
 ==========
-invalid css syntax 22 
+22 - invalid css syntax 21 
 expected: invalid
 ==========
 Tokens (8):
@@ -4031,7 +3754,7 @@ Tokens (8):
 ]
 
 ==========
-complex object destructuring 23 
+23 - complex object destructuring 22 
 expected: stress
 ==========
 Tokens (23):
@@ -4176,7 +3899,7 @@ Tokens (23):
 ]
 
 ==========
-complex expressions 24 
+24 - complex expressions 23 
 expected: stress
 ==========
 Tokens (64):
@@ -4567,7 +4290,7 @@ Tokens (64):
 ]
 
 ==========
-nested expressions 25 
+25 - nested expressions 24 
 expected: stress
 ==========
 Tokens (15):
@@ -4664,7 +4387,7 @@ Tokens (15):
 ]
 
 ==========
-error boundary patterns 26 
+26 - error boundary patterns 25 
 expected: valid
 ==========
 Tokens (23):
@@ -4809,7 +4532,7 @@ Tokens (23):
 ]
 
 ==========
-extremely long source 27 
+27 - extremely long source 26 
 expected: stress
 ==========
 Tokens (243):
@@ -6274,7 +5997,7 @@ Tokens (243):
 ]
 
 ==========
-table complex structure 28 
+28 - table complex structure 27 
 expected: valid
 ==========
 Tokens (191):
@@ -7427,7 +7150,7 @@ Tokens (191):
 ]
 
 ==========
-form elements 29 
+29 - form elements 28 
 expected: valid
 ==========
 Tokens (254):
@@ -8958,10 +8681,10 @@ Tokens (254):
 ]
 
 ==========
-cdata and comments 30 
+30 - cdata and comments 29 
 expected: valid
 ==========
-Tokens (40):
+Tokens (20):
 [
   {
     "kind": "LessThan",
@@ -8988,196 +8711,76 @@ Tokens (40):
     "value": "\n    "
   },
   {
-    "kind": "Unknown",
+    "kind": "HtmlComment",
     "start": 10,
-    "end": 11,
-    "value": "<"
+    "end": 34,
+    "value": "<!-- Regular comment -->"
   },
   {
     "kind": "Text",
-    "start": 11,
+    "start": 34,
     "end": 39,
-    "value": "!-- Regular comment -->\n    "
+    "value": "\n    "
   },
   {
-    "kind": "Unknown",
+    "kind": "HtmlComment",
     "start": 39,
-    "end": 40,
-    "value": "<"
+    "end": 84,
+    "value": "<!-- Multi\n         line\n         comment -->"
   },
   {
     "kind": "Text",
-    "start": 40,
+    "start": 84,
     "end": 89,
-    "value": "!-- Multi\n         line\n         comment -->\n    "
+    "value": "\n    "
   },
   {
-    "kind": "Unknown",
+    "kind": "HtmlComment",
     "start": 89,
-    "end": 90,
-    "value": "<"
+    "end": 131,
+    "value": "<!-- <div>Nested HTML in comment</div> -->"
   },
   {
     "kind": "Text",
-    "start": 90,
-    "end": 94,
-    "value": "!-- "
-  },
-  {
-    "kind": "LessThan",
-    "start": 94,
-    "end": 95,
-    "value": "<"
-  },
-  {
-    "kind": "TagName",
-    "start": 95,
-    "end": 98,
-    "value": "div"
-  },
-  {
-    "kind": "GreaterThan",
-    "start": 98,
-    "end": 99,
-    "value": ">"
-  },
-  {
-    "kind": "Text",
-    "start": 99,
-    "end": 121,
-    "value": "Nested HTML in comment"
-  },
-  {
-    "kind": "LessThanSlash",
-    "start": 121,
-    "end": 123,
-    "value": "</"
-  },
-  {
-    "kind": "TagName",
-    "start": 123,
-    "end": 126,
-    "value": "div"
-  },
-  {
-    "kind": "GreaterThan",
-    "start": 126,
-    "end": 127,
-    "value": ">"
-  },
-  {
-    "kind": "Text",
-    "start": 127,
+    "start": 131,
     "end": 136,
-    "value": " -->\n    "
+    "value": "\n    "
   },
   {
-    "kind": "Unknown",
+    "kind": "HtmlComment",
     "start": 136,
-    "end": 137,
-    "value": "<"
+    "end": 157,
+    "value": "<!-- {expression} -->"
   },
   {
     "kind": "Text",
-    "start": 137,
-    "end": 141,
-    "value": "!-- "
-  },
-  {
-    "kind": "ExpressionStart",
-    "start": 141,
-    "end": 142,
-    "value": "{"
-  },
-  {
-    "kind": "Expression",
-    "start": 142,
-    "end": 152,
-    "value": "expression"
-  },
-  {
-    "kind": "ExpressionEnd",
-    "start": 152,
-    "end": 153,
-    "value": "}"
-  },
-  {
-    "kind": "Text",
-    "start": 153,
+    "start": 157,
     "end": 162,
-    "value": " -->\n    "
+    "value": "\n    "
   },
   {
-    "kind": "Unknown",
+    "kind": "HtmlComment",
     "start": 162,
-    "end": 163,
-    "value": "<"
+    "end": 180,
+    "value": "<!-- </server> -->"
   },
   {
     "kind": "Text",
-    "start": 163,
-    "end": 167,
-    "value": "!-- "
-  },
-  {
-    "kind": "LessThanSlash",
-    "start": 167,
-    "end": 169,
-    "value": "</"
-  },
-  {
-    "kind": "TagName",
-    "start": 169,
-    "end": 175,
-    "value": "server"
-  },
-  {
-    "kind": "GreaterThan",
-    "start": 175,
-    "end": 176,
-    "value": ">"
-  },
-  {
-    "kind": "Text",
-    "start": 176,
+    "start": 180,
     "end": 185,
-    "value": " -->\n    "
+    "value": "\n    "
   },
   {
-    "kind": "Unknown",
+    "kind": "HtmlComment",
     "start": 185,
-    "end": 186,
-    "value": "<"
+    "end": 202,
+    "value": "<!-- </style> -->"
   },
   {
     "kind": "Text",
-    "start": 186,
-    "end": 190,
-    "value": "!-- "
-  },
-  {
-    "kind": "LessThanSlash",
-    "start": 190,
-    "end": 192,
-    "value": "</"
-  },
-  {
-    "kind": "TagName",
-    "start": 192,
-    "end": 197,
-    "value": "style"
-  },
-  {
-    "kind": "GreaterThan",
-    "start": 197,
-    "end": 198,
-    "value": ">"
-  },
-  {
-    "kind": "Text",
-    "start": 198,
+    "start": 202,
     "end": 215,
-    "value": " -->\n    Content\n"
+    "value": "\n    Content\n"
   },
   {
     "kind": "LessThanSlash",
@@ -9205,7 +8808,7 @@ Tokens (40):
 ]
 
 ==========
-void elements 31 
+31 - void elements 30 
 expected: valid
 ==========
 Tokens (64):
@@ -9596,7 +9199,7 @@ Tokens (64):
 ]
 
 ==========
-accessibility attributes 32 
+32 - accessibility attributes 31 
 expected: valid
 ==========
 Tokens (93):
@@ -10161,7 +9764,7 @@ Tokens (93):
 ]
 
 ==========
-complex css calc and functions 33 
+33 - complex css calc and functions 32 
 expected: stress
 ==========
 Tokens (16):
@@ -10264,7 +9867,7 @@ Tokens (16):
 ]
 
 ==========
-invalid nested expressions 34 
+34 - invalid nested expressions 33 
 expected: invalid
 ==========
 Tokens (36):
@@ -10487,7 +10090,7 @@ Tokens (36):
 ]
 
 ==========
-very long expression 35 
+35 - very long expression 34 
 expected: stress
 ==========
 Tokens (12):
@@ -10566,7 +10169,7 @@ Tokens (12):
 ]
 
 ==========
-attribute values 36 
+36 - attribute values 35 
 expected: valid
 ==========
 Tokens (41):
@@ -10819,7 +10422,7 @@ Tokens (41):
 ]
 
 ==========
-conditional rendering patterns 37 
+37 - conditional rendering patterns 36 
 expected: valid
 ==========
 Tokens (36):
@@ -11042,7 +10645,7 @@ Tokens (36):
 ]
 
 ==========
-full component 38 
+38 - full component 37 
 expected: valid
 ==========
 Tokens (118):
@@ -11757,7 +11360,7 @@ Tokens (118):
 ]
 
 ==========
-invalid unfinished tag 39 
+39 - invalid unfinished tag 38 
 expected: invalid
 ==========
 Tokens (6):
@@ -11800,7 +11403,7 @@ Tokens (6):
 ]
 
 ==========
-production component 40 
+40 - production component 39 
 expected: valid
 ==========
 Tokens (113):
@@ -12485,7 +12088,7 @@ Tokens (113):
 ]
 
 ==========
-long text 41 
+41 - long text 40 
 expected: stress
 ==========
 Tokens (24):
@@ -12636,7 +12239,7 @@ Tokens (24):
 ]
 
 ==========
-invalid unfinished attribute 42 
+42 - invalid unfinished attribute 41 
 expected: invalid
 ==========
 Tokens (6):
@@ -12679,7 +12282,7 @@ Tokens (6):
 ]
 
 ==========
-invalid server block 43 
+43 - invalid server block 42 
 expected: invalid
 ==========
 Tokens (5):
@@ -12716,7 +12319,7 @@ Tokens (5):
 ]
 
 ==========
-invalid style block 44 
+44 - invalid style block 43 
 expected: invalid
 ==========
 Tokens (5):
@@ -12753,7 +12356,7 @@ Tokens (5):
 ]
 
 ==========
-invalid unfinished attribute string 45 
+45 - invalid unfinished attribute string 44 
 expected: invalid
 ==========
 Tokens (6):
@@ -12796,7 +12399,7 @@ Tokens (6):
 ]
 
 ==========
-invalid expression 46 
+46 - invalid expression 45 
 expected: invalid
 ==========
 Tokens (7):
@@ -12845,7 +12448,7 @@ Tokens (7):
 ]
 
 ==========
-all javascript strings 47 
+47 - all javascript strings 46 
 expected: stress
 ==========
 Tokens (8):
@@ -12900,7 +12503,7 @@ Tokens (8):
 ]
 
 ==========
-javascript comments 48 
+48 - javascript comments 47 
 expected: valid
 ==========
 Tokens (16):
@@ -13003,7 +12606,7 @@ Tokens (16):
 ]
 
 ==========
-basic 49 
+49 - basic 48 
 expected: valid
 ==========
 Tokens (8):
@@ -13058,7 +12661,7 @@ Tokens (8):
 ]
 
 ==========
-complex server typescript 50 
+50 - complex server typescript 49 
 expected: stress
 ==========
 Tokens (23):
@@ -13203,7 +12806,7 @@ Tokens (23):
 ]
 
 ==========
-regular expressions 51 
+51 - regular expressions 50 
 expected: stress
 ==========
 Tokens (5):
@@ -13240,7 +12843,7 @@ Tokens (5):
 ]
 
 ==========
-unicode 52 
+52 - unicode 51 
 expected: valid
 ==========
 Tokens (56):
@@ -13583,7 +13186,7 @@ Tokens (56):
 ]
 
 ==========
-syntax looking text 53 
+53 - syntax looking text 52 
 expected: stress
 ==========
 Tokens (17):
@@ -13692,7 +13295,7 @@ Tokens (17):
 ]
 
 ==========
-css closing tag lookalikes 54 
+54 - css closing tag lookalikes 53 
 expected: stress
 ==========
 Tokens (16):
@@ -13795,7 +13398,7 @@ Tokens (16):
 ]
 
 ==========
-deep html nesting 55 
+55 - deep html nesting 54 
 expected: valid
 ==========
 Tokens (120):
@@ -14522,7 +14125,7 @@ Tokens (120):
 ]
 
 ==========
-wrong closing tag 56 
+56 - wrong closing tag 55 
 expected: invalid
 ==========
 Tokens (8):
@@ -14577,7 +14180,7 @@ Tokens (8):
 ]
 
 ==========
-empty multiline blocks 57 
+57 - empty multiline blocks 56 
 expected: valid
 ==========
 Tokens (24):
@@ -14728,7 +14331,7 @@ Tokens (24):
 ]
 
 ==========
-custom elements 58 
+58 - custom elements 57 
 expected: valid
 ==========
 Tokens (43):
@@ -14993,7 +14596,7 @@ Tokens (43):
 ]
 
 ==========
-nested mismatched braces 59 
+59 - nested mismatched braces 58 
 expected: invalid
 ==========
 Tokens (20):
@@ -15120,7 +14723,7 @@ Tokens (20):
 ]
 
 ==========
-html entities 60 
+60 - html entities 59 
 expected: valid
 ==========
 Tokens (8):
@@ -15175,7 +14778,7 @@ Tokens (8):
 ]
 
 ==========
-boolean attributes 61 
+61 - boolean attributes 60 
 expected: valid
 ==========
 Tokens (82):
@@ -15674,7 +15277,7 @@ Tokens (82):
 ]
 
 ==========
-mixed content patterns 62 
+62 - mixed content patterns 61 
 expected: valid
 ==========
 Tokens (30):
@@ -15776,16 +15379,16 @@ Tokens (30):
     "value": "\n    text after\n    "
   },
   {
-    "kind": "Unknown",
+    "kind": "HtmlComment",
     "start": 92,
-    "end": 93,
-    "value": "<"
+    "end": 108,
+    "value": "<!-- comment -->"
   },
   {
     "kind": "Text",
-    "start": 93,
+    "start": 108,
     "end": 127,
-    "value": "!-- comment -->\n    more text\n    "
+    "value": "\n    more text\n    "
   },
   {
     "kind": "LessThan",
@@ -15861,7 +15464,7 @@ Tokens (30):
 ]
 
 ==========
-event handlers complex 63 
+63 - event handlers complex 62 
 expected: valid
 ==========
 Tokens (72):
@@ -16300,7 +15903,7 @@ Tokens (72):
 ]
 
 ==========
-complex template literals in expressions 64 
+64 - complex template literals in expressions 63 
 expected: stress
 ==========
 Tokens (32):
@@ -16499,7 +16102,7 @@ Tokens (32):
 ]
 
 ==========
-deeply nested elements 65 
+65 - deeply nested elements 64 
 expected: stress
 ==========
 Tokens (88):
@@ -17034,7 +16637,7 @@ Tokens (88):
 ]
 
 ==========
-random garbage 66 
+66 - random garbage 65 
 expected: invalid
 ==========
 Tokens (11):
@@ -17107,7 +16710,7 @@ Tokens (11):
 ]
 
 ==========
-control characters 67 
+67 - control characters 66 
 expected: stress
 ==========
 Tokens (8):
@@ -17162,7 +16765,7 @@ Tokens (8):
 ]
 
 ==========
-nested server 68 
+68 - nested server 67 
 expected: invalid
 ==========
 Tokens (12):
@@ -17241,7 +16844,7 @@ Tokens (12):
 ]
 
 ==========
-empty blocks 69 
+69 - empty blocks 68 
 expected: valid
 ==========
 Tokens (19):
@@ -17362,7 +16965,7 @@ Tokens (19):
 ]
 
 ==========
-large attribute 70 
+70 - large attribute 69 
 expected: stress
 ==========
 Tokens (14):
@@ -17453,7 +17056,7 @@ Tokens (14):
 ]
 
 ==========
-unclosed template literal 71 
+71 - unclosed template literal 70 
 expected: invalid
 ==========
 Tokens (5):
@@ -17490,7 +17093,7 @@ Tokens (5):
 ]
 
 ==========
-mismatched quotes attribute 72 
+72 - mismatched quotes attribute 71 
 expected: invalid
 ==========
 Tokens (6):
@@ -17533,7 +17136,7 @@ Tokens (6):
 ]
 
 ==========
-many siblings 73 
+73 - many siblings 72 
 expected: stress
 ==========
 Tokens (168):
@@ -18548,7 +18151,7 @@ Tokens (168):
 ]
 
 ==========
-server html lookalikes 74 
+74 - server html lookalikes 73 
 expected: stress
 ==========
 Tokens (5):

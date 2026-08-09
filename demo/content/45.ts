@@ -1,8 +1,5 @@
 export default {
-   name: "invalid style block",
+   name: "45 - invalid unfinished attribute string",
    expected: "invalid",
-   source: String.raw`<style>
-body {
-    color: red;
-`,
+   source: String.raw`<div class="hello></div>`,
 }

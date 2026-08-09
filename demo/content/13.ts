@@ -1,17 +1,10 @@
 export default {
-   name: "fragment syntax",
-   expected: "valid",
-   source: String.raw`<>
-    <div>First</div>
-    <div>Second</div>
-</>
-
-<>
-    {items.map(item => <span key={item.id}>{item.name}</span>)}
-</>
-
-<>
-    {condition && <div>Conditional</div>}
-    <div>Always</div>
-</>`,
+   name: "13 - xss injection attempts",
+   expected: "invalid",
+   source: String.raw`<div>
+    {eval("alert(1)")}
+    {constructor.constructor("alert(1)")()}
+    {window.location = "evil.com"}
+    {document.cookie}
+</div>`,
 }

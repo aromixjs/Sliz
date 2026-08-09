@@ -1,18 +1,9 @@
 export default {
-   name: "custom elements",
-   expected: "valid",
-   source: String.raw`<my-component>
-    <slot></slot>
-</my-component>
-
-<another-element
-    .property={value}
-    .onclick={handler}
-    @custom-event={handleEvent}
->
-    Content
-</another-element>
-
-<x-empty />
-<y-validated input="test" />`,
+   name: "59 - nested mismatched braces",
+   expected: "invalid",
+   source: String.raw`<div>
+    {foo({ bar: { baz: 1 } })}
+    {arr.map(x => x.map(y => y))}
+    {obj={ nested: { deep: { deeper: 1 } }}}
+</div>`,
 }

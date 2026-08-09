@@ -72,7 +72,6 @@ import t71 from "./71";
 import t72 from "./72";
 import t73 from "./73";
 import t74 from "./74";
-import t75 from "./75";
 
 export const cases = [
   t1, t2, t3, t4, t5, t6, t7, t8, t9, t10,
@@ -82,5 +81,5 @@ export const cases = [
   t41, t42, t43, t44, t45, t46, t47, t48, t49, t50,
   t51, t52, t53, t54, t55, t56, t57, t58, t59, t60,
   t61, t62, t63, t64, t65, t66, t67, t68, t69, t70,
-  t71, t72, t73, t74, t75,
+  t71, t72, t73, t74,
 ];

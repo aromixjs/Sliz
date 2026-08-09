@@ -1,15 +1,18 @@
 export default {
-   name: "empty multiline blocks",
+   name: "58 - custom elements",
    expected: "valid",
-   source: String.raw`<server>
+   source: String.raw`<my-component>
+    <slot></slot>
+</my-component>
 
-</server>
+<another-element
+    .property={value}
+    .onclick={handler}
+    @custom-event={handleEvent}
+>
+    Content
+</another-element>
 
-<style>
-
-</style>
-
-<div>
-
-</div>`,
+<x-empty />
+<y-validated input="test" />`,
 }

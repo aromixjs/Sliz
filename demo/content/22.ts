@@ -1,12 +1,22 @@
 export default {
-   name: "invalid server syntax",
+   name: "22 - invalid css syntax",
    expected: "invalid",
-   source: String.raw`<server lang="ts">
-const = ;
-let = 123;
-var x = ;
-function () {}
-const arr = [,];
-const obj = {,};
-</server>`,
+   source: String.raw`<style>
+.foo {
+    color: ;
+    margin: ;
+    ;
+    : red;
+    color red;
+    color: red;
+}
+
+{ invalid }
+
+@ {
+}
+
+@invalid {
+}
+</style>`,
 }

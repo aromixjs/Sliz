@@ -1,5 +1,5 @@
 export default {
-   name: "lexer nightmare",
+   name: "9 - lexer nightmare",
    expected: "stress",
    source: String.raw`<server lang="ts">
 const value = \`hello \${user?.name ?? "anonymous"}\`;

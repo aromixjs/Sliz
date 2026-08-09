@@ -1,53 +1,19 @@
 export default {
-   name: "production component",
-   expected: "valid",
-   source: String.raw`<server lang="ts">
-import { getUser } from "./auth";
-import { getProducts } from "./products";
+   name: "41 - long text",
+   expected: "stress",
+   source: String.raw`<article>
+    <p>
+        Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+        Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+        Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris
+        nisi ut aliquip ex ea commodo consequat.
+    </p>
 
-const user = await getUser();
-const products = await getProducts();
-
-async function addToCart(productId: string) {
-    await db.cart.insert({
-        userId: user.id,
-        productId,
-        quantity: 1,
-    });
-}
-</server>
-
-<style>
-.product-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-    gap: 1rem;
-}
-
-.product {
-    padding: 1rem;
-    border-radius: 12px;
-}
-
-.product:hover {
-    transform: translateY(-2px);
-}
-</style>
-
-<section class="products">
-    <header>
-        <h1>Products</h1>
-        <p>Hello {user.name}</p>
-    </header>
-
-    <div class="product-grid">
-        <article class="product" .when={products.length}>
-            <h2>{products[0].name}</h2>
-            <p>{products[0].description}</p>
-            <button .onclick={addToCart(products[0].id)}>
-                Add to cart
-            </button>
-        </article>
-    </div>
-</section>`,
+    <p>
+        Duis aute irure dolor in reprehenderit in voluptate velit esse
+        cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat
+        cupidatat non proident, sunt in culpa qui officia deserunt mollit
+        anim id est laborum.
+    </p>
+</article>`,
 }

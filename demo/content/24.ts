@@ -1,32 +1,20 @@
 export default {
-   name: "complex object destructuring",
+   name: "24 - complex expressions",
    expected: "stress",
-   source: String.raw`<server lang="ts">
-const {
-    user: { name, email, profile: { avatar, bio } },
-    settings: { theme, language },
-    metadata: { createdAt, updatedAt },
-} = await getUserData();
-
-const [first, second, ...rest] = await getItems();
-
-const {
-    data,
-    error,
-    status,
-} = await fetchData();
-
-function process({
-    id,
-    name,
-    nested: { value },
-    array: [item1, item2],
-}: ProcessInput) {
-    return { id, name, value, item1, item2 };
-}
-</server>
-
-<div>
-    {name}
+   source: String.raw`<div>
+    {user.name}
+    {user?.profile?.name}
+    {items[0]}
+    {items[index]}
+    {items[index]?.name}
+    {foo ? bar : baz}
+    {foo && bar}
+    {foo || bar}
+    {!foo}
+    {a + b * c}
+    {fn(a, b, c)}
+    {foo({ a: 1, b: 2 })}
+    {condition ? user.name : "Anonymous"}
+    {items.map(item => item.name)}
 </div>`,
 }

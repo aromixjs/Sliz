@@ -1,5 +1,5 @@
 export default {
-   name: "many attributes",
+   name: "8 - many attributes",
    expected: "valid",
    source: String.raw`<div
     id="main"

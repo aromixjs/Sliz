@@ -1,36 +1,29 @@
 export default {
-   name: "table complex structure",
+   name: "29 - form elements",
    expected: "valid",
-   source: String.raw`<table>
-    <caption>Product List</caption>
-    <colgroup>
-        <col span="2">
-        <col>
-    </colgroup>
-    <thead>
-        <tr>
-            <th scope="col">Name</th>
-            <th scope="col">Price</th>
-            <th scope="col">Stock</th>
-        </tr>
-    </thead>
-    <tbody>
-        <tr>
-            <td>Product 1</td>
-            <td>$10</td>
-            <td>5</td>
-        </tr>
-        <tr>
-            <td>Product 2</td>
-            <td>$20</td>
-            <td>0</td>
-        </tr>
-    </tbody>
-    <tfoot>
-        <tr>
-            <td colspan="2">Total</td>
-            <td>5</td>
-        </tr>
-    </tfoot>
-</table>`,
+   source: String.raw`<form action="/submit" method="POST">
+    <fieldset>
+        <legend>User Info</legend>
+        <label for="name">Name:</label>
+        <input type="text" id="name" name="name" required pattern="[A-Za-z]+" />
+        <label for="email">Email:</label>
+        <input type="email" id="email" name="email" required />
+        <label for="age">Age:</label>
+        <input type="number" id="age" name="age" min="0" max="150" />
+    </fieldset>
+    <fieldset>
+        <legend>Preferences</legend>
+        <select name="color" id="color">
+            <option value="">Select...</option>
+            <option value="red">Red</option>
+            <option value="blue">Blue</option>
+            <option value="green" selected>Green</option>
+        </select>
+        <textarea name="bio" rows="4" cols="50" placeholder="Tell us about yourself..."></textarea>
+        <input type="checkbox" id="agree" name="agree" required />
+        <label for="agree">I agree to terms</label>
+    </fieldset>
+    <button type="submit">Submit</button>
+    <button type="reset">Reset</button>
+</form>`,
 }

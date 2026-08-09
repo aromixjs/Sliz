@@ -1,20 +1,19 @@
 export default {
-   name: "complex expressions",
+   name: "25 - nested expressions",
    expected: "stress",
-   source: String.raw`<div>
-    {user.name}
-    {user?.profile?.name}
-    {items[0]}
-    {items[index]}
-    {items[index]?.name}
-    {foo ? bar : baz}
-    {foo && bar}
-    {foo || bar}
-    {!foo}
-    {a + b * c}
-    {fn(a, b, c)}
-    {foo({ a: 1, b: 2 })}
-    {condition ? user.name : "Anonymous"}
-    {items.map(item => item.name)}
+   source: String.raw`<div
+    data={foo({
+        user: {
+            name: user.name,
+            roles: ["admin", "editor"],
+            metadata: {
+                active: true,
+                count: items.length,
+            },
+        },
+        values: [1, 2, 3],
+    })}
+>
+    {JSON.stringify(user)}
 </div>`,
 }

@@ -7,6 +7,7 @@ import {
   expression,
   expressionEnd,
   expressionStart,
+  htmlComment,
   lessThan,
   lessThanSlash,
   script,
@@ -32,6 +33,7 @@ export function tokenize(context: CompilerContext) {
   const matchers = [
     lessThan,
     lessThanSlash,
+    htmlComment,
     tagName,
     attributeName,
     attributeEquals,

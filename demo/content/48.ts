@@ -1,29 +1,35 @@
 export default {
-   name: "all javascript strings",
-   expected: "stress",
-   source: String.raw`<server lang="ts">
-const a = "normal string";
-const b = 'single quoted string';
+   name: "48 - javascript comments",
+   expected: "valid",
+   source: String.raw`<server>
+/*
+    block comment
+    <server>
+    </server>
+    </style>
+*/
 
-const c = "string with <tag>";
-const d = 'string with </server>';
-const e = "string with </style>";
-const f = "string with > and < and /";
+const foo = 123;
 
-const escaped = "hello \\"world\\"";
-const singleEscaped = 'hello \\'world\\'';
+// normal comment
+const bar = 456; // trailing comment
 
-const multiline = \`hello
-world
-this is multiline
-\`;
+/*
+ * another comment
+ *
+ * <div>
+ * {something}
+ * </div>
+ */
 
-const interpolation = \`hello \${user.name}\`;
+const value = {
+    foo: 1,
+    // foo: 2,
+    bar: 3,
+};
+</server>
 
-const nested = \`outer \${foo(\`inner \${bar}\`)} end\`;
-
-const html = \`<div>Hello</div>\`;
-const closing = \`</server>\`;
-const css = \`</style>\`;
-</server>`,
+<div>
+    Hello
+</div>`,
 }

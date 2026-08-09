@@ -1,13 +1,7 @@
 export default {
-   name: "invalid nested expressions",
-   expected: "invalid",
+   name: "35 - very long expression",
+   expected: "stress",
    source: String.raw`<div>
-    {arr[0]}
-    {arr[)}
-    {fn()}
-    {fn(]}
-    {obj.key}
-    {obj.key}}
-    {obj[key]}
+    {veryLongVariableName?.deeply?.nested?.property?.that?.goes?.on?.and?.on?.and?.on?.forever?.with?.many?.levels?.of?.nesting}
 </div>`,
 }

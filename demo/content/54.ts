@@ -1,16 +1,27 @@
 export default {
-   name: "syntax looking text",
+   name: "54 - css closing tag lookalikes",
    expected: "stress",
-   source: String.raw`<div>
-    Less than <
-    Greater than >
-    Slash /
-    Closing-looking </not-a-real-tag>
-    Braces {hello}
-    Multiple {{{{{
-    Quotes "hello"
-    Apostrophe 'hello'
-    Equals =
-    Ampersand &
+   source: String.raw`<style>
+.foo::before {
+    content: "</style>";
+}
+
+.bar {
+    background-image: url("</style>");
+}
+
+.baz {
+    content: '<div>';
+}
+
+/* </style> */
+
+.foo {
+    --value: "</style>";
+}
+</style>
+
+<div>
+    after style
 </div>`,
 }

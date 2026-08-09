@@ -1,12 +1,14 @@
 export default {
-   name: "self closing tags",
-   expected: "valid",
+   name: "16 - script injection in html",
+   expected: "invalid",
    source: String.raw`<div>
-    <img src="/image.png" alt="Image" />
-    <input type="text" />
-    <input type="checkbox" disabled />
-    <br />
-    <hr/>
-    <custom-element foo="bar"/>
+    <script>alert('xss')</script>
+    <img src=x onerror="alert(1)">
+    <svg onload="alert(1)">
+    <iframe src="javascript:alert(1)">
+    <a href="javascript:alert(1)">Click</a>
+    <body onload="alert(1)">
+    <input onfocus="alert(1)" autofocus>
+    <marquee onstart="alert(1)">
 </div>`,
 }

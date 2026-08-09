@@ -1,22 +1,21 @@
 export default {
-   name: "regular expressions",
-   expected: "stress",
+   name: "52 - unicode",
+   expected: "valid",
    source: String.raw`<server>
-const simple = /hello/;
-const flags = /hello/gi;
-const escaped = /hello\/world/;
-const characterClass = /[a-z<>{}]/;
-const complex = /^(https?:\/\/)?([^\/]+)(\/.*)?$/i;
-
-const result = text
-    .replace(/foo/g, "bar")
-    .match(/hello\s+world/i);
-
-const regexLike = /<\/server>/;
-const regexStyle = /<\/style>/;
+const name = "Istiuak";
+const bangla = "বাংলা";
+const arabic = "العربية";
+const chinese = "中文";
+const japanese = "日本語";
+const emoji = "😀 🚀 🌍";
+const symbols = "© ™ € £ ¥ ₹";
 </server>
 
 <div>
-    Regex test
+    <h1>বাংলা ভাষা</h1>
+    <p>こんにちは世界</p>
+    <p>مرحبا بالعالم</p>
+    <p>你好世界</p>
+    <p>😀 🚀 🌍</p>
 </div>`,
 }

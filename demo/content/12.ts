@@ -1,5 +1,5 @@
 export default {
-   name: "list rendering edge cases",
+   name: "12 - list rendering edge cases",
    expected: "stress",
    source: String.raw`<ul>
     {items.map((item, index) => (

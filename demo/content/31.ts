@@ -1,15 +1,20 @@
 export default {
-   name: "cdata and comments",
+   name: "31 - void elements",
    expected: "valid",
    source: String.raw`<div>
-    <!-- Regular comment -->
-    <!-- Multi
-         line
-         comment -->
-    <!-- <div>Nested HTML in comment</div> -->
-    <!-- {expression} -->
-    <!-- </server> -->
-    <!-- </style> -->
-    Content
+    <area>
+    <base>
+    <br>
+    <col>
+    <embed>
+    <hr>
+    <img>
+    <input>
+    <link>
+    <meta>
+    <param>
+    <source>
+    <track>
+    <wbr>
 </div>`,
 }

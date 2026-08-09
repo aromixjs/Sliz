@@ -1,10 +1,14 @@
 export default {
-   name: "xss injection attempts",
+   name: "14 - invalid self closing on non void",
    expected: "invalid",
-   source: String.raw`<div>
-    {eval("alert(1)")}
-    {constructor.constructor("alert(1)")()}
-    {window.location = "evil.com"}
-    {document.cookie}
-</div>`,
+   source: String.raw`<div />
+<span />
+<p />
+<section />
+<article />
+<header />
+<footer />
+<main />
+<form />
+<table />`,
 }

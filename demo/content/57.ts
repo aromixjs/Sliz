@@ -1,7 +1,15 @@
 export default {
-   name: "wrong closing tag",
-   expected: "invalid",
-   source: String.raw`<div>
-    hello
-</span>`,
+   name: "57 - empty multiline blocks",
+   expected: "valid",
+   source: String.raw`<server>
+
+</server>
+
+<style>
+
+</style>
+
+<div>
+
+</div>`,
 }

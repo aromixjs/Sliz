@@ -20,6 +20,8 @@ export enum SyntaxKind {
   Expression = "Expression",
   ExpressionEnd = "ExpressionEnd",
 
+  HtmlComment = "HtmlComment",
+
   Text = "Text",
 
   Unknown = "Unknown",

@@ -1,13 +1,5 @@
 export default {
-   name: "nested server",
-   expected: "invalid",
-   source: String.raw`<server>
-const a = 1;
-
-<server>
-const b = 2;
-</server>
-
-const c = 3;
-</server>`,
+   name: "69 - empty blocks",
+   expected: "valid",
+   source: String.raw`<server></server><style></style><div></div>`,
 }

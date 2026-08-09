@@ -1,7 +1,5 @@
 export default {
-   name: "unclosed template literal",
+   name: "72 - mismatched quotes attribute",
    expected: "invalid",
-   source: String.raw`<server>
-const html = \`<div>Hello
-</server>`,
+   source: String.raw`<div class="hello'></div>`,
 }

@@ -1,35 +1,22 @@
 export default {
-   name: "javascript comments",
+   name: "49 - basic",
    expected: "valid",
-   source: String.raw`<server>
-/*
-    block comment
-    <server>
-    </server>
-    </style>
-*/
+   source: String.raw`<server lang="ts">
+const user = await getUser();
+const myName = "user";
+const username = 'name1';
+const backtick = \`data\`;
 
-const foo = 123;
+async function updateName(name) {
+    await db.users.update(user.id, { name });
+}
 
-// normal comment
-const bar = 456; // trailing comment
-
-/*
- * another comment
- *
- * <div>
- * {something}
- * </div>
- */
-
-const value = {
-    foo: 1,
-    // foo: 2,
-    bar: 3,
-};
+const data = await loadData();
 </server>
 
-<div>
-    Hello
+<style></style>
+
+<div .when={user}>
+Hello {user.name}
 </div>`,
 }
