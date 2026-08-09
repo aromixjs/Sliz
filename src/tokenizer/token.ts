@@ -2,7 +2,7 @@ import { type Maybe } from "../types/maybe";
 
 export enum SyntaxKind {
   LessThan = "LessThan",
-  LessThanSlash = "LessThanSlash",
+  Slash = "Slash",
 
   TagName = "TagName",
   AttributeName = "AttributeName",
@@ -26,24 +26,6 @@ export enum SyntaxKind {
   EndOfFile = "EndOfFile",
 }
 
-export enum State {
-  Text = "Text",
-
-  BeforeOpeningTagName = "BeforeOpeningTagName",
-  BeforeClosingTagName = "BeforeClosingTagName",
-
-  AfterOpeningTagName = "AfterOpeningTagName",
-  AfterClosingTagName = "AfterClosingTagName",
-
-  AfterAttributeName = "AfterAttributeName",
-  BeforeAttributeValue = "BeforeAttributeValue",
-  AfterAttributeValue = "AfterAttributeValue",
-
-  ServerScript = "ServerScript",
-  ClientScript = "ClientScript",
-  Style = "Style",
-}
-
 export interface Token {
   kind: SyntaxKind;
   start: number;
@@ -55,7 +37,6 @@ export interface Token {
 export interface TokenizerContext {
   readonly source: string;
   cursor: number;
-  readonly tagStack: Array<string>;
   readonly tokens: Array<Token>
 }
 

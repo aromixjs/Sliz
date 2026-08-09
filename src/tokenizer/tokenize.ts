@@ -1,4 +1,5 @@
 import { CompilerContext } from "../pipeline/context";
+import { attributeName, attributeValue, equals, greaterThan, lessThan, script, slash, tagName } from "./matcher";
 import { Matcher, SyntaxKind, TokenizerContext } from "./token";
 
 
@@ -6,11 +7,10 @@ export function tokenize(context: CompilerContext) {
   const ctx: TokenizerContext = {
     source: context.source,
     cursor: 0,
-    tagStack: [],
     tokens: []
   }
 
-  const matchers: Matcher[] = []
+  const matchers: Matcher[] = [lessThan,slash,tagName,attributeName,equals,attributeValue,greaterThan,script]
 
   while (ctx.cursor < ctx.source.length) {
     const start = ctx.cursor;
