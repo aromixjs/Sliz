@@ -130,7 +130,7 @@ export default {
       position++;
     }
 
-    return position;
+    return -1;
   },
   regex(source: string, start: number) {
     let position = start + 1;

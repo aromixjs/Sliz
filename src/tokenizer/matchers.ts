@@ -32,13 +32,13 @@ export const lessThan: Matcher = (c) => {
 export const lessThanSlash: Matcher = (c) => {
   const { source, cursor, state } = c;
 
-  const isText = state === State.Text;
-  const isRaw =
-    state === State.ServerScript ||
-    state === State.ClientScript ||
-    state === State.Style;
 
-  if (!isText && !isRaw) {
+  if (
+    state !== State.Text &&
+    state !== State.ServerScript &&
+    state !== State.ClientScript &&
+    state !== State.Style
+  ) {
     return;
   }
 
@@ -124,9 +124,8 @@ export const tagName: Matcher = (c) => {
 export const attributeName: Matcher = (c) => {
   const { source, cursor, state } = c;
 
-  if (
-    state !== State.AfterOpeningTagName && state !== State.AfterAttributeValue
-  ) {
+  if (state !== State.AfterOpeningTagName &&
+    state !== State.AfterAttributeValue) {
     return;
   }
 
@@ -159,6 +158,18 @@ export const attributeName: Matcher = (c) => {
     return;
   }
 
+  const afterName = skip.whiteSpace(source, end);
+  let nextState;
+
+
+  if (source.charCodeAt(afterName) === char.equals) {
+    nextState = State.AfterAttributeName
+  } else {
+    nextState = State.AfterAttributeValue
+  }
+
+
+
   return {
     token: {
       kind: SyntaxKind.AttributeName,
@@ -167,7 +178,7 @@ export const attributeName: Matcher = (c) => {
       value: source.slice(start, end),
     },
     nextCursor: end,
-    nextState: State.AfterAttributeName,
+    nextState: nextState,
   };
 };
 
@@ -465,8 +476,18 @@ export const expression: Matcher = (c) => {
 
   const end = skip.braceExpression(source, cursor - 1);
 
-  if (end <= cursor) {
-    return;
+  if (end === -1) {
+    // unterminated expression will handle in ast 
+    return {
+      token: {
+        kind: SyntaxKind.Expression,
+        start: cursor,
+        end: source.length,
+        value: source.slice(cursor),
+      },
+      nextCursor: source.length,
+      nextState: State.Text,
+    };
   }
 
   return {
