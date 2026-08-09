@@ -13217,7 +13217,7 @@ Tokens (23):
 51 - regular expressions 50 
 expected: stress
 ==========
-Tokens (18):
+Tokens (5):
 [
   {
     "kind": "LessThan",
@@ -13240,86 +13240,8 @@ Tokens (18):
   {
     "kind": "ServerScript",
     "start": 8,
-    "end": 322,
-    "value": "\nconst simple = /hello/;\nconst flags = /hello/gi;\nconst escaped = /hello\\/world/;\nconst characterClass = /[a-z<>{}]/;\nconst complex = /^(https?:\\/\\/)?([^\\/]+)(\\/.*)?$/i;\n\nconst result = text\n    .replace(/foo/g, \"bar\")\n    .match(/hello\\s+world/i);\n\nconst regexLike = /<\\/server>/;\nconst regexStyle = /<\\/style>/;\n"
-  },
-  {
-    "kind": "LessThan",
-    "start": 322,
-    "end": 323,
-    "value": "<"
-  },
-  {
-    "kind": "Slash",
-    "start": 323,
-    "end": 324,
-    "value": "/"
-  },
-  {
-    "kind": "TagName",
-    "start": 324,
-    "end": 330,
-    "value": "server"
-  },
-  {
-    "kind": "GreaterThan",
-    "start": 330,
-    "end": 331,
-    "value": ">"
-  },
-  {
-    "kind": "Text",
-    "start": 331,
-    "end": 333,
-    "value": "\n\n"
-  },
-  {
-    "kind": "LessThan",
-    "start": 333,
-    "end": 334,
-    "value": "<"
-  },
-  {
-    "kind": "TagName",
-    "start": 334,
-    "end": 337,
-    "value": "div"
-  },
-  {
-    "kind": "GreaterThan",
-    "start": 337,
-    "end": 338,
-    "value": ">"
-  },
-  {
-    "kind": "Text",
-    "start": 338,
-    "end": 354,
-    "value": "\n    Regex test\n"
-  },
-  {
-    "kind": "LessThan",
-    "start": 354,
-    "end": 355,
-    "value": "<"
-  },
-  {
-    "kind": "Slash",
-    "start": 355,
-    "end": 356,
-    "value": "/"
-  },
-  {
-    "kind": "TagName",
-    "start": 356,
-    "end": 359,
-    "value": "div"
-  },
-  {
-    "kind": "GreaterThan",
-    "start": 359,
     "end": 360,
-    "value": ">"
+    "value": "\nconst simple = /hello/;\nconst flags = /hello/gi;\nconst escaped = /hello\\/world/;\nconst characterClass = /[a-z<>{}]/;\nconst complex = /^(https?:\\/\\/)?([^\\/]+)(\\/.*)?$/i;\n\nconst result = text\n    .replace(/foo/g, \"bar\")\n    .match(/hello\\s+world/i);\n\nconst regexLike = /<\\/server>/;\nconst regexStyle = /<\\/style>/;\n</server>\n\n<div>\n    Regex test\n</div>"
   },
   {
     "kind": "EndOfFile",

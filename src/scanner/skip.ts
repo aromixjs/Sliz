@@ -159,7 +159,8 @@ export default {
       if (code === char.slash && !inCharClass) {
         position++;
 
-        while (position < source.length && is.alpha(source.charCodeAt(position))) {
+        const code = source.charCodeAt(position);
+        while (position < source.length && is.alpha(code)) {
           position++;
         }
 

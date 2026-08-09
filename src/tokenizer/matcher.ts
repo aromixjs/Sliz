@@ -245,104 +245,106 @@ export const greaterThan: Matcher = (c) => {
    c.cursor = start + 1;
 };
 
-
-
 export const script: Matcher = (c) => {
-   const { source, cursor, tokens } = c;
+  const { source, cursor, tokens } = c;
 
-   const greaterThanIndex = tokens.findLastIndex(
-      (token) => token.kind === SyntaxKind.GreaterThan,
-   );
+  const endTag = tokens.findLast((token) =>
+    token.kind === SyntaxKind.GreaterThan
+  );
 
-   if (greaterThanIndex === -1) {
-      return;
-   }
+  if (!endTag) {
+    return;
+  }
 
-   const lessThanIndex = tokens.findLastIndex(
-      (token, index) =>
-         index < greaterThanIndex &&
-         token.kind === SyntaxKind.LessThan,
-   );
+  const endTagIndex = tokens.indexOf(endTag);
 
-   if (lessThanIndex === -1) {
-      return;
-   }
+  const lessThan = tokens
+    .slice(0, endTagIndex)
+    .findLast((token) => token.kind === SyntaxKind.LessThan);
 
-   const tagName = tokens[lessThanIndex + 1];
+  if (!lessThan) {
+    return;
+  }
 
-   if (tagName?.kind !== SyntaxKind.TagName) {
-      return;
-   }
-   const name = tagName.value?.toLowerCase();
+  const lessThanIndex = tokens.indexOf(lessThan);
+  const tagName = tokens[lessThanIndex + 1];
 
+  if (tagName?.kind !== SyntaxKind.TagName) {
+    return;
+  }
 
-   if (name !== "server" && name !== "script") {
-      return;
-   }
+  const name = tagName.value?.toLowerCase();
 
+  if (name !== "server" && name !== "script") {
+    return;
+  }
 
-   let position = cursor;
+  let position = cursor;
 
-   while (position < source.length) {
+  while (position < source.length) {
+    const code = source.charCodeAt(position);
 
-      const code = source.charCodeAt(position);
+    if (is.quote(code)) {
+      position =
+        code === char.backtick
+          ? skip.template(source, position)
+          : skip.string(source, position);
 
-      if (is.quote(code)) {
-         position =
-            code === char.backtick
-               ? skip.template(source, position)
-               : skip.string(source, position);
+      continue;
+    }
 
-         continue;
-      }
-      if (code === char.slash) {
-         const next = source.charCodeAt(position + 1);
+    if (code === char.slash) {
+      const next = source.charCodeAt(position + 1);
 
-         if (next === char.slash) {
-            position = skip.lineComment(source, position);
-            continue;
-         }
-
-         if (next === char.asterisk) {
-            position = skip.blockComment(source, position);
-            continue;
-         }
-
-         if (is.regexStart(source, position)) {
-            position = skip.regex(source, position);
-            continue;
-         }
+      if (next === char.slash) {
+        position = skip.lineComment(source, position);
+        continue;
       }
 
-      if (
-         code === char.lessThan &&
-         source.charCodeAt(position + 1) === char.slash
-      ) {
-         break;
+      if (next === char.asterisk) {
+        position = skip.blockComment(source, position);
+        continue;
       }
 
-      position++;
+      if (is.regexStart(source, position)) {
+        position = skip.regex(source, position);
+        continue;
+      }
+    }
 
-   }
+    if (
+      code === char.lessThan &&
+      source.charCodeAt(position + 1) === char.slash
+    ) {
+      let end = position + 2;
 
-   if (position === cursor) {
-      return;
-   }
+      while (end < source.length && is.alpha(source.charCodeAt(end))) {
+        end++;
+      }
 
-   c.tokens.push({
-      kind:
-         name === "server"
-            ? SyntaxKind.ServerScript
-            : SyntaxKind.ClientScript,
-      start: cursor,
-      end: position,
-      value: source.slice(cursor, position),
-   });
+      if (source.slice(position + 2, end).toLowerCase() === name) {
+        break;
+      }
+    }
 
-   c.cursor = position;
+    position++;
+  }
 
+  if (position === cursor) {
+    return;
+  }
 
+  c.tokens.push({
+    kind:
+      name === "server"
+        ? SyntaxKind.ServerScript
+        : SyntaxKind.ClientScript,
+    start: cursor,
+    end: position,
+    value: source.slice(cursor, position),
+  });
 
+  c.cursor = position;
 };
 
 export const style: Matcher = (c) => {
@@ -428,75 +430,75 @@ export const style: Matcher = (c) => {
 
 
 export const text: Matcher = (c) => {
-  const { source, cursor } = c;
+   const { source, cursor } = c;
 
-  let position = cursor;
-  let textStart = cursor;
+   let position = cursor;
+   let textStart = cursor;
 
-  while (position < source.length) {
-    const code = source.charCodeAt(position);
+   while (position < source.length) {
+      const code = source.charCodeAt(position);
 
-    if (code === char.lessThan) {
-      break;
-    }
+      if (code === char.lessThan) {
+         break;
+      }
 
-    if (code !== char.openBrace) {
-      position++;
-      continue;
-    }
+      if (code !== char.openBrace) {
+         position++;
+         continue;
+      }
 
-    // Emit text before the expression.
-    if (position > textStart) {
+      // Emit text before the expression.
+      if (position > textStart) {
+         c.tokens.push({
+            kind: SyntaxKind.Text,
+            start: textStart,
+            end: position,
+            value: source.slice(textStart, position),
+         });
+      }
+
+      const end = skip.braceExpression(source, position);
+
+      if (end === -1) {
+         // Unterminated expression.
+         c.tokens.push({
+            kind: SyntaxKind.Expression,
+            start: position,
+            end: source.length,
+            value: source.slice(position),
+         });
+
+         c.cursor = source.length;
+         return;
+      }
+
+      // Emit the complete expression, including {}.
       c.tokens.push({
-        kind: SyntaxKind.Text,
-        start: textStart,
-        end: position,
-        value: source.slice(textStart, position),
+         kind: SyntaxKind.Expression,
+         start: position,
+         end,
+         value: source.slice(position, end),
       });
-    }
 
-    const end = skip.braceExpression(source, position);
+      position = end;
+      textStart = position;
+   }
 
-    if (end === -1) {
-      // Unterminated expression.
+   // Emit remaining text.
+   if (position > textStart) {
       c.tokens.push({
-        kind: SyntaxKind.Expression,
-        start: position,
-        end: source.length,
-        value: source.slice(position),
+         kind: SyntaxKind.Text,
+         start: textStart,
+         end: position,
+         value: source.slice(textStart, position),
       });
+   }
 
-      c.cursor = source.length;
+   if (position === cursor) {
       return;
-    }
+   }
 
-    // Emit the complete expression, including {}.
-    c.tokens.push({
-      kind: SyntaxKind.Expression,
-      start: position,
-      end,
-      value: source.slice(position, end),
-    });
-
-    position = end;
-    textStart = position;
-  }
-
-  // Emit remaining text.
-  if (position > textStart) {
-    c.tokens.push({
-      kind: SyntaxKind.Text,
-      start: textStart,
-      end: position,
-      value: source.slice(textStart, position),
-    });
-  }
-
-  if (position === cursor) {
-    return;
-  }
-
-  c.cursor = position;
+   c.cursor = position;
 };
 
 
