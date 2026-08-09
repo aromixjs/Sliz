@@ -16,9 +16,7 @@ export enum SyntaxKind {
   ClientScript = "ClientScript",
   Style = "Style",
 
-  ExpressionStart = "ExpressionStart",
   Expression = "Expression",
-  ExpressionEnd = "ExpressionEnd",
 
   HtmlComment = "HtmlComment",
 
@@ -30,7 +28,6 @@ export enum SyntaxKind {
 
 export enum State {
   Text = "Text",
-  Expression = "Expression",
 
   BeforeOpeningTagName = "BeforeOpeningTagName",
   BeforeClosingTagName = "BeforeClosingTagName",
@@ -58,7 +55,6 @@ export interface Token {
 export interface TokenizerContext {
   readonly source: string;
   readonly cursor: number;
-  readonly state: State;
   readonly tagStack: Array<string>;
 }
 export interface MatchResult {

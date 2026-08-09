@@ -56,6 +56,7 @@ export default {
   attributeName(code: number) {
     return (code > char.space && code !== char.equals &&
       code !== char.greaterThan && code !== char.doubleQuote &&
-      code !== char.singleQuote && code !== char.slash);
+      code !== char.singleQuote && code !== char.slash &&
+      code !== char.openBrace && code !== char.closeBrace);
   },
 };

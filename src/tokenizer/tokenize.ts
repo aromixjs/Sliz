@@ -1,22 +1,14 @@
 import { CompilerContext } from "../pipeline/context";
 import { Maybe } from "../types/maybe";
+import { attributeEquals, attributeName, attributeValue } from "./matchers/attribute";
+import { lessThan } from "./matchers/lessThan";
+import { lessThanSlash } from "./matchers/lessThanSlash";
+import { clientScript, serverScript } from "./matchers/script";
+import { closingTagEnd, openingTagEnd } from "./matchers/tagEnd";
+import { closingTagName, openingTagName } from "./matchers/tagName";
+
 import {
-  attributeEquals,
-  attributeName,
-  attributeValue,
-  expression,
-  expressionEnd,
-  expressionStart,
-  htmlComment,
-  lessThan,
-  lessThanSlash,
-  script,
-  style,
-  tagEnd,
-  tagName,
-  text,
-} from "./matchers";
-import {
+  Matcher,
   MatchResult,
   State,
   SyntaxKind,
@@ -24,6 +16,24 @@ import {
   TokenizerContext,
 } from "./token";
 
+const stateToMatcher:Record<State,Array<Matcher>>={
+Text:[lessThan,lessThanSlash],
+ServerScript:[lessThanSlash,serverScript],
+ClientScript:[lessThanSlash,clientScript],
+Style:[lessThanSlash],
+BeforeOpeningTagName:[openingTagName],
+BeforeClosingTagName:[closingTagName],
+AfterOpeningTagName:[attributeName,closingTagEnd],
+AfterClosingTagName:[closingTagEnd],
+AfterAttributeValue:[attributeName, openingTagEnd],
+AfterAttributeName:[attributeEquals, openingTagEnd],
+BeforeAttributeValue:[attributeValue],
+
+
+
+
+
+}
 export function tokenize(context: CompilerContext) {
   const { source } = context;
   const tokens: Token[] = [];
@@ -38,7 +48,7 @@ export function tokenize(context: CompilerContext) {
     attributeName,
     attributeEquals,
     attributeValue,
-    tagEnd,
+    closingTagEnd,
     script,
     style,
     expressionStart,
