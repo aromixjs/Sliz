@@ -6,39 +6,35 @@ import { Matcher, SyntaxKind } from "./token";
 
 export const lessThan: Matcher = (c) => {
    const { source, cursor, } = c;
-
    const current = source.charCodeAt(cursor);
-   const next = source.charCodeAt(cursor + 1);
 
-   if (current !== char.lessThan) {
-      return;
+   if (current === char.lessThan) {
+      c.tokens.push({
+         kind: SyntaxKind.LessThan,
+         start: cursor,
+         end: cursor + 1,
+         value: "<",
+      });
+
+      c.cursor++;
    }
-
-   c.tokens.push({
-      kind: SyntaxKind.LessThan,
-      start: cursor,
-      end: cursor + 1,
-      value: "<",
-   });
-
-   c.cursor++;
 };
 
 export const slash: Matcher = (c) => {
    const { source, cursor } = c;
 
-   if (source.charCodeAt(cursor) !== char.slash) {
-      return;
+   if (source.charCodeAt(cursor) === char.slash) {
+
+      c.tokens.push({
+         kind: SyntaxKind.Slash,
+         start: cursor,
+         end: cursor + 1,
+         value: "/",
+      });
+
+      c.cursor++;
    }
 
-   c.tokens.push({
-      kind: SyntaxKind.Slash,
-      start: cursor,
-      end: cursor + 1,
-      value: "/",
-   });
-
-   c.cursor++;
 };
 
 
@@ -83,7 +79,6 @@ export const tagName: Matcher = (c) => {
 
 
 export const attributeName: Matcher = (c) => {
-
    const { source, cursor, tokens } = c;
    const previous = tokens.at(-1);
 
@@ -137,8 +132,6 @@ export const attributeName: Matcher = (c) => {
    });
 
    c.cursor = end;
-
-
 }
 
 export const equals: Matcher = (c) => {
@@ -147,10 +140,7 @@ export const equals: Matcher = (c) => {
    const start = skip.whiteSpace(source, cursor);
 
    if (source.charCodeAt(start) !== char.equals) {
-      return;
-   }
-
-   c.tokens.push({
+    c.tokens.push({
       kind: SyntaxKind.Equals,
       start,
       end: start + 1,
@@ -158,6 +148,9 @@ export const equals: Matcher = (c) => {
    });
 
    c.cursor = start + 1;
+   }
+
+
 };
 
 
@@ -246,105 +239,105 @@ export const greaterThan: Matcher = (c) => {
 };
 
 export const script: Matcher = (c) => {
-  const { source, cursor, tokens } = c;
+   const { source, cursor, tokens } = c;
 
-  const endTag = tokens.findLast((token) =>
-    token.kind === SyntaxKind.GreaterThan
-  );
+   const endTag = tokens.findLast((token) =>
+      token.kind === SyntaxKind.GreaterThan
+   );
 
-  if (!endTag) {
-    return;
-  }
+   if (!endTag) {
+      return;
+   }
 
-  const endTagIndex = tokens.indexOf(endTag);
+   const endTagIndex = tokens.indexOf(endTag);
 
-  const lessThan = tokens
-    .slice(0, endTagIndex)
-    .findLast((token) => token.kind === SyntaxKind.LessThan);
+   const lessThan = tokens
+      .slice(0, endTagIndex)
+      .findLast((token) => token.kind === SyntaxKind.LessThan);
 
-  if (!lessThan) {
-    return;
-  }
+   if (!lessThan) {
+      return;
+   }
 
-  const lessThanIndex = tokens.indexOf(lessThan);
-  const tagName = tokens[lessThanIndex + 1];
+   const lessThanIndex = tokens.indexOf(lessThan);
+   const tagName = tokens[lessThanIndex + 1];
 
-  if (tagName?.kind !== SyntaxKind.TagName) {
-    return;
-  }
+   if (tagName?.kind !== SyntaxKind.TagName) {
+      return;
+   }
 
-  const name = tagName.value?.toLowerCase();
+   const name = tagName.value?.toLowerCase();
 
-  if (name !== "server" && name !== "script") {
-    return;
-  }
+   if (name !== "server" && name !== "script") {
+      return;
+   }
 
-  let position = cursor;
+   let position = cursor;
 
-  while (position < source.length) {
-    const code = source.charCodeAt(position);
+   while (position < source.length) {
+      const code = source.charCodeAt(position);
 
-    if (is.quote(code)) {
-      position =
-        code === char.backtick
-          ? skip.template(source, position)
-          : skip.string(source, position);
+      if (is.quote(code)) {
+         position =
+            code === char.backtick
+               ? skip.template(source, position)
+               : skip.string(source, position);
 
-      continue;
-    }
-
-    if (code === char.slash) {
-      const next = source.charCodeAt(position + 1);
-
-      if (next === char.slash) {
-        position = skip.lineComment(source, position);
-        continue;
+         continue;
       }
 
-      if (next === char.asterisk) {
-        position = skip.blockComment(source, position);
-        continue;
+      if (code === char.slash) {
+         const next = source.charCodeAt(position + 1);
+
+         if (next === char.slash) {
+            position = skip.lineComment(source, position);
+            continue;
+         }
+
+         if (next === char.asterisk) {
+            position = skip.blockComment(source, position);
+            continue;
+         }
+
+         if (is.regexStart(source, position)) {
+            position = skip.regex(source, position);
+            continue;
+         }
       }
 
-      if (is.regexStart(source, position)) {
-        position = skip.regex(source, position);
-        continue;
+      if (
+         code === char.lessThan &&
+         source.charCodeAt(position + 1) === char.slash
+      ) {
+         let end = position + 2;
+
+         while (end < source.length && is.alpha(source.charCodeAt(end))) {
+            end++;
+         }
+
+         if (source.slice(position + 2, end).toLowerCase() === name) {
+            break;
+         }
       }
-    }
 
-    if (
-      code === char.lessThan &&
-      source.charCodeAt(position + 1) === char.slash
-    ) {
-      let end = position + 2;
+      position++;
+   }
 
-      while (end < source.length && is.alpha(source.charCodeAt(end))) {
-        end++;
-      }
+   if (position === cursor) {
+      return;
+   }
 
-      if (source.slice(position + 2, end).toLowerCase() === name) {
-        break;
-      }
-    }
+   c.tokens.push({
+      kind:
+         name === "server"
+            ? SyntaxKind.ServerScript
+            : SyntaxKind.ClientScript,
+      start: cursor,
+      end: position,
+      value: source.slice(cursor, position),
+   });
 
-    position++;
-  }
-
-  if (position === cursor) {
-    return;
-  }
-
-  c.tokens.push({
-    kind:
-      name === "server"
-        ? SyntaxKind.ServerScript
-        : SyntaxKind.ClientScript,
-    start: cursor,
-    end: position,
-    value: source.slice(cursor, position),
-  });
-
-  c.cursor = position;
+   c.cursor = position;
 };
 
 export const style: Matcher = (c) => {
