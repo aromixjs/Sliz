@@ -345,222 +345,198 @@ export const script: Matcher = (c) => {
 
 };
 
-// export const style: Matcher = (c) => {
-//   const { source, cursor, state } = c;
+export const style: Matcher = (c) => {
+   const { source, cursor, tokens } = c;
 
-//   if (state !== State.Style) {
-//     return;
-//   }
-//   let position = cursor;
+   const greaterThanIndex = tokens.findLastIndex(
+      (token) => token.kind === SyntaxKind.GreaterThan,
+   );
 
-//   while (position < source.length) {
-//     const code = source.charCodeAt(position);
+   if (greaterThanIndex === -1) {
+      return;
+   }
 
-//     if (
-//       code === char.lessThan &&
-//       source.charCodeAt(position + 1) === char.slash
-//     ) {
-//       break;
-//     }
+   const lessThanIndex = tokens.findLastIndex(
+      (token, index) =>
+         index < greaterThanIndex &&
+         token.kind === SyntaxKind.LessThan,
+   );
 
-//     // CSS string
-//     if (code === char.singleQuote || code === char.doubleQuote) {
-//       position = skip.string(source, position);
-//       continue;
-//     }
-//     // CSS comment
-//     if (
-//       code === char.slash &&
-//       source.charCodeAt(position + 1) === char.asterisk
-//     ) {
-//       position = skip.blockComment(source, position);
-//       continue;
-//     }
+   if (lessThanIndex === -1) {
+      return;
+   }
 
-//     position++;
-//   }
+   const tagName = tokens[lessThanIndex + 1];
 
-//   if (position === cursor) {
-//     return;
-//   }
+   if (tagName?.kind !== SyntaxKind.TagName) {
+      return;
+   }
 
-//   return {
-//     token: {
-//       kind: SyntaxKind.Style,
-//       start: cursor,
-//       end: position,
-//       value: source.slice(cursor, position),
-//     },
-//     nextCursor: position,
-//     nextState: State.Text,
-//   };
-// };
+   if (tagName.value?.toLowerCase() !== "style") {
+      return;
+   }
 
-// export const expressionStart: Matcher = (c) => {
-//   const { source, cursor, state } = c;
+   let position = cursor;
 
-//   if (state !== State.Text) {
-//     return;
-//   }
+   while (position < source.length) {
+      const code = source.charCodeAt(position);
 
-//   if (source.charCodeAt(cursor) !== char.openBrace) {
-//     return;
-//   }
+      // Let normal tag matchers handle </style>
+      if (
+         code === char.lessThan &&
+         source.charCodeAt(position + 1) === char.slash
+      ) {
+         break;
+      }
 
-//   return {
-//     token: {
-//       kind: SyntaxKind.ExpressionStart,
-//       start: cursor,
-//       end: cursor + 1,
-//       value: "{",
-//     },
-//     nextCursor: cursor + 1,
-//     nextState: State.Expression,
-//   };
-// };
+      // CSS strings
+      if (
+         code === char.singleQuote ||
+         code === char.doubleQuote
+      ) {
+         position = skip.string(source, position);
+         continue;
+      }
 
-// export const expression: Matcher = (c) => {
-//   const { source, cursor, state } = c;
+      // CSS comments
+      if (
+         code === char.slash &&
+         source.charCodeAt(position + 1) === char.asterisk
+      ) {
+         position = skip.blockComment(source, position);
+         continue;
+      }
 
-//   if (state !== State.Expression) {
-//     return;
-//   }
+      position++;
+   }
 
-//   const end = skip.braceExpression(source, cursor - 1);
+   if (position === cursor) {
+      return;
+   }
 
-//   if (end === -1) {
-//     // unterminated expression will handle in ast
-//     return {
-//       token: {
-//         kind: SyntaxKind.Expression,
-//         start: cursor,
-//         end: source.length,
-//         value: source.slice(cursor),
-//       },
-//       nextCursor: source.length,
-//       nextState: State.Text,
-//     };
-//   }
+   c.tokens.push({
+      kind: SyntaxKind.Style,
+      start: cursor,
+      end: position,
+      value: source.slice(cursor, position),
+   });
 
-//   return {
-//     token: {
-//       kind: SyntaxKind.Expression,
-//       start: cursor,
-//       end: end - 1,
-//       value: source.slice(cursor, end - 1),
-//     },
-//     nextCursor: end - 1,
-//     nextState: State.Expression,
-//   };
-// };
+   c.cursor = position;
+};
 
-// export const expressionEnd: Matcher = (c) => {
-//   const { source, cursor, state } = c;
 
-//   if (state !== State.Expression) {
-//     return;
-//   }
 
-//   if (source.charCodeAt(cursor) !== char.closeBrace) {
-//     return;
-//   }
 
-//   return {
-//     token: {
-//       kind: SyntaxKind.ExpressionEnd,
-//       start: cursor,
-//       end: cursor + 1,
-//       value: "}",
-//     },
-//     nextCursor: cursor + 1,
-//     nextState: State.Text,
-//   };
-// };
+export const text: Matcher = (c) => {
+  const { source, cursor } = c;
 
-// export const htmlComment: Matcher = (c) => {
-//   const { source, cursor, state } = c;
+  let position = cursor;
+  let textStart = cursor;
 
-//   if (state !== State.Text) {
-//     return;
-//   }
+  while (position < source.length) {
+    const code = source.charCodeAt(position);
 
-//   if (
-//     source.charCodeAt(cursor) !== char.lessThan ||
-//     source.charCodeAt(cursor + 1) !== char.exclamationMark ||
-//     source.charCodeAt(cursor + 2) !== char.minus ||
-//     source.charCodeAt(cursor + 3) !== char.minus
-//   ) {
-//     return;
-//   }
+    if (code === char.lessThan) {
+      break;
+    }
 
-//   let position = cursor + 4;
+    if (code !== char.openBrace) {
+      position++;
+      continue;
+    }
 
-//   while (position < source.length) {
-//     if (
-//       source.charCodeAt(position) === char.minus &&
-//       source.charCodeAt(position + 1) === char.minus &&
-//       source.charCodeAt(position + 2) === char.greaterThan
-//     ) {
-//       return {
-//         token: {
-//           kind: SyntaxKind.HtmlComment,
-//           start: cursor,
-//           end: position + 3,
-//           value: source.slice(cursor, position + 3),
-//         },
-//         nextCursor: position + 3,
-//         nextState: State.Text,
-//       };
-//     }
-//     position++;
-//   }
+    // Emit text before the expression.
+    if (position > textStart) {
+      c.tokens.push({
+        kind: SyntaxKind.Text,
+        start: textStart,
+        end: position,
+        value: source.slice(textStart, position),
+      });
+    }
 
-//   return {
-//     token: {
-//       kind: SyntaxKind.HtmlComment,
-//       start: cursor,
-//       end: source.length,
-//       value: source.slice(cursor),
-//     },
-//     nextCursor: source.length,
-//     nextState: State.Text,
-//   };
-// };
+    const end = skip.braceExpression(source, position);
 
-// export const text: Matcher = (c) => {
-//   const { source, cursor, state } = c;
+    if (end === -1) {
+      // Unterminated expression.
+      c.tokens.push({
+        kind: SyntaxKind.Expression,
+        start: position,
+        end: source.length,
+        value: source.slice(position),
+      });
 
-//   if (state !== State.Text) {
-//     return;
-//   }
+      c.cursor = source.length;
+      return;
+    }
 
-//   let end = cursor;
+    // Emit the complete expression, including {}.
+    c.tokens.push({
+      kind: SyntaxKind.Expression,
+      start: position,
+      end,
+      value: source.slice(position, end),
+    });
 
-//   while (end < source.length) {
-//     const code = source.charCodeAt(end);
+    position = end;
+    textStart = position;
+  }
 
-//     if (
-//       code === char.openBrace ||
-//       code === char.lessThan
-//     ) {
-//       break;
-//     }
+  // Emit remaining text.
+  if (position > textStart) {
+    c.tokens.push({
+      kind: SyntaxKind.Text,
+      start: textStart,
+      end: position,
+      value: source.slice(textStart, position),
+    });
+  }
 
-//     end++;
-//   }
+  if (position === cursor) {
+    return;
+  }
 
-//   if (end === cursor) {
-//     return;
-//   }
+  c.cursor = position;
+};
 
-//   return {
-//     token: {
-//       kind: SyntaxKind.Text,
-//       start: cursor,
-//       end,
-//       value: source.slice(cursor, end),
-//     },
-//     nextCursor: end,
-//     nextState: State.Text,
-//   };
-// };
+
+
+
+
+export const htmlComment: Matcher = (c) => {
+   const { source, cursor } = c;
+
+   if (
+      source.charCodeAt(cursor) !== char.lessThan ||
+      source.charCodeAt(cursor + 1) !== char.exclamationMark ||
+      source.charCodeAt(cursor + 2) !== char.minus ||
+      source.charCodeAt(cursor + 3) !== char.minus
+   ) {
+      return;
+   }
+
+   let end = cursor + 4;
+
+   while (end < source.length) {
+      if (
+         source.charCodeAt(end) === char.minus &&
+         source.charCodeAt(end + 1) === char.minus &&
+         source.charCodeAt(end + 2) === char.greaterThan
+      ) {
+         end += 3;
+         break;
+      }
+
+      end++;
+   }
+
+   c.tokens.push({
+      kind: SyntaxKind.HtmlComment,
+      start: cursor,
+      end,
+      value: source.slice(cursor, end),
+   });
+
+   c.cursor = end;
+};
+
