@@ -31,7 +31,16 @@ export const lessThan: Matcher = (c) => {
 
 export const lessThanSlash: Matcher = (c) => {
   const { source, cursor, state } = c;
-  if (state !== State.Text) return;
+
+  const isText = state === State.Text;
+  const isRaw =
+    state === State.ServerScript ||
+    state === State.ClientScript ||
+    state === State.Style;
+
+  if (!isText && !isRaw) {
+    return;
+  }
 
   const current = source.charCodeAt(cursor);
   const next = source.charCodeAt(cursor + 1);
