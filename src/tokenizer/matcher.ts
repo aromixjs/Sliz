@@ -287,13 +287,6 @@ export const script: Matcher = (c) => {
 
       const code = source.charCodeAt(position);
 
-      if (
-         code === char.lessThan &&
-         source.charCodeAt(position + 1) === char.slash
-      ) {
-         break;
-      }
-
       if (is.quote(code)) {
          position =
             code === char.backtick
@@ -319,6 +312,13 @@ export const script: Matcher = (c) => {
             position = skip.regex(source, position);
             continue;
          }
+      }
+
+      if (
+         code === char.lessThan &&
+         source.charCodeAt(position + 1) === char.slash
+      ) {
+         break;
       }
 
       position++;
@@ -381,14 +381,6 @@ export const style: Matcher = (c) => {
    while (position < source.length) {
       const code = source.charCodeAt(position);
 
-      // Let normal tag matchers handle </style>
-      if (
-         code === char.lessThan &&
-         source.charCodeAt(position + 1) === char.slash
-      ) {
-         break;
-      }
-
       // CSS strings
       if (
          code === char.singleQuote ||
@@ -405,6 +397,14 @@ export const style: Matcher = (c) => {
       ) {
          position = skip.blockComment(source, position);
          continue;
+      }
+
+      // Let normal tag matchers handle </style>
+      if (
+         code === char.lessThan &&
+         source.charCodeAt(position + 1) === char.slash
+      ) {
+         break;
       }
 
       position++;
@@ -517,7 +517,7 @@ export const htmlComment: Matcher = (c) => {
 
    let end = cursor + 4;
 
-   while (end < source.length) {
+   while (end + 2 < source.length) {
       if (
          source.charCodeAt(end) === char.minus &&
          source.charCodeAt(end + 1) === char.minus &&

@@ -10,7 +10,7 @@ export function tokenize(context: CompilerContext) {
     tokens: []
   }
 
-  const matchers: Matcher[] = [lessThan,slash,tagName,attributeName,equals,attributeValue,greaterThan,script,style,text,htmlComment]
+  const matchers: Matcher[] = [lessThan, slash, tagName, attributeName, equals, attributeValue, greaterThan, script, style, text, htmlComment]
 
   while (ctx.cursor < ctx.source.length) {
     const start = ctx.cursor;
