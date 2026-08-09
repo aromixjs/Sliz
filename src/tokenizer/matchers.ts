@@ -58,7 +58,7 @@ export const lessThanSlash: Matcher = (c) => {
 };
 
 export const tagName: Matcher = (c) => {
-  const { source, cursor, state } = c;
+  const { source, cursor, state, tagStack } = c;
 
   const isOpening = state === State.BeforeOpeningTagName;
   const isClosing = state === State.BeforeClosingTagName;
@@ -81,13 +81,19 @@ export const tagName: Matcher = (c) => {
     end++;
   }
 
+  if (end === cursor) {
+    return;
+  }
+
+  let value = source.slice(cursor, end);
   if (isOpening) {
+    tagStack.push(value);
     return {
       token: {
         kind: SyntaxKind.TagName,
         start: cursor,
         end,
-        value: source.slice(cursor, end),
+        value,
       },
       nextCursor: end,
       nextState: State.AfterOpeningTagName,
@@ -98,7 +104,7 @@ export const tagName: Matcher = (c) => {
         kind: SyntaxKind.TagName,
         start: cursor,
         end,
-        value: source.slice(cursor, end),
+        value,
       },
       nextCursor: end,
       nextState: State.AfterClosingTagName,
@@ -109,7 +115,9 @@ export const tagName: Matcher = (c) => {
 export const attributeName: Matcher = (c) => {
   const { source, cursor, state } = c;
 
-  if (state !== State.AfterOpeningTagName) {
+  if (
+    state !== State.AfterOpeningTagName && state !== State.AfterAttributeValue
+  ) {
     return;
   }
 
@@ -179,124 +187,348 @@ export const attributeEquals: Matcher = (c) => {
   };
 };
 
-// export const serverStart: Matcher = (ctx) => {
-//   const { source, cursor, mode } = ctx;
-//   if (mode !== TokenizerMode.Root) return undefined;
+export const attributeValue: Matcher = (c) => {
+  const { source, cursor, state } = c;
 
-//   const serverOpen = serverTagOpen(source, cursor);
+  if (state !== State.BeforeAttributeValue) {
+    return;
+  }
 
-//   if (serverOpen === undefined) return undefined;
+  const start = skip.whiteSpace(source, cursor);
 
-//   return {
-//     token: {
-//       kind: SyntaxKind.ServerStart,
-//       start: cursor,
-//       end: serverOpen,
-//       value: source.slice(cursor, serverOpen),
-//     },
-//     nextCursor: serverOpen,
-//     nextMode: TokenizerMode.Server,
-//   };
-// };
+  if (start >= source.length) {
+    return;
+  }
 
-// export const serverEnd: Matcher = (ctx) => {
-//   if (ctx.mode !== TokenizerMode.Server) return undefined;
-//   const { source, cursor } = ctx;
+  let end = start;
+  const code = source.charCodeAt(end);
 
-//   const serverEnd = serverTagClose(source, cursor);
-//   if (serverEnd === undefined) return undefined;
+  if (code === char.singleQuote || code === char.doubleQuote) {
+    end = skip.string(source, end);
+  } else if (code === char.openBrace) {
+    end = skip.braceExpression(source, end);
+  } else {
+    while (end < source.length) {
+      const code = source.charCodeAt(end);
 
-//   return {
-//     token: {
-//       kind: SyntaxKind.ServerEnd,
-//       start: cursor,
-//       end: serverEnd,
-//       value: source.slice(cursor, serverEnd),
-//     },
-//     nextCursor: serverEnd,
-//     nextMode: TokenizerMode.Root,
-//   };
-// };
+      if (
+        code === char.space ||
+        code === char.tab ||
+        code === char.lineFeed ||
+        code === char.carriageReturn ||
+        code === char.greaterThan ||
+        code === char.slash
+      ) {
+        break;
+      }
 
-// export const serverCode: Matcher = (ctx) => {
-//   if (ctx.mode !== TokenizerMode.Server) return undefined;
-//   const { source, cursor } = ctx;
-//   let position = cursor;
+      end++;
+    }
+  }
 
-//   while (position < source.length) {
-//     const code = source.charCodeAt(position);
+  if (end === start) {
+    return;
+  }
 
-//     if (is.quote(code)) {
-//       if (code === char.backtick) {
-//         position = skip.template(source, position);
-//       } else {
-//         position = skip.string(source, position);
-//       }
-//       continue;
-//     }
+  return {
+    token: {
+      kind: SyntaxKind.AttributeValue,
+      start,
+      end,
+      value: source.slice(start, end),
+    },
+    nextCursor: end,
+    nextState: State.AfterAttributeValue,
+  };
+};
 
-//     if (code === char.slash) {
-//       const next = source.charCodeAt(position + 1);
+export const tagEnd: Matcher = (c) => {
+  const { source, cursor, state, tagStack } = c;
 
-//       if (next === char.slash) {
-//         position = skip.lineComment(source, position);
-//         continue;
-//       }
+  if (
+    state !== State.AfterOpeningTagName &&
+    state !== State.AfterClosingTagName &&
+    state !== State.AfterAttributeName &&
+    state !== State.AfterAttributeValue
+  ) {
+    return;
+  }
 
-//       if (next === char.asterisk) {
-//         position = skip.blockComment(source, position);
-//         continue;
-//       }
+  const start = skip.whiteSpace(source, cursor);
 
-//       if (is.regexStart(source, position)) {
-//         position = skip.regex(source, position);
-//         continue;
-//       }
-//     }
+  if (source.charCodeAt(start) === char.slash) {
+    if (source.charCodeAt(start + 1) !== char.greaterThan) {
+      return;
+    }
+    tagStack.pop();
+    return {
+      token: {
+        kind: SyntaxKind.SlashGreaterThan,
+        start,
+        end: start + 2,
+        value: source.slice(start, start + 2),
+      },
+      nextCursor: start + 2,
+      nextState: State.Text,
+    };
+  }
 
-//     const serverEnd = serverTagClose(source, position);
-//     if (serverEnd !== undefined) {
-//       break;
-//     }
+  if (source.charCodeAt(start) !== char.greaterThan) {
+    return;
+  }
 
-//     position++;
-//   }
+  let nextState = State.Text;
+  if (state === State.AfterClosingTagName) {
+    tagStack.pop();
+  } else {
+    const tagName = tagStack[tagStack.length - 1]?.toLowerCase();
+    if (tagName === "server") nextState = State.ServerScript;
+    else if (tagName === "style") nextState = State.Style;
+    else if (tagName === "script") nextState = State.ClientScript;
+  }
 
-//   if (position === cursor) return undefined;
+  return {
+    token: {
+      kind: SyntaxKind.GreaterThan,
+      start,
+      end: start + 1,
+      value: source.slice(start, start + 1),
+    },
+    nextCursor: start + 1,
+    nextState,
+  };
+};
 
-//   return {
-//     token: {
-//       kind: SyntaxKind.ServerCode,
-//       start: cursor,
-//       end: position,
-//       value: source.slice(cursor, position),
-//     },
-//     nextCursor: position,
-//     nextMode: TokenizerMode.Server,
-//   };
-// };
+export const script: Matcher = (c) => {
+  const { source, cursor, state } = c;
+  const isServer = state === State.ServerScript;
+  const isClient = state === State.ClientScript;
 
-// export const html: Matcher = (ctx) => {
-//   if (ctx.mode !== TokenizerMode.Root) return undefined;
-//   const { source, cursor } = ctx;
-//   let position = cursor;
+  if (!isServer && !isClient) {
+    return;
+  }
 
-//   while (position < source.length) {
-//     const openServer = serverTagOpen(source, position);
-//     if (openServer !== undefined) break;
-//     position++;
-//   }
+  let position = cursor;
 
-//   if (position === cursor) return undefined;
+  while (position < source.length) {
+    const code = source.charCodeAt(position);
 
-//   return {
-//     token: {
-//       kind: SyntaxKind.Html,
-//       start: cursor,
-//       end: position,
-//       value: source.slice(cursor, position),
-//     },
-//     nextCursor: position,
-//     nextMode: TokenizerMode.Server,
-//   };
-// };
+    if (
+      code === char.lessThan && source.charCodeAt(position + 1) === char.slash
+    ) {
+      break;
+    }
+    const before = position;
+
+    if (is.quote(code)) {
+      if (code === char.backtick) {
+        position = skip.template(source, position);
+      } else {
+        position = skip.string(source, position);
+      }
+      continue;
+    } else if (code === char.slash) {
+      const next = source.charCodeAt(position + 1);
+
+      if (next === char.slash) {
+        position = skip.lineComment(source, position);
+        continue;
+      } else if (next === char.asterisk) {
+        position = skip.blockComment(source, position);
+        continue;
+      } else if (is.regexStart(source, position)) {
+        position = skip.regex(source, position);
+        continue;
+      } else {
+        position++;
+      }
+    } else {
+      position++;
+    }
+
+    if (position <= before) {
+      position = before + 1;
+    }
+  }
+
+  if (position === cursor) return undefined;
+
+  let kind: SyntaxKind;
+
+  if (isServer) {
+    kind = SyntaxKind.ServerScript;
+  } else if (isClient) {
+    kind = SyntaxKind.ClientScript;
+  }
+
+  return {
+    token: {
+      kind: kind!,
+      start: cursor,
+      end: position,
+      value: source.slice(cursor, position),
+    },
+    nextCursor: position,
+    nextState: State.Text,
+  };
+};
+
+export const style: Matcher = (c) => {
+  const { source, cursor, state } = c;
+
+  if (state !== State.Style) {
+    return;
+  }
+  let position = cursor;
+
+  while (position < source.length) {
+    const code = source.charCodeAt(position);
+
+    if (
+      code === char.lessThan &&
+      source.charCodeAt(position + 1) === char.slash
+    ) {
+      break;
+    }
+
+    // CSS string
+    if (code === char.singleQuote || code === char.doubleQuote) {
+      position = skip.string(source, position);
+      continue;
+    }
+    // CSS comment
+    if (
+      code === char.slash &&
+      source.charCodeAt(position + 1) === char.asterisk
+    ) {
+      position = skip.blockComment(source, position);
+      continue;
+    }
+
+    position++;
+  }
+
+  if (position === cursor) {
+    return;
+  }
+
+  return {
+    token: {
+      kind: SyntaxKind.Style,
+      start: cursor,
+      end: position,
+      value: source.slice(cursor, position),
+    },
+    nextCursor: position,
+    nextState: State.Text,
+  };
+};
+
+export const expressionStart: Matcher = (c) => {
+  const { source, cursor, state } = c;
+
+  if (state !== State.Text) {
+    return;
+  }
+
+  if (source.charCodeAt(cursor) !== char.openBrace) {
+    return;
+  }
+
+  return {
+    token: {
+      kind: SyntaxKind.ExpressionStart,
+      start: cursor,
+      end: cursor + 1,
+      value: "{",
+    },
+    nextCursor: cursor + 1,
+    nextState: State.Expression,
+  };
+};
+
+export const expression: Matcher = (c) => {
+  const { source, cursor, state } = c;
+
+  if (state !== State.Expression) {
+    return;
+  }
+
+  const end = skip.braceExpression(source, cursor - 1);
+
+  if (end <= cursor) {
+    return;
+  }
+
+  return {
+    token: {
+      kind: SyntaxKind.Expression,
+      start: cursor,
+      end: end - 1,
+      value: source.slice(cursor, end - 1),
+    },
+    nextCursor: end - 1,
+    nextState: State.Expression,
+  };
+};
+
+export const expressionEnd: Matcher = (c) => {
+  const { source, cursor, state } = c;
+
+  if (state !== State.Expression) {
+    return;
+  }
+
+  if (source.charCodeAt(cursor) !== char.closeBrace) {
+    return;
+  }
+
+  return {
+    token: {
+      kind: SyntaxKind.ExpressionEnd,
+      start: cursor,
+      end: cursor + 1,
+      value: "}",
+    },
+    nextCursor: cursor + 1,
+    nextState: State.Text,
+  };
+};
+
+export const text: Matcher = (c) => {
+  const { source, cursor, state } = c;
+
+  if (state !== State.Text) {
+    return;
+  }
+
+  let end = cursor;
+
+  while (end < source.length) {
+    const code = source.charCodeAt(end);
+
+    if (
+      code === char.openBrace ||
+      code === char.lessThan
+    ) {
+      break;
+    }
+
+    end++;
+  }
+
+  if (end === cursor) {
+    return;
+  }
+
+  return {
+    token: {
+      kind: SyntaxKind.Text,
+      start: cursor,
+      end,
+      value: source.slice(cursor, end),
+    },
+    nextCursor: end,
+    nextState: State.Text,
+  };
+};

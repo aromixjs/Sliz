@@ -96,7 +96,7 @@ export default {
   },
 
   braceExpression(source: string, start: number) {
-    let position = start;
+    let position = start + 1;
     let depth = 1;
 
     while (position < source.length) {

@@ -1,6 +1,20 @@
 import { CompilerContext } from "../pipeline/context";
 import { Maybe } from "../types/maybe";
-import { attributeEquals, attributeName, lessThan, lessThanSlash, tagName } from "./matchers";
+import {
+  attributeEquals,
+  attributeName,
+  attributeValue,
+  expression,
+  expressionEnd,
+  expressionStart,
+  lessThan,
+  lessThanSlash,
+  script,
+  style,
+  tagEnd,
+  tagName,
+  text,
+} from "./matchers";
 import {
   MatchResult,
   State,
@@ -12,12 +26,27 @@ import {
 export function tokenize(context: CompilerContext) {
   const { source } = context;
   const tokens: Token[] = [];
+  const tagStack: string[] = [];
   let state = State.Text;
-  const matchers = [lessThan, lessThanSlash, tagName, attributeName,attributeEquals];
   let cursor = 0;
+  const matchers = [
+    lessThan,
+    lessThanSlash,
+    tagName,
+    attributeName,
+    attributeEquals,
+    attributeValue,
+    tagEnd,
+    script,
+    style,
+    expressionStart,
+    expressionEnd,
+    expression,
+    text,
+  ];
 
   while (cursor < source.length) {
-    const context: TokenizerContext = { source, cursor, state };
+    const context: TokenizerContext = { source, cursor, state, tagStack };
     let result: Maybe<MatchResult>;
 
     for (const matcher of matchers) {
