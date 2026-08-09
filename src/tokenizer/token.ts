@@ -54,13 +54,9 @@ export interface Token {
 // Matcher Types
 export interface TokenizerContext {
   readonly source: string;
-  readonly cursor: number;
+  cursor: number;
   readonly tagStack: Array<string>;
-}
-export interface MatchResult {
-  token: Token;
-  nextCursor: number;
-  nextState: State;
+  readonly tokens: Array<Token>
 }
 
-export type Matcher = (ctx: TokenizerContext) => Maybe<MatchResult>;
+export type Matcher = (ctx: TokenizerContext) => void;
