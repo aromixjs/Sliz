@@ -12,7 +12,7 @@ export namespace consume {
     * **How it works:**
     * 1. Loops while not at EOF.
     * 2. If it encounters `>` or `/>`, the tag is done — returns immediately.
-    * 3. If it encounters `<` or `{`, the tag is malformed — returns immediately so the outer loop handles it.
+    * 3. If it encounters `<`, `{`, or bare `/` (not `/>`), the tag is malformed — returns immediately so the outer loop handles it.
     * 4. Skips whitespace between attributes.
     * 5. Otherwise, hands off to `consume.attribute` to read one attribute, then loops again.
     *
@@ -28,7 +28,8 @@ export namespace consume {
 
          if (
             code === char.lessThan ||
-            code === char.openBrace
+            code === char.openBrace ||
+            code === char.slash
          ) {
             return;
          }

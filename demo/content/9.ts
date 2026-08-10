@@ -1,13 +1,13 @@
 export default {
   name: "9 - lexer nightmare",
   expected: "stress",
-  source: String.raw`<server lang="ts">
+  source: String.raw`<script server lang="ts">
 const value = \`hello \${user?.name ?? "anonymous"}\`;
 
 const regex = /^(foo|bar)\\/(baz)?$/gi;
 
 const object = {
-    text: "</server>",
+    text: "</script>",
     nested: {
         value: \`</style>\`,
         array: [
@@ -23,7 +23,7 @@ const object = {
 
 /*
     Fake tags:
-    </server>
+    </script>
     </style>
     <div>
     {foo}
@@ -34,7 +34,7 @@ const fn = (value: string) => {
         .replace(/</g, "&lt;")
         .replace(/>/g, "&gt;");
 };
-</server>
+</script>
 
 <style>
 .foo::before {

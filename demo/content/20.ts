@@ -1,7 +1,7 @@
 export default {
   name: "20 - server async patterns",
   expected: "stress",
-  source: String.raw`<server lang="ts">
+  source: String.raw`<script server lang="ts">
 async function fetchData() {
     const response = await fetch("/api/data");
     const data = await response.json();
@@ -26,7 +26,7 @@ async function* streamData() {
 
 const data = await fetchData();
 const results = await processAll(["a", "b", "c"]);
-</server>
+</script>
 
 <div>
     {data?.name}

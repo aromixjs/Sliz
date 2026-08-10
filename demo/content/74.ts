@@ -1,12 +1,12 @@
 export default {
   name: "74 - server html lookalikes",
   expected: "stress",
-  source: String.raw`<server>
+  source: String.raw`<script server>
 const html = "<div>Hello</div>";
 const html2 = '<span>World</span>';
-const close = "</server>";
+const close = "</script>";
 const close2 = "</style>";
-const open = "<server>";
+const open = "<script server>";
 const fake = "<div>{hello}</div>";
 
 const template = \`
@@ -17,9 +17,9 @@ const template = \`
 
 const object = {
     html: "<div></div>",
-    close: "</server>",
+    close: "</script>",
 };
-</server>
+</script>
 
 <div>
     {user.name}

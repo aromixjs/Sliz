@@ -1,11 +1,11 @@
 export default {
   name: "48 - javascript comments",
   expected: "valid",
-  source: String.raw`<server>
+  source: String.raw`<script server>
 /*
     block comment
-    <server>
-    </server>
+    <script server>
+    </script>
     </style>
 */
 
@@ -27,7 +27,7 @@ const value = {
     // foo: 2,
     bar: 3,
 };
-</server>
+</script>
 
 <div>
     Hello

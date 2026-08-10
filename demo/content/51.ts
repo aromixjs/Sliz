@@ -1,7 +1,7 @@
 export default {
   name: "51 - regular expressions",
   expected: "stress",
-  source: String.raw`<server>
+  source: String.raw`<script server>
 const simple = /hello/;
 const flags = /hello/gi;
 const escaped = /hello\/world/;
@@ -14,7 +14,7 @@ const result = text
 
 const regexLike = /<\/server>/;
 const regexStyle = /<\/style>/;
-</server>
+</script>
 
 <div>
     Regex test

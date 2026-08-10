@@ -1,7 +1,7 @@
 export default {
   name: "38 - full component",
   expected: "valid",
-  source: String.raw`<server lang="ts">
+  source: String.raw`<script server lang="ts">
 import { getSession } from "./session";
 
 const session = await getSession();
@@ -17,7 +17,7 @@ const menu = [
     { label: "Products", href: "/products" },
     { label: "Settings", href: "/settings" },
 ];
-</server>
+</script>
 
 <style>
 .header {

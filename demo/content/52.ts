@@ -1,7 +1,7 @@
 export default {
   name: "52 - unicode",
   expected: "valid",
-  source: String.raw`<server>
+  source: String.raw`<script server>
 const name = "Istiuak";
 const bangla = "বাংলা";
 const arabic = "العربية";
@@ -9,7 +9,7 @@ const chinese = "中文";
 const japanese = "日本語";
 const emoji = "😀 🚀 🌍";
 const symbols = "© ™ € £ ¥ ₹";
-</server>
+</script>
 
 <div>
     <h1>বাংলা ভাষা</h1>

@@ -1,9 +1,9 @@
 export default {
   name: "57 - empty multiline blocks",
   expected: "valid",
-  source: String.raw`<server>
+  source: String.raw`<script server>
 
-</server>
+</script>
 
 <style>
 

@@ -1,7 +1,7 @@
 export default {
   name: "40 - production component",
   expected: "valid",
-  source: String.raw`<server lang="ts">
+  source: String.raw`<script server lang="ts">
 import { getUser } from "./auth";
 import { getProducts } from "./products";
 
@@ -15,7 +15,7 @@ async function addToCart(productId: string) {
         quantity: 1,
     });
 }
-</server>
+</script>
 
 <style>
 .product-grid {

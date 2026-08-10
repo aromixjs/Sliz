@@ -1,7 +1,7 @@
 export default {
   name: "11 - ugly whitespace",
   expected: "valid",
-  source: String.raw`   <server    lang = "ts"   >
+  source: String.raw`   <script server    lang = "ts"   >
 const     foo      =      "bar"
 
 
@@ -10,7 +10,7 @@ const     foo      =      "bar"
 const       value=await      load(
     foo
 )
-</server>
+</script>
 
 
 

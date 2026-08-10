@@ -1,7 +1,7 @@
 export default {
   name: "18 - server complex imports",
   expected: "stress",
-  source: String.raw`<server lang="ts">
+  source: String.raw`<script server lang="ts">
 import { default as React, useState, useEffect, useCallback, useMemo, useRef } from "react";
 import type { FC, ReactNode, ChangeEvent, KeyboardEvent } from "react";
 import * as Utils from "./utils";
@@ -75,7 +75,7 @@ const Component: FC<Props> = ({ children, className, onSubmit }) => {
 };
 
 export default Component;
-</server>
+</script>
 
 <div>Server complex</div>`,
 };
