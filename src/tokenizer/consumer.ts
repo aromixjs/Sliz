@@ -217,25 +217,22 @@ export namespace consume {
 
    /**
     * Reads a closing tag like `</div>` or `</br>`.
-    * 
+    *
     * **How it works:**
     * 1. Remembers where the tag started, then advances past the `</` characters.
-    * 2. Reads the tag name until whitespace or `>` is hit.
+    * 2. Reads the tag name until whitespace, `>`, `<`, `{`, `/`, or EOF is hit — these are all sync points.
     * 3. **If no tag name was found:** Adds an "Expected tag name" error to `diagnostics`, advances past one character, and returns.
     * 4. Emits three tokens: `LessThan` for `<`, `Slash` for `/`, and `TagName` for the tag name.
     * 5. Skips any whitespace after the tag name.
     * 6. Calls `consume.tagEnd` to read the closing `>` or `/>`.
-    * 
+    * 7. **If `tagEnd` fails:** Advances past the problematic character so the outer loop can continue.
+    *
     * @param ctx The tokenizer context. Cursor must be positioned at the `<` of the closing tag.
     */
    export function closingTag(ctx: TokenizerContext) {
       const start = ctx.cursor.clone();
-
-      // Consume </
       ctx.cursor.advance();
       ctx.cursor.advance();
-
-
       const tagStart = ctx.cursor.clone();
 
       while (!ctx.cursor.eof) {
@@ -243,7 +240,10 @@ export namespace consume {
 
          if (
             is.whitespace(code) ||
-            code === char.greaterThan
+            code === char.greaterThan ||
+            code === char.lessThan ||
+            code === char.openBrace ||
+            code === char.slash
          ) {
             break;
          }
@@ -263,7 +263,6 @@ export namespace consume {
          ctx.cursor.advanceTo(ctx.cursor.position + 1);
          return;
       }
-
 
       ctx.tokens.push({
          kind: SyntaxKind.LessThan,
@@ -285,8 +284,15 @@ export namespace consume {
          end: ctx.cursor.position,
          value: ctx.cursor.getChars(tagStart),
       });
+
       skip.whiteSpace(ctx);
+
+      const tagEndStart = ctx.cursor.position;
       consume.tagEnd(ctx);
+
+      if (ctx.cursor.position === tagEndStart) {
+         ctx.cursor.advance();
+      }
    }
 
 
@@ -780,18 +786,18 @@ export namespace consume {
 
    /**
     * Reads the closing `>` or `/>` of a tag.
-    * 
+    *
     * **How it works:**
     * 1. Remembers where the cursor started.
-    * 2. **If the next two characters are `/>`:** advances past both and saves a `GreaterThan` token with value `"/>`.
-    * 3. **If the next character is `>`:** advances past it and saves a `GreaterThan` token with value `">"`.
-    * 4. **If neither is found:** Adds an "Expected '>'" error to `diagnostics`.
-    * 
+    * 2. **If the next two characters are `/>`:** advances past both and saves a `SlashGreaterThan` token.
+    * 3. **If the next character is `>`:** advances past it and saves a `GreaterThan` token.
+    * 4. **If neither is found:** Adds an "Expected '>'" error to `diagnostics` — cursor stays so caller can advance.
+    *
     * @param ctx The tokenizer context. Cursor must be positioned at the `>` or `/>` of the tag.
     */
    export function tagEnd(ctx: TokenizerContext) {
       const start = ctx.cursor.clone();
-      // Self-closing tag: />
+
       if (
          ctx.cursor.peek() === char.slash &&
          ctx.cursor.peek(1) === char.greaterThan
@@ -800,7 +806,7 @@ export namespace consume {
          ctx.cursor.advance();
 
          ctx.tokens.push({
-            kind: SyntaxKind.GreaterThan,
+            kind: SyntaxKind.SlashGreaterThan,
             start: start.position,
             end: ctx.cursor.position,
             value: "/>",
@@ -809,7 +815,6 @@ export namespace consume {
          return;
       }
 
-      // Normal tag: >
       if (ctx.cursor.peek() === char.greaterThan) {
          ctx.cursor.advance();
 
