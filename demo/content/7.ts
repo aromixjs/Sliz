@@ -1,7 +1,7 @@
 export default {
-   name: "7 - css complex selectors",
-   expected: "stress",
-   source: String.raw`<style>
+  name: "7 - css complex selectors",
+  expected: "stress",
+  source: String.raw`<style>
 [data-attr="value"] {
     color: red;
 }
@@ -43,4 +43,4 @@ export default {
 </style>
 
 <div>CSS selectors</div>`,
-}
+};

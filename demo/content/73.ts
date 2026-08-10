@@ -1,7 +1,7 @@
 export default {
-   name: "73 - many siblings",
-   expected: "stress",
-   source: String.raw`<div>
+  name: "73 - many siblings",
+  expected: "stress",
+  source: String.raw`<div>
     <span>1</span>
     <span>2</span>
     <span>3</span>
@@ -23,4 +23,4 @@ export default {
     <span>19</span>
     <span>20</span>
 </div>`,
-}
+};

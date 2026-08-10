@@ -1,7 +1,7 @@
 export default {
-   name: "9 - lexer nightmare",
-   expected: "stress",
-   source: String.raw`<server lang="ts">
+  name: "9 - lexer nightmare",
+  expected: "stress",
+  source: String.raw`<server lang="ts">
 const value = \`hello \${user?.name ?? "anonymous"}\`;
 
 const regex = /^(foo|bar)\\/(baz)?$/gi;
@@ -54,4 +54,4 @@ const fn = (value: string) => {
 <div>
     {value}
 </div>`,
-}
+};

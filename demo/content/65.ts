@@ -1,7 +1,7 @@
 export default {
-   name: "65 - deeply nested elements",
-   expected: "stress",
-   source: String.raw`<div>
+  name: "65 - deeply nested elements",
+  expected: "stress",
+  source: String.raw`<div>
     <div>
         <div>
             <div>
@@ -22,4 +22,4 @@ export default {
         </div>
     </div>
 </div>`,
-}
+};

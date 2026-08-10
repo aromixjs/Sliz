@@ -1,7 +1,7 @@
 export default {
-   name: "34 - invalid nested expressions",
-   expected: "invalid",
-   source: String.raw`<div>
+  name: "34 - invalid nested expressions",
+  expected: "invalid",
+  source: String.raw`<div>
     {arr[0]}
     {arr[)}
     {fn()}
@@ -10,4 +10,4 @@ export default {
     {obj.key}}
     {obj[key]}
 </div>`,
-}
+};

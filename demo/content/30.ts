@@ -1,7 +1,7 @@
 export default {
-   name: "30 - cdata and comments",
-   expected: "valid",
-   source: String.raw`<div>
+  name: "30 - cdata and comments",
+  expected: "valid",
+  source: String.raw`<div>
     <!-- Regular comment -->
     <!-- Multi
          line
@@ -12,4 +12,4 @@ export default {
     <!-- </style> -->
     Content
 </div>`,
-}
+};

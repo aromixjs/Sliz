@@ -1,7 +1,7 @@
 export default {
-   name: "3 - complex css",
-   expected: "stress",
-   source: String.raw`<style>
+  name: "3 - complex css",
+  expected: "stress",
+  source: String.raw`<style>
 :root {
     --primary: #3366ff;
     --spacing: 1rem;
@@ -57,4 +57,4 @@ body {
 </style>
 
 <div>CSS test</div>`,
-}
+};

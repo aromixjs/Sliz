@@ -1,7 +1,7 @@
 export default {
-   name: "26 - error boundary patterns",
-   expected: "valid",
-   source: String.raw`<server lang="ts">
+  name: "26 - error boundary patterns",
+  expected: "valid",
+  source: String.raw`<server lang="ts">
 try {
     const data = await fetchData();
 } catch (error) {
@@ -23,4 +23,4 @@ try {
 <div>
     {error ? <ErrorDisplay error={error} /> : <Content data={data} />}
 </div>`,
-}
+};

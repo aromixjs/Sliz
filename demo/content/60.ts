@@ -1,7 +1,7 @@
 export default {
-   name: "60 - html entities",
-   expected: "valid",
-   source: String.raw`<div>
+  name: "60 - html entities",
+  expected: "valid",
+  source: String.raw`<div>
     &amp; &lt; &gt; &quot; &apos;
     &#65; &#x41;
     &nbsp; &copy; &reg; &trade;
@@ -9,4 +9,4 @@ export default {
     &Alpha; &Beta; &Gamma;
     &alpha; &beta; &gamma;
 </div>`,
-}
+};

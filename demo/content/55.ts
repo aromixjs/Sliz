@@ -1,7 +1,7 @@
 export default {
-   name: "55 - deep html nesting",
-   expected: "valid",
-   source: String.raw`<main>
+  name: "55 - deep html nesting",
+  expected: "valid",
+  source: String.raw`<main>
     <section>
         <div>
             <article>
@@ -32,4 +32,4 @@ export default {
         </div>
     </section>
 </main>`,
-}
+};

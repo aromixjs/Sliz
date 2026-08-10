@@ -1,7 +1,7 @@
 export default {
-   name: "74 - server html lookalikes",
-   expected: "stress",
-   source: String.raw`<server>
+  name: "74 - server html lookalikes",
+  expected: "stress",
+  source: String.raw`<server>
 const html = "<div>Hello</div>";
 const html2 = '<span>World</span>';
 const close = "</server>";
@@ -24,4 +24,4 @@ const object = {
 <div>
     {user.name}
 </div>`,
-}
+};

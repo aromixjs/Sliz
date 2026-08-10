@@ -1,7 +1,7 @@
 export default {
-   name: "53 - syntax looking text",
-   expected: "stress",
-   source: String.raw`<div>
+  name: "53 - syntax looking text",
+  expected: "stress",
+  source: String.raw`<div>
     Less than <
     Greater than >
     Slash /
@@ -13,4 +13,4 @@ export default {
     Equals =
     Ampersand &
 </div>`,
-}
+};

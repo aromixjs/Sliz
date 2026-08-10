@@ -1,7 +1,7 @@
 export default {
-   name: "58 - custom elements",
-   expected: "valid",
-   source: String.raw`<my-component>
+  name: "58 - custom elements",
+  expected: "valid",
+  source: String.raw`<my-component>
     <slot></slot>
 </my-component>
 
@@ -15,4 +15,4 @@ export default {
 
 <x-empty />
 <y-validated input="test" />`,
-}
+};

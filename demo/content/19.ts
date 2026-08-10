@@ -1,7 +1,7 @@
 export default {
-   name: "19 - invalid attribute names",
-   expected: "invalid",
-   source: String.raw`<div
+  name: "19 - invalid attribute names",
+  expected: "invalid",
+  source: String.raw`<div
     123="invalid"
     -name="invalid"
     .name="invalid"
@@ -12,4 +12,4 @@ export default {
 >
     Content
 </div>`,
-}
+};

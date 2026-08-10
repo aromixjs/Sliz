@@ -1,7 +1,7 @@
 export default {
-   name: "64 - complex template literals in expressions",
-   expected: "stress",
-   source: String.raw`<div>
+  name: "64 - complex template literals in expressions",
+  expected: "stress",
+  source: String.raw`<div>
     {\`hello \${user.name}\`}
     {\`nested \${foo(\`inner \${bar}\`)} end\`}
     {\`multi
@@ -11,4 +11,4 @@ template\`}
     {\`</server>\`}
     {\`</style>\`}
 </div>`,
-}
+};

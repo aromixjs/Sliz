@@ -1,7 +1,7 @@
 export default {
-   name: "22 - invalid css syntax",
-   expected: "invalid",
-   source: String.raw`<style>
+  name: "22 - invalid css syntax",
+  expected: "invalid",
+  source: String.raw`<style>
 .foo {
     color: ;
     margin: ;
@@ -19,4 +19,4 @@ export default {
 @invalid {
 }
 </style>`,
-}
+};

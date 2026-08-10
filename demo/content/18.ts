@@ -1,7 +1,7 @@
 export default {
-   name: "18 - server complex imports",
-   expected: "stress",
-   source: String.raw`<server lang="ts">
+  name: "18 - server complex imports",
+  expected: "stress",
+  source: String.raw`<server lang="ts">
 import { default as React, useState, useEffect, useCallback, useMemo, useRef } from "react";
 import type { FC, ReactNode, ChangeEvent, KeyboardEvent } from "react";
 import * as Utils from "./utils";
@@ -78,4 +78,4 @@ export default Component;
 </server>
 
 <div>Server complex</div>`,
-}
+};

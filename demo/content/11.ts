@@ -1,7 +1,7 @@
 export default {
-   name: "11 - ugly whitespace",
-   expected: "valid",
-   source: String.raw`   <server    lang = "ts"   >
+  name: "11 - ugly whitespace",
+  expected: "valid",
+  source: String.raw`   <server    lang = "ts"   >
 const     foo      =      "bar"
 
 
@@ -24,4 +24,4 @@ body     {
 <div      class = "foo"       id = "bar"    >
     Hello
 </div>`,
-}
+};

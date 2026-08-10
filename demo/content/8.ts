@@ -1,7 +1,7 @@
 export default {
-   name: "8 - many attributes",
-   expected: "valid",
-   source: String.raw`<div
+  name: "8 - many attributes",
+  expected: "valid",
+  source: String.raw`<div
     id="main"
     class="container mx-auto px-4"
     title="hello world"
@@ -17,4 +17,4 @@ export default {
 >
     Content
 </div>`,
-}
+};

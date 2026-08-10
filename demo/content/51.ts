@@ -1,7 +1,7 @@
 export default {
-   name: "51 - regular expressions",
-   expected: "stress",
-   source: String.raw`<server>
+  name: "51 - regular expressions",
+  expected: "stress",
+  source: String.raw`<server>
 const simple = /hello/;
 const flags = /hello/gi;
 const escaped = /hello\/world/;
@@ -19,4 +19,4 @@ const regexStyle = /<\/style>/;
 <div>
     Regex test
 </div>`,
-}
+};

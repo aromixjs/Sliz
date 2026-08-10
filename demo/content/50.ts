@@ -1,7 +1,7 @@
 export default {
-   name: "50 - complex server typescript",
-   expected: "stress",
-   source: String.raw`<server lang="ts">
+  name: "50 - complex server typescript",
+  expected: "stress",
+  source: String.raw`<server lang="ts">
 import type { User, Product } from "./types";
 import { createHash } from "node:crypto";
 
@@ -90,4 +90,4 @@ const fn = async <T extends object>(
 <div>
     {result?.name}
 </div>`,
-}
+};

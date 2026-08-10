@@ -3,13 +3,15 @@ import { type Maybe } from "../Types/Maybe";
 import { CharacterCursor } from "./Cursor";
 
 export enum SyntaxKind {
+  Doctype ='Doctype',
+
+
   Text = "Text",
   LessThan = "LessThan",
   Slash = "Slash",
   OpenBrace = "OpenBrace",
   JsExpression = "JsExpression",
   CloseBrace = "CloseBrace",
-
 
   TagName = "TagName",
   AttributeName = "AttributeName",
@@ -41,6 +43,6 @@ export interface Token {
 // Matcher Types
 export interface TokenizerContext {
   readonly Cursor: CharacterCursor;
-  readonly Tokens: Array<Token>,
-  readonly Diagnostics: Array<Diagnostic>
+  readonly Tokens: Array<Token>;
+  readonly Diagnostics: Array<Diagnostic>;
 }

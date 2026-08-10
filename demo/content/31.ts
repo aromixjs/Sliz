@@ -1,7 +1,7 @@
 export default {
-   name: "31 - void elements",
-   expected: "valid",
-   source: String.raw`<div>
+  name: "31 - void elements",
+  expected: "valid",
+  source: String.raw`<div>
     <area>
     <base>
     <br>
@@ -17,4 +17,4 @@ export default {
     <track>
     <wbr>
 </div>`,
-}
+};

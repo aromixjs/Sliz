@@ -1,7 +1,7 @@
 export default {
-   name: "4 - invalid html structure",
-   expected: "invalid",
-   source: String.raw`<div>
+  name: "4 - invalid html structure",
+  expected: "invalid",
+  source: String.raw`<div>
     <p>
         <span>Text</span>
     </p>
@@ -10,4 +10,4 @@ export default {
     </p>
 </div>
 <p>Orphan paragraph</p>`,
-}
+};

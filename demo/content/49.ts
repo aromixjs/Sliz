@@ -1,7 +1,7 @@
 export default {
-   name: "49 - basic",
-   expected: "valid",
-   source: String.raw`<server lang="ts">
+  name: "49 - basic",
+  expected: "valid",
+  source: String.raw`<server lang="ts">
 const user = await getUser();
 const myName = "user";
 const username = 'name1';
@@ -19,4 +19,4 @@ const data = await loadData();
 <div .when={user}>
 Hello {user.name}
 </div>`,
-}
+};

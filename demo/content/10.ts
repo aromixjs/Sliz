@@ -1,7 +1,7 @@
 export default {
-   name: "10 - dynamic tag names",
-   expected: "valid",
-   source: String.raw`<div>
+  name: "10 - dynamic tag names",
+  expected: "valid",
+  source: String.raw`<div>
     {(() => {
         const Tag = isButton ? 'button' : 'a';
         return <Tag href={url}>{label}</Tag>;
@@ -14,4 +14,4 @@ export default {
         return <Component key={tag} />;
     })}
 </div>`,
-}
+};

@@ -5,16 +5,16 @@ import { ConsumeText } from "./Consumers/Text";
 import { TokenizerContext } from "./Token";
 
 export function Dispatch(Ctx: TokenizerContext) {
-   const Code = Ctx.Cursor.Peek()
-   switch (Code) {
-      case Char.lessThan:
-         ConsumeMarkup(Ctx)
-         return;
-      case Char.openBrace:
-         ConsumeExpression(Ctx)
-         return;
-      default:
-         ConsumeText(Ctx)
-         return;
-   }
+  const Code = Ctx.Cursor.Peek();
+  switch (Code) {
+    case Char.LessThan:
+      ConsumeMarkup(Ctx);
+      return;
+    case Char.OpenBrace:
+      ConsumeExpression(Ctx);
+      return;
+    default:
+      ConsumeText(Ctx);
+      return;
+  }
 }

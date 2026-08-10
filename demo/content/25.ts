@@ -1,7 +1,7 @@
 export default {
-   name: "25 - nested expressions",
-   expected: "stress",
-   source: String.raw`<div
+  name: "25 - nested expressions",
+  expected: "stress",
+  source: String.raw`<div
     data={foo({
         user: {
             name: user.name,
@@ -16,4 +16,4 @@ export default {
 >
     {JSON.stringify(user)}
 </div>`,
-}
+};

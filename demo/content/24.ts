@@ -1,7 +1,7 @@
 export default {
-   name: "24 - complex expressions",
-   expected: "stress",
-   source: String.raw`<div>
+  name: "24 - complex expressions",
+  expected: "stress",
+  source: String.raw`<div>
     {user.name}
     {user?.profile?.name}
     {items[0]}
@@ -17,4 +17,4 @@ export default {
     {condition ? user.name : "Anonymous"}
     {items.map(item => item.name)}
 </div>`,
-}
+};

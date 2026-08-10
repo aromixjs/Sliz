@@ -1,7 +1,7 @@
 export default {
-   name: "28 - table complex structure",
-   expected: "valid",
-   source: String.raw`<table>
+  name: "28 - table complex structure",
+  expected: "valid",
+  source: String.raw`<table>
     <caption>Product List</caption>
     <colgroup>
         <col span="2">
@@ -33,4 +33,4 @@ export default {
         </tr>
     </tfoot>
 </table>`,
-}
+};

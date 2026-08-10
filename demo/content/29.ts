@@ -1,7 +1,7 @@
 export default {
-   name: "29 - form elements",
-   expected: "valid",
-   source: String.raw`<form action="/submit" method="POST">
+  name: "29 - form elements",
+  expected: "valid",
+  source: String.raw`<form action="/submit" method="POST">
     <fieldset>
         <legend>User Info</legend>
         <label for="name">Name:</label>
@@ -26,4 +26,4 @@ export default {
     <button type="submit">Submit</button>
     <button type="reset">Reset</button>
 </form>`,
-}
+};

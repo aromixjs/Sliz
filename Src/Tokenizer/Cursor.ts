@@ -9,7 +9,7 @@ export class CharacterCursor {
   }
 
   /** Reset the cursor to the beginning. */
-  Init(): void {
+  Reset(): void {
     this.Index = 0;
   }
 
@@ -22,6 +22,17 @@ export class CharacterCursor {
   Advance(): void {
     this.Index++;
   }
+
+
+  /** Advance the cursor to the end of the source. */
+  AdvanceToEnd(): void {
+    this.Index = this.Source.length;
+  }
+
+
+AdvanceTo(Position: number): void {
+  this.Index = Position;
+}
 
   /** Current position. */
   get Position(): number {

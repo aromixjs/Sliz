@@ -1,7 +1,7 @@
 export default {
-   name: "47 - all javascript strings",
-   expected: "stress",
-   source: String.raw`<server lang="ts">
+  name: "47 - all javascript strings",
+  expected: "stress",
+  source: String.raw`<server lang="ts">
 const a = "normal string";
 const b = 'single quoted string';
 
@@ -26,4 +26,4 @@ const html = \`<div>Hello</div>\`;
 const closing = \`</server>\`;
 const css = \`</style>\`;
 </server>`,
-}
+};

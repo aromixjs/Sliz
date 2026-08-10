@@ -7,10 +7,10 @@ export default {
       const Code = Source.charCodeAt(Cursor);
 
       if (
-        Code !== Char.space &&
-        Code !== Char.tab &&
-        Code !== Char.lineFeed &&
-        Code !== Char.carriageReturn
+        Code !== Char.Space &&
+        Code !== Char.Tab &&
+        Code !== Char.LineFeed &&
+        Code !== Char.CarriageReturn
       ) {
         break;
       }
@@ -21,10 +21,10 @@ export default {
     return Cursor;
   },
 
-  lineComment(Source: string, Start: number) {
+  LineComment(Source: string, Start: number) {
     let Position = Start + 2;
     while (
-      Position < Source.length && Source.charCodeAt(Position) !== Char.lineFeed
+      Position < Source.length && Source.charCodeAt(Position) !== Char.LineFeed
     ) {
       Position++;
     }
@@ -36,8 +36,8 @@ export default {
 
     while (Position < Source.length) {
       if (
-        Source.charCodeAt(Position) === Char.asterisk &&
-        Source.charCodeAt(Position + 1) === Char.slash
+        Source.charCodeAt(Position) === Char.Asterisk &&
+        Source.charCodeAt(Position + 1) === Char.Slash
       ) {
         return Position + 2;
       }
@@ -54,7 +54,7 @@ export default {
     while (Position < Source.length) {
       const Code = Source.charCodeAt(Position);
 
-      if (Code === Char.backslash) {
+      if (Code === Char.Backslash) {
         Position += 2;
       } else if (Code === QuoteCode) {
         return Position + 1;
@@ -72,20 +72,20 @@ export default {
     while (Position < Source.length) {
       const Code = Source.charCodeAt(Position);
 
-      if (Code === Char.backslash) {
+      if (Code === Char.Backslash) {
         Position += 2;
         continue;
       }
 
-      if (Code === Char.backtick) {
+      if (Code === Char.Backtick) {
         return Position + 1;
       }
 
       if (
-        Code === Char.dollar &&
-        Source.charCodeAt(Position + 1) === Char.openBrace
+        Code === Char.Dollar &&
+        Source.charCodeAt(Position + 1) === Char.OpenBrace
       ) {
-        Position = this.braceExpression(Source, Position + 2);
+        Position = this.BraceExpression(Source, Position + 2);
         continue;
       }
 
@@ -95,31 +95,31 @@ export default {
     return Position;
   },
 
-  braceExpression(Source: string, Start: number) {
+  BraceExpression(Source: string, Start: number) {
     let Position = Start + 1;
     let Depth = 1;
 
     while (Position < Source.length) {
       const Code = Source.charCodeAt(Position);
 
-      if (Code === Char.backslash) {
+      if (Code === Char.Backslash) {
         Position += 2;
         continue;
       }
 
-      if (Code === Char.singleQuote || Code === Char.doubleQuote) {
+      if (Code === Char.SingleQuote || Code === Char.DoubleQuote) {
         Position = this.string(Source, Position);
         continue;
       }
 
-      if (Code === Char.backtick) {
+      if (Code === Char.Backtick) {
         Position = this.template(Source, Position);
         continue;
       }
 
-      if (Code === Char.openBrace) {
+      if (Code === Char.OpenBrace) {
         Depth++;
-      } else if (Code === Char.closeBrace) {
+      } else if (Code === Char.CloseBrace) {
         Depth--;
 
         if (Depth === 0) {
@@ -132,35 +132,36 @@ export default {
 
     return -1;
   },
-  regex(Source: string, Start: number) {
+
+  Regex(Source: string, Start: number) {
     let Position = Start + 1;
     let InCharClass = false;
 
     while (Position < Source.length) {
       const Code = Source.charCodeAt(Position);
 
-      if (Code === Char.backslash) {
+      if (Code === Char.Backslash) {
         Position += 2;
         continue;
       }
 
-      if (Code === Char.lineFeed) {
+      if (Code === Char.LineFeed) {
         return Start + 1;
       }
 
-      if (Code === Char.openBracket) {
+      if (Code === Char.OpenBracket) {
         InCharClass = true;
       }
 
-      if (Code === Char.closeBracket) {
+      if (Code === Char.CloseBracket) {
         InCharClass = false;
       }
 
-      if (Code === Char.slash && !InCharClass) {
+      if (Code === Char.Slash && !InCharClass) {
         Position++;
 
         const Code = Source.charCodeAt(Position);
-        while (Position < Source.length && Is.alpha(Code)) {
+        while (Position < Source.length && Is.Alpha(Code)) {
           Position++;
         }
 

@@ -1,7 +1,6 @@
 import { dir } from "console";
 import { tokenize } from "../src";
 
-
 const source = `
 <div class="min-h-screen bg-gray-50">
   <header class="border-b bg-white">
@@ -232,14 +231,12 @@ const source = `
     </section>
   </main>
 </div>
-`
-
+`;
 
 const result = tokenize({
-   Source: source,
-   FileName: 'test.sliz',
-   Diagnostics: []
-})
+  Source: source,
+  FileName: "test.sliz",
+  Diagnostics: [],
+});
 
-
-dir(result, { depth: null })
+dir(result, { depth: null });

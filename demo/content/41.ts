@@ -1,7 +1,7 @@
 export default {
-   name: "41 - long text",
-   expected: "stress",
-   source: String.raw`<article>
+  name: "41 - long text",
+  expected: "stress",
+  source: String.raw`<article>
     <p>
         Lorem ipsum dolor sit amet, consectetur adipiscing elit.
         Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
@@ -16,4 +16,4 @@ export default {
         anim id est laborum.
     </p>
 </article>`,
-}
+};

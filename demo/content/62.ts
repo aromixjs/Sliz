@@ -1,7 +1,7 @@
 export default {
-   name: "62 - mixed content patterns",
-   expected: "valid",
-   source: String.raw`<div>
+  name: "62 - mixed content patterns",
+  expected: "valid",
+  source: String.raw`<div>
     Text before
     <span>element</span>
     text between
@@ -12,4 +12,4 @@ export default {
     <strong>bold</strong>
     final text
 </div>`,
-}
+};

@@ -1,7 +1,7 @@
 export default {
-   name: "33 - complex css calc and functions",
-   expected: "stress",
-   source: String.raw`<style>
+  name: "33 - complex css calc and functions",
+  expected: "stress",
+  source: String.raw`<style>
 .calc {
     width: calc(100% - 2rem);
     height: calc(100vh - 60px);
@@ -38,4 +38,4 @@ export default {
 </style>
 
 <div>CSS functions</div>`,
-}
+};

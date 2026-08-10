@@ -1,7 +1,7 @@
 export default {
-   name: "6 - attribute value edge cases",
-   expected: "stress",
-   source: String.raw`<div
+  name: "6 - attribute value edge cases",
+  expected: "stress",
+  source: String.raw`<div
     a=""
     b=''
     c=""
@@ -17,4 +17,4 @@ export default {
     m="special {expr}"
     n="special </tag>"
 ></div>`,
-}
+};

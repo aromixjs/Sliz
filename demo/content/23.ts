@@ -1,7 +1,7 @@
 export default {
-   name: "23 - complex object destructuring",
-   expected: "stress",
-   source: String.raw`<server lang="ts">
+  name: "23 - complex object destructuring",
+  expected: "stress",
+  source: String.raw`<server lang="ts">
 const {
     user: { name, email, profile: { avatar, bio } },
     settings: { theme, language },
@@ -29,4 +29,4 @@ function process({
 <div>
     {name}
 </div>`,
-}
+};

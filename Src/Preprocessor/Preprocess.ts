@@ -1,9 +1,9 @@
 import Char from "../Scanner/Char";
 import Skip from "../Scanner/Skip";
 import {
-    ExpressionPreprocessInput,
-    ExpressionPreprocessOutput,
-    ExtractedExpression,
+  ExpressionPreprocessInput,
+  ExpressionPreprocessOutput,
+  ExtractedExpression,
 } from "./Types";
 
 export function Expressions(

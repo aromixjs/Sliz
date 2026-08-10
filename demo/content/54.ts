@@ -1,7 +1,7 @@
 export default {
-   name: "54 - css closing tag lookalikes",
-   expected: "stress",
-   source: String.raw`<style>
+  name: "54 - css closing tag lookalikes",
+  expected: "stress",
+  source: String.raw`<style>
 .foo::before {
     content: "</style>";
 }
@@ -24,4 +24,4 @@ export default {
 <div>
     after style
 </div>`,
-}
+};

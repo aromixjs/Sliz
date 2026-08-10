@@ -1,7 +1,7 @@
 export default {
-   name: "61 - boolean attributes",
-   expected: "valid",
-   source: String.raw`<input disabled>
+  name: "61 - boolean attributes",
+  expected: "valid",
+  source: String.raw`<input disabled>
 <input disabled />
 <input disabled="disabled">
 <input ?disabled={isDisabled}>
@@ -16,4 +16,4 @@ export default {
 </details>
 
 <video autoplay controls muted></video>`,
-}
+};

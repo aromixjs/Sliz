@@ -1,43 +1,44 @@
+import { TokenizerContext } from "../Tokenizer/Token";
 import Char from "./Char";
 
 export default {
-  whitespace(Code: number) {
-    return Code === Char.space || Code === Char.tab || Code === Char.lineFeed ||
-      Code === Char.carriageReturn;
+  Whitespace(Code: number) {
+    return Code === Char.Space || Code === Char.Tab || Code === Char.LineFeed ||
+      Code === Char.CarriageReturn;
   },
 
-  alpha(Code: number) {
-    return (Code >= Char.lowerA && Code <= Char.lowerZ) ||
-      (Code >= Char.upperA && Code <= Char.upperZ);
+  Alpha(Code: number) {
+    return (Code >= Char.LowerA && Code <= Char.LowerZ) ||
+      (Code >= Char.UpperA && Code <= Char.UpperZ);
   },
 
-  quote(Code: number): boolean {
-    return Code === Char.singleQuote || Code === Char.doubleQuote ||
-      Code === Char.backtick;
+  Quote(Code: number): boolean {
+    return Code === Char.SingleQuote || Code === Char.DoubleQuote ||
+      Code === Char.Backtick;
   },
 
-  regexStart(Source: string, Position: number) {
+  RegexStart(Source: string, Position: number) {
     let LocalPosition = Position - 1;
     while (LocalPosition >= 0) {
       const Code = Source.charCodeAt(LocalPosition);
-      if (!this.whitespace(Code)) {
+      if (!this.Whitespace(Code)) {
         switch (Code) {
-          case Char.equals:
-          case Char.openParen:
-          case Char.openBracket:
-          case Char.openBrace:
-          case Char.semicolon:
-          case Char.comma:
-          case Char.exclamationMark:
-          case Char.ampersand:
-          case Char.pipe:
-          case Char.questionMark:
-          case Char.caret:
-          case Char.plus:
-          case Char.minus:
-          case Char.percent:
-          case Char.asterisk:
-          case Char.colon:
+          case Char.Equals:
+          case Char.OpenParen:
+          case Char.OpenBracket:
+          case Char.OpenBrace:
+          case Char.Semicolon:
+          case Char.Comma:
+          case Char.ExclamationMark:
+          case Char.Ampersand:
+          case Char.Pipe:
+          case Char.QuestionMark:
+          case Char.Caret:
+          case Char.Plus:
+          case Char.Minus:
+          case Char.Percent:
+          case Char.Asterisk:
+          case Char.Colon:
             return true;
           default:
             return false;
@@ -49,14 +50,33 @@ export default {
     return true;
   },
 
-  identifierStart(Code: number) {
-    return this.alpha(Code) || Code === Char.underscore || Code === Char.dollar;
+  IdentifierStart(Code: number) {
+    return this.Alpha(Code) || Code === Char.Underscore || Code === Char.Dollar;
   },
 
-  attributeName(Code: number) {
-    return (Code > Char.space && Code !== Char.equals &&
-      Code !== Char.greaterThan && Code !== Char.doubleQuote &&
-      Code !== Char.singleQuote && Code !== Char.slash &&
-      Code !== Char.openBrace && Code !== Char.closeBrace);
+  AttributeName(Code: number) {
+    return (Code > Char.Space && Code !== Char.Equals &&
+      Code !== Char.GreaterThan && Code !== Char.DoubleQuote &&
+      Code !== Char.SingleQuote && Code !== Char.Slash &&
+      Code !== Char.OpenBrace && Code !== Char.CloseBrace);
   },
+
+
+  Doctype(Ctx: TokenizerContext) {
+    const Cursor = Ctx.Cursor;
+
+    return (
+      Cursor.Peek() === Char.LessThan &&
+      Cursor.Peek(1) === Char.ExclamationMark &&
+      (Cursor.Peek(2) === Char.UpperD || Cursor.Peek(2) === Char.LowerD) &&
+      (Cursor.Peek(3) === Char.UpperO || Cursor.Peek(3) === Char.LowerO) &&
+      (Cursor.Peek(4) === Char.UpperC || Cursor.Peek(4) === Char.LowerC) &&
+      (Cursor.Peek(5) === Char.UpperT || Cursor.Peek(5) === Char.LowerT) &&
+      (Cursor.Peek(6) === Char.UpperY || Cursor.Peek(6) === Char.LowerY) &&
+      (Cursor.Peek(7) === Char.UpperP || Cursor.Peek(7) === Char.LowerP) &&
+      (Cursor.Peek(8) === Char.UpperE || Cursor.Peek(8) === Char.LowerE)
+    );
+  }
+
+
 };

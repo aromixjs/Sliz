@@ -1,7 +1,7 @@
 export default {
-   name: "32 - accessibility attributes",
-   expected: "valid",
-   source: String.raw`<div
+  name: "32 - accessibility attributes",
+  expected: "valid",
+  source: String.raw`<div
     role="dialog"
     aria-labelledby="title"
     aria-describedby="desc"
@@ -27,4 +27,4 @@ export default {
     <h1 id="title">Dialog</h1>
     <p id="desc">Description</p>
 </div>`,
-}
+};

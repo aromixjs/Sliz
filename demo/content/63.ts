@@ -1,7 +1,7 @@
 export default {
-   name: "63 - event handlers complex",
-   expected: "valid",
-   source: String.raw`<button .onclick={() => handleClick()}>Click</button>
+  name: "63 - event handlers complex",
+  expected: "valid",
+  source: String.raw`<button .onclick={() => handleClick()}>Click</button>
 <button .onclick={handleClick}>Click</button>
 <button .onclick={(e) => handleClick(e)}>Click</button>
 <button .onclick={handleClick.bind(null, arg)}>Click</button>
@@ -12,4 +12,4 @@ export default {
 <div .onmouseover={() => setHover(true)} .onmouseout={() => setHover(false)}>
     Hover me
 </div>`,
-}
+};

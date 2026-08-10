@@ -1,7 +1,7 @@
 export default {
-   name: "36 - attribute values",
-   expected: "valid",
-   source: String.raw`<div
+  name: "36 - attribute values",
+  expected: "valid",
+  source: String.raw`<div
     a="hello"
     b='hello'
     c="hello world"
@@ -16,4 +16,4 @@ export default {
 >
     test
 </div>`,
-}
+};

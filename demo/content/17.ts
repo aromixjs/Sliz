@@ -1,7 +1,7 @@
 export default {
-   name: "17 - style injection attempts",
-   expected: "invalid",
-   source: String.raw`<div style="background: url('javascript:alert(1)')">
+  name: "17 - style injection attempts",
+  expected: "invalid",
+  source: String.raw`<div style="background: url('javascript:alert(1)')">
     Content
 </div>
 
@@ -12,4 +12,4 @@ export default {
 <div style="expression(alert(1))">
     Content
 </div>`,
-}
+};

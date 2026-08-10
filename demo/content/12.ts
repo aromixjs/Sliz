@@ -1,7 +1,7 @@
 export default {
-   name: "12 - list rendering edge cases",
-   expected: "stress",
-   source: String.raw`<ul>
+  name: "12 - list rendering edge cases",
+  expected: "stress",
+  source: String.raw`<ul>
     {items.map((item, index) => (
         <li key={item.id}>
             {index}. {item.name}
@@ -26,4 +26,4 @@ export default {
         ))}
     </tbody>
 </table>`,
-}
+};
