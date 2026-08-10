@@ -8,12 +8,13 @@ export namespace consume {
 
    /**
     * Reads all attributes on a tag until the closing `>` or `/>` is reached.
-    * 
+    *
     * **How it works:**
     * 1. Loops while not at EOF.
     * 2. If it encounters `>` or `/>`, the tag is done — returns immediately.
-    * 3. Otherwise, hands off to `consume.attribute` to read one attribute, then loops again.
-    * 
+    * 3. If it encounters `<` or `{`, the tag is malformed — returns immediately so the outer loop handles it.
+    * 4. Otherwise, hands off to `consume.attribute` to read one attribute, then loops again.
+    *
     * @param ctx The tokenizer context. Cursor must be positioned after the tag name.
     */
    export function attributes(ctx: TokenizerContext) {
@@ -27,6 +28,13 @@ export namespace consume {
             return;
          }
 
+         if (
+            code === char.lessThan ||
+            code === char.openBrace
+         ) {
+            return;
+         }
+
          consume.attribute(ctx);
       }
    }
@@ -34,16 +42,16 @@ export namespace consume {
 
    /**
     * Reads a single attribute: its name, optional `=` sign, and optional value.
-    * 
+    *
     * **How it works:**
     * 1. Remembers where the cursor started.
-    * 2. Reads characters until whitespace, `=`, `>`, or `/` is hit — these characters form the attribute name.
+    * 2. Reads characters until whitespace, `=`, `>`, `<`, `{`, `/`, or EOF is hit — these are all sync points.
     * 3. **If no name was read** (cursor didn't move): returns early, nothing to emit.
     * 4. Saves the attribute name as an `AttributeName` token.
     * 5. Skips any whitespace after the name.
     * 6. If the next character is `=`, advances past it, skips whitespace, and hands off to `consume.attributeValue` to read the value.
     * 7. **If there is no `=`:** returns early — this is a boolean attribute like `disabled`.
-    * 
+    *
     * @param ctx The tokenizer context. Cursor must be positioned at the start of the attribute name.
     */
    export function attribute(ctx: TokenizerContext) {
@@ -56,6 +64,8 @@ export namespace consume {
             is.whitespace(code) ||
             code === char.equals ||
             code === char.greaterThan ||
+            code === char.lessThan ||
+            code === char.openBrace ||
             code === char.slash
          ) {
             break;
@@ -75,15 +85,14 @@ export namespace consume {
          value: ctx.cursor.getChars(start),
       });
 
-
-      skip.whiteSpace(ctx)
+      skip.whiteSpace(ctx);
 
       if (ctx.cursor.peek() !== char.equals) {
          return;
       }
 
       ctx.cursor.advance();
-      skip.whiteSpace(ctx)
+      skip.whiteSpace(ctx);
       consume.attributeValue(ctx);
    }
 
@@ -121,13 +130,14 @@ export namespace consume {
 
    /**
     * Reads a quoted attribute value from the opening quote to the matching closing quote.
-    * 
+    *
     * **How it works:**
     * 1. Remembers the opening quote character and advances past it.
     * 2. Advances character by character looking for the matching closing quote:
+    *    - **If `<` or `{` is found:** the value is malformed — stops scanning and reports an error. These are sync points.
     *    - **If found:** Saves an `AttributeValue` token (including the quotes) and stops.
-    * 3. **If the closing quote is never found (file ends early):** Adds an "Unterminated attribute value" error message to `diagnostics`, saves whatever content was read as an `AttributeValue` token, and moves the cursor to the end of the file.
-    * 
+    * 3. **If the closing quote is never found (file ends early):** Adds an "Unterminated attribute value" error message to `diagnostics`, saves whatever content was read as an `AttributeValue` token, and stops.
+    *
     * @param ctx The tokenizer context. Cursor must be positioned at the opening quote.
     */
    export function quotedAttributeValue(ctx: TokenizerContext) {
@@ -137,7 +147,9 @@ export namespace consume {
       ctx.cursor.advance();
 
       while (!ctx.cursor.eof) {
-         if (ctx.cursor.peek() === quote) {
+         const code = ctx.cursor.peek();
+
+         if (code === quote) {
             ctx.cursor.advance();
 
             ctx.tokens.push({
@@ -148,6 +160,13 @@ export namespace consume {
             });
 
             return;
+         }
+
+         if (
+            code === char.lessThan ||
+            code === char.openBrace
+         ) {
+            break;
          }
 
          ctx.cursor.advance();
@@ -167,19 +186,17 @@ export namespace consume {
          end: ctx.cursor.position,
          value: ctx.cursor.getChars(start),
       });
-
-      ctx.cursor.advanceToEnd();
    }
 
    /**
-    * Reads an unquoted attribute value until whitespace, `>`, or `/` is hit.
-    * 
+    * Reads an unquoted attribute value until whitespace, `>`, `<`, `{`, `/`, or EOF is hit.
+    *
     * **How it works:**
     * 1. Remembers where the value starts.
-    * 2. Advances character by character until a delimiter (whitespace, `>`, or `/`) is hit.
+    * 2. Advances character by character until a delimiter (whitespace, `>`, `<`, `{`, `/`, or EOF) is hit.
     * 3. **If no characters were consumed** (cursor didn't move): returns early, nothing to emit.
     * 4. Otherwise, saves the consumed characters as an `AttributeValue` token.
-    * 
+    *
     * @param ctx The tokenizer context. Cursor must be positioned at the start of the value.
     */
    export function unquotedAttributeValue(ctx: TokenizerContext) {
@@ -191,6 +208,8 @@ export namespace consume {
          if (
             is.whitespace(code) ||
             code === char.greaterThan ||
+            code === char.lessThan ||
+            code === char.openBrace ||
             code === char.slash
          ) {
             break;
@@ -233,6 +252,9 @@ export namespace consume {
       const start = ctx.cursor.clone();
       ctx.cursor.advance();
       ctx.cursor.advance();
+
+      skip.whiteSpace(ctx);
+
       const tagStart = ctx.cursor.clone();
 
       while (!ctx.cursor.eof) {
@@ -581,22 +603,26 @@ export namespace consume {
 
    /**
     * Reads an opening tag like `<div>` or `<br/>`, returning its name for further dispatch.
-    * 
+    *
     * **How it works:**
     * 1. Remembers where the tag started, then advances past the `<` character.
-    * 2. Reads the tag name until whitespace, `>`, or `/` is hit.
-    * 3. **If no tag name was found:** Adds an "Expected tag name" error to `diagnostics`, advances past one character, and returns `undefined`.
-    * 4. Emits a `LessThan` token for `<` and a `TagName` token for the tag name.
-    * 5. Calls `consume.attributes` to read all attributes on the tag.
-    * 6. Calls `consume.tagEnd` to read the closing `>` or `/>`.
-    * 7. Returns the lowercased tag name so callers can dispatch on it (e.g., `"script"` or `"style"`).
-    * 
+    * 2. Skips any whitespace between `<` and the tag name.
+    * 3. Reads the tag name until whitespace, `>`, `<`, `{`, `/`, or EOF is hit — these are all sync points.
+    * 4. **If no tag name was found:** Adds an "Expected tag name" error to `diagnostics`, advances past one character, and returns `undefined`.
+    * 5. Emits a `LessThan` token for `<` and a `TagName` token for the tag name.
+    * 6. Calls `consume.attributes` to read all attributes on the tag.
+    * 7. Calls `consume.tagEnd` to read the closing `>` or `/>`.
+    * 8. **If `tagEnd` fails:** Advances past the problematic character so the outer loop can continue.
+    * 9. Returns the lowercased tag name so callers can dispatch on it (e.g., `"script"` or `"style"`).
+    *
     * @param ctx The tokenizer context. Cursor must be positioned at the `<` of the opening tag.
     * @returns The lowercased tag name, or `undefined` if no tag name was found.
     */
    export function openingTag(ctx: TokenizerContext) {
       const start = ctx.cursor.clone();
       ctx.cursor.advance();
+
+      skip.whiteSpace(ctx);
 
       const tagStart = ctx.cursor.clone();
 
@@ -606,6 +632,8 @@ export namespace consume {
          if (
             is.whitespace(code) ||
             code === char.greaterThan ||
+            code === char.lessThan ||
+            code === char.openBrace ||
             code === char.slash
          ) {
             break;
@@ -643,11 +671,16 @@ export namespace consume {
          value: ctx.cursor.getChars(tagStart),
       });
 
+      consume.attributes(ctx);
 
-      consume.attributes(ctx)
-      consume.tagEnd(ctx)
+      const tagEndStart = ctx.cursor.position;
+      consume.tagEnd(ctx);
 
-      return tagName
+      if (ctx.cursor.position === tagEndStart) {
+         ctx.cursor.advance();
+      }
+
+      return tagName;
    }
 
 
