@@ -687,7 +687,7 @@ export namespace consume {
 
    /**
     * Reads the raw content of a `<script>` tag until the closing `</script>` tag is found.
-    * 
+    *
     * **How it works:**
     * 1. Remembers where the script content starts.
     * 2. Advances character by character, skipping over anything that could contain `</script>` by accident:
@@ -696,8 +696,10 @@ export namespace consume {
     *    - **`//`:** skips the entire line comment via `skip.lineComment`.
     *    - **`/*`:** skips the entire block comment via `skip.blockComment`.
     * 3. If it encounters `</script>` (case-insensitive), stops — the script content is done.
-    * 4. **If anything was read:** saves the raw content as a `Script` token.
-    * 
+    * 4. If it encounters `<` (not `</script>`), the script is malformed — stops scanning and reports an error.
+    * 5. **If EOF is reached without `</script>`:** Adds an "Unterminated script" error.
+    * 6. **If anything was read:** saves the raw content as a `Script` token.
+    *
     * @param ctx The tokenizer context. Cursor must be positioned right after the opening `<script>` tag.
     */
    export function script(ctx: TokenizerContext) {
@@ -743,7 +745,47 @@ export namespace consume {
             break;
          }
 
+         if (code === char.lessThan) {
+            ctx.diagnostics.push({
+               start: start.position,
+               end: ctx.cursor.position,
+               message: "Unterminated script",
+               code: DiagnosticCode.UnterminatedScript,
+               severity: DiagnosticSeverity.Error,
+            });
+
+            ctx.tokens.push({
+               kind: SyntaxKind.Script,
+               start: start.position,
+               end: ctx.cursor.position,
+               value: ctx.cursor.getChars(start),
+            });
+
+            return;
+         }
+
          ctx.cursor.advance();
+      }
+
+      if (ctx.cursor.eof) {
+         if (ctx.cursor.position > start.position) {
+            ctx.diagnostics.push({
+               start: start.position,
+               end: ctx.cursor.position,
+               message: "Unterminated script",
+               code: DiagnosticCode.UnterminatedScript,
+               severity: DiagnosticSeverity.Error,
+            });
+
+            ctx.tokens.push({
+               kind: SyntaxKind.Script,
+               start: start.position,
+               end: ctx.cursor.position,
+               value: ctx.cursor.getChars(start),
+            });
+         }
+
+         return;
       }
 
       if (ctx.cursor.position > start.position) {
@@ -759,15 +801,17 @@ export namespace consume {
 
    /**
     * Reads the raw content of a `<style>` tag until the closing `</style>` tag is found.
-    * 
+    *
     * **How it works:**
     * 1. Remembers where the style content starts.
     * 2. Advances character by character, skipping over anything that could contain `</style>` by accident:
     *    - **Single or double quotes:** skips the entire string via `skip.string`.
     *    - **`/*`:** skips the entire block comment via `skip.blockComment`.
     * 3. If it encounters `</style>` (case-insensitive), stops — the style content is done.
-    * 4. **If anything was read:** saves the raw content as a `Style` token.
-    * 
+    * 4. If it encounters `<` (not `</style>`), the style is malformed — stops scanning and reports an error.
+    * 5. **If EOF is reached without `</style>`:** Adds an "Unterminated style" error.
+    * 6. **If anything was read:** saves the raw content as a `Style` token.
+    *
     * @param ctx The tokenizer context. Cursor must be positioned right after the opening `<style>` tag.
     */
    export function style(ctx: TokenizerContext) {
@@ -776,7 +820,6 @@ export namespace consume {
       while (!ctx.cursor.eof) {
          const code = ctx.cursor.peek();
 
-         // CSS strings
          if (
             code === char.singleQuote ||
             code === char.doubleQuote
@@ -785,7 +828,6 @@ export namespace consume {
             continue;
          }
 
-         // CSS block comment
          if (
             code === char.slash &&
             ctx.cursor.peek(1) === char.asterisk
@@ -794,7 +836,6 @@ export namespace consume {
             continue;
          }
 
-         // Closing </style>
          if (
             code === char.lessThan &&
             ctx.cursor.peek(1) === char.slash &&
@@ -803,7 +844,47 @@ export namespace consume {
             break;
          }
 
+         if (code === char.lessThan) {
+            ctx.diagnostics.push({
+               start: start.position,
+               end: ctx.cursor.position,
+               message: "Unterminated style",
+               code: DiagnosticCode.UnterminatedStyle,
+               severity: DiagnosticSeverity.Error,
+            });
+
+            ctx.tokens.push({
+               kind: SyntaxKind.Style,
+               start: start.position,
+               end: ctx.cursor.position,
+               value: ctx.cursor.getChars(start),
+            });
+
+            return;
+         }
+
          ctx.cursor.advance();
+      }
+
+      if (ctx.cursor.eof) {
+         if (ctx.cursor.position > start.position) {
+            ctx.diagnostics.push({
+               start: start.position,
+               end: ctx.cursor.position,
+               message: "Unterminated style",
+               code: DiagnosticCode.UnterminatedStyle,
+               severity: DiagnosticSeverity.Error,
+            });
+
+            ctx.tokens.push({
+               kind: SyntaxKind.Style,
+               start: start.position,
+               end: ctx.cursor.position,
+               value: ctx.cursor.getChars(start),
+            });
+         }
+
+         return;
       }
 
       if (ctx.cursor.position > start.position) {
