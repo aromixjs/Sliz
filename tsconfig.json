@@ -20,17 +20,12 @@
       "node",
       "vitest/globals"
     ],
-    "paths": {
-      "@lib/*": [
-        "./lib/*"
-      ]
-    }
+    "paths": {}
   },
   "include": [
-    "src/**/*.ts",
-    "src/**/*.d.ts",
+    "Src/**/*.ts",
+    "Src/**/*.d.ts",
     "playground/**/*.ts",
-    "lib/**/*.ts",
     "tests/**/*.ts",
     "demo/**/*.ts"
   ]

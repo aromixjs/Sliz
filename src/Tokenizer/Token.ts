@@ -1,6 +1,6 @@
 import { Diagnostic } from "../Pipeline/Context";
-import { type Maybe } from "../types/maybe";
-import { CharacterCursor } from "./cursor";
+import { type Maybe } from "../Types/Maybe";
+import { CharacterCursor } from "./Cursor";
 
 export enum SyntaxKind {
   Text = "Text",
@@ -46,4 +46,4 @@ export interface TokenizerContext {
   readonly diagnostics: Array<Diagnostic>
 }
 
-export type Matcher = (ctx: TokenizerContext) => void;
+export type Matcher = (Ctx: TokenizerContext) => void;

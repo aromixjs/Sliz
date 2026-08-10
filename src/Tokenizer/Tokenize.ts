@@ -1,6 +1,6 @@
 import { CompilerContext } from "../Pipeline/Context";
-import { CharacterCursor } from "./cursor";
-import { Dispatch } from "./dispatch";
+import { CharacterCursor } from "./Cursor";
+import { Dispatch } from "./Dispatch";
 import { TokenizerContext } from "./Token";
 
 
