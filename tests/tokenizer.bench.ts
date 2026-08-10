@@ -1,5 +1,6 @@
 import { bench, describe } from "vitest";
-import { Parser } from "htmlparser2";
+import { baseParse as vueParse } from "@vue/compiler-core";
+import { Parser as htmlparser2 } from "htmlparser2";
 import { tokenize } from "../src/tokenizer/tokenize";
 import { CompilerContext, Diagnostic } from "../src/pipeline/context";
 import { cases } from "../demo/content";
@@ -17,33 +18,42 @@ function buildLargeSource(): string {
   return src.slice(0, 50000);
 }
 
-const source = buildLargeSource();
+const slizSource = buildLargeSource();
 
-const noopHandler = {
-  onopentagname() {},
-  onopentag() {},
-  onclosetag() {},
-  ontext() {},
-  oncomment() {},
-  ondeclaration() {},
-  onprocessinginstruction() {},
-  onreset() {},
-  onend() {},
-  onError() {},
-};
+// Vue-compatible version: { expr } → {{ expr }}, <script server> → <script>, </script> → </script>
+const vueSource = slizSource
+  .replace(/\{([^{}]+)\}/g, "{{$1}}")
+  .replace(/<script server[^>]*>/g, "<script>")
+  .replace(/<\/script>/g, "</script>");
 
-describe("tokenizer benchmark", () => {
+describe("tokenizer benchmark — similar workload", () => {
   bench("htmlparser2 Parser", () => {
-    const parser = new Parser(noopHandler, { decodeEntities: false });
-    parser.write(source);
+    const parser = new htmlparser2(
+      {
+        onopentagname() { },
+        onopentag() { },
+        onclosetag() { },
+        ontext() { },
+        oncomment() { },
+        onprocessinginstruction() { },
+        onreset() { },
+        onend() { },
+      },
+      { decodeEntities: false },
+    );
+    parser.write(slizSource);
     parser.end();
+  });
+
+  bench("vue compiler-baseParse", () => {
+    vueParse(vueSource, { onError: () => { } });
   });
 
   bench("sliz tokenizer", () => {
     const diagnostics: Diagnostic[] = [];
     const ctx: CompilerContext = {
       fileName: "bench.sliz",
-      source,
+      source: slizSource,
       diagnostics,
     };
     tokenize(ctx);
