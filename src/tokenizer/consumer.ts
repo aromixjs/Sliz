@@ -13,7 +13,8 @@ export namespace consume {
     * 1. Loops while not at EOF.
     * 2. If it encounters `>` or `/>`, the tag is done — returns immediately.
     * 3. If it encounters `<` or `{`, the tag is malformed — returns immediately so the outer loop handles it.
-    * 4. Otherwise, hands off to `consume.attribute` to read one attribute, then loops again.
+    * 4. Skips whitespace between attributes.
+    * 5. Otherwise, hands off to `consume.attribute` to read one attribute, then loops again.
     *
     * @param ctx The tokenizer context. Cursor must be positioned after the tag name.
     */
@@ -21,10 +22,7 @@ export namespace consume {
       while (!ctx.cursor.eof) {
          const code = ctx.cursor.peek();
 
-         if (
-            code === char.greaterThan ||
-            (code === char.slash && ctx.cursor.peek(1) === char.greaterThan)
-         ) {
+         if (is.tagEnd(ctx)) {
             return;
          }
 
@@ -33,6 +31,11 @@ export namespace consume {
             code === char.openBrace
          ) {
             return;
+         }
+
+         if (is.whitespace(code)) {
+            skip.whiteSpace(ctx);
+            continue;
          }
 
          consume.attribute(ctx);
@@ -63,7 +66,7 @@ export namespace consume {
          if (
             is.whitespace(code) ||
             code === char.equals ||
-            code === char.greaterThan ||
+            is.tagEnd(ctx) ||
             code === char.lessThan ||
             code === char.openBrace ||
             code === char.slash
@@ -100,13 +103,13 @@ export namespace consume {
 
    /**
     * Reads an attribute value after the `=` sign, dispatching to the right reader based on what character the value starts with.
-    * 
+    *
     * **How it works:**
     * 1. Peeks at the first character of the value.
     * 2. **If `{`:** reads it as a JS expression via `consume.expression`.
     * 3. **If `'` or `"`:** reads it as a quoted string via `consume.quotedAttributeValue`.
     * 4. **Otherwise:** reads it as an unquoted value via `consume.unquotedAttributeValue`.
-    * 
+    *
     * @param ctx The tokenizer context. Cursor must be positioned at the start of the value.
     */
    export function attributeValue(ctx: TokenizerContext) {
@@ -117,10 +120,7 @@ export namespace consume {
          return;
       }
 
-      if (
-         code === char.singleQuote ||
-         code === char.doubleQuote
-      ) {
+      if (is.quote(code)) {
          consume.quotedAttributeValue(ctx);
          return;
       }
@@ -175,7 +175,7 @@ export namespace consume {
       ctx.diagnostics.push({
          start: start.position,
          end: ctx.cursor.position,
-         message: "Unterminated attribute value",
+         message: "Unterminated attribute value — missing closing quote",
          code: DiagnosticCode.UnterminatedAttributeValue,
          severity: DiagnosticSeverity.Error,
       });
@@ -207,7 +207,7 @@ export namespace consume {
 
          if (
             is.whitespace(code) ||
-            code === char.greaterThan ||
+            is.tagEnd(ctx) ||
             code === char.lessThan ||
             code === char.openBrace ||
             code === char.slash
@@ -239,12 +239,13 @@ export namespace consume {
     *
     * **How it works:**
     * 1. Remembers where the tag started, then advances past the `</` characters.
-    * 2. Reads the tag name until whitespace, `>`, `<`, `{`, `/`, or EOF is hit — these are all sync points.
-    * 3. **If no tag name was found:** Adds an "Expected tag name" error to `diagnostics`, advances past one character, and returns.
-    * 4. Emits three tokens: `LessThan` for `<`, `Slash` for `/`, and `TagName` for the tag name.
-    * 5. Skips any whitespace after the tag name.
-    * 6. Calls `consume.tagEnd` to read the closing `>` or `/>`.
-    * 7. **If `tagEnd` fails:** Advances past the problematic character so the outer loop can continue.
+    * 2. Skips any whitespace between `</` and the tag name.
+    * 3. Reads the tag name until whitespace, `>`, `<`, `{`, `/`, or EOF is hit — these are all sync points.
+    * 4. **If no tag name was found:** Adds an "Expected tag name" error to `diagnostics`, advances past one character, and returns.
+    * 5. Emits three tokens: `LessThan` for `<`, `Slash` for `/`, and `TagName` for the tag name.
+    * 6. Skips any whitespace after the tag name.
+    * 7. Calls `consume.tagEnd` to read the closing `>` or `/>`.
+    * 8. **If `tagEnd` fails:** Advances past the problematic character so the outer loop can continue.
     *
     * @param ctx The tokenizer context. Cursor must be positioned at the `<` of the closing tag.
     */
@@ -262,7 +263,7 @@ export namespace consume {
 
          if (
             is.whitespace(code) ||
-            code === char.greaterThan ||
+            is.tagEnd(ctx) ||
             code === char.lessThan ||
             code === char.openBrace ||
             code === char.slash
@@ -277,7 +278,7 @@ export namespace consume {
          ctx.diagnostics.push({
             start: start.position,
             end: ctx.cursor.position,
-            message: "Expected tag name",
+            message: "Expected tag name after '</'",
             code: DiagnosticCode.ExpectedTagName,
             severity: DiagnosticSeverity.Error,
          });
@@ -320,7 +321,7 @@ export namespace consume {
 
    /**
     * Reads a `<!DOCTYPE ...>` declaration until the closing `>` is found, a `<` is hit, or the end of the file.
-    * 
+    *
     * **How it works:**
     * 1. Remembers where the declaration starts.
     * 2. Advances character by character looking for the closing `>`:
@@ -328,7 +329,7 @@ export namespace consume {
     *    - **If unquoted `>` is found:** saves a `Doctype` token and stops.
     *    - **If `<` is found:** the doctype is malformed — stops scanning and reports an error.
     * 3. **If `>` is never found:** Adds an "Unterminated doctype" error to `diagnostics`, saves whatever was read as a `Doctype` token, and stops.
-    * 
+    *
     * @param ctx The tokenizer context holding the cursor, error diagnostics, and token list.
     */
    export function doctype(ctx: TokenizerContext) {
@@ -337,10 +338,7 @@ export namespace consume {
       while (!ctx.cursor.eof) {
          const code = ctx.cursor.peek();
 
-         if (
-            code === char.singleQuote ||
-            code === char.doubleQuote
-         ) {
+         if (is.quote(code)) {
             skip.string(ctx);
             continue;
          }
@@ -368,7 +366,7 @@ export namespace consume {
       ctx.diagnostics.push({
          start: start.position,
          end: ctx.cursor.position,
-         message: "Unterminated doctype",
+         message: "Unterminated doctype declaration — expected '>' before next '<'",
          code: DiagnosticCode.UnterminatedDoctype,
          severity: DiagnosticSeverity.Error,
       });
@@ -384,15 +382,15 @@ export namespace consume {
 
    /**
     * Reads a JavaScript expression enclosed in curly braces like `{ name }` or `{ count + 1 }`.
-    * 
+    *
     * **How it works:**
     * 1. Remembers where the opening `{` starts and advances past it.
     * 2. Uses `skip.braceExpression` to scan ahead and find the matching closing `}`.
     *    - `braceExpression` stops at `}`, `</` (closing tag), or EOF.
-    * 3. **If `</` is found:** the expression is malformed — adds an "Unterminated expression" error to `diagnostics`, saves the opening `{` and expression content as tokens, and stops. Cursor stays at `<` so the outer loop handles the closing tag.
+    * 3. **If `</` is found:** the expression is malformed — adds an "Unterminated expression" error, saves partial tokens, and stops. Cursor stays at `<` so the outer loop handles the closing tag.
     * 4. **If EOF is reached:** adds an "Unterminated expression" error, saves partial tokens, and stops.
     * 5. **If `}` is found:** saves three tokens: the opening `{`, the expression content, and the closing `}`.
-    * 
+    *
     * @param ctx The tokenizer context, which tracks cursor position, errors, and saved tokens.
     */
    export function expression(ctx: TokenizerContext) {
@@ -402,40 +400,16 @@ export namespace consume {
       const expressionStart = ctx.cursor.clone();
       skip.braceExpression(ctx);
 
-      if (ctx.cursor.eof) {
-         ctx.diagnostics.push({
-            start: start.position,
-            end: ctx.cursor.source.length,
-            message: "Unterminated expression",
-            code: DiagnosticCode.UnterminatedExpression,
-            severity: DiagnosticSeverity.Error,
-         });
-
-         ctx.tokens.push({
-            kind: SyntaxKind.OpenBrace,
-            start: start.position,
-            end: start.position + 1,
-            value: "{",
-         });
-
-         ctx.tokens.push({
-            kind: SyntaxKind.JsExpression,
-            start: expressionStart.position,
-            end: ctx.cursor.source.length,
-            value: ctx.cursor.getChars(expressionStart),
-         });
-
-         return;
-      }
-
-      if (
+      const isUnterminated = ctx.cursor.eof || (
          ctx.cursor.peek() === char.lessThan &&
          ctx.cursor.peek(1) === char.slash
-      ) {
+      );
+
+      if (isUnterminated) {
          ctx.diagnostics.push({
             start: start.position,
             end: ctx.cursor.position,
-            message: "Unterminated expression",
+            message: "Unterminated expression — expected '}' before '</' or end of file",
             code: DiagnosticCode.UnterminatedExpression,
             severity: DiagnosticSeverity.Error,
          });
@@ -483,32 +457,32 @@ export namespace consume {
 
    /**
     * Reads an HTML comment starting from `<!--` until `-->` is found or the end of the file.
-    * 
+    *
     * **How it works:**
     * 1. Remembers where the comment starts.
     * 2. Advances past the opening `<!--` sequence (4 characters).
     * 3. Loops through characters:
-    *    - **If `<!--` is found inside the comment:** HTML doesn't support nested comments — adds a "Nested comment" error to `diagnostics` and keeps scanning.
+    *    - **If `<!--` is found inside the comment:** HTML doesn't support nested comments — adds a "Nested comment" error and keeps scanning.
     *    - **If `-->` is found:** the comment is done — saves an `HtmlComment` token and stops.
-    * 4. **If `-->` is never found (file ends early):** Adds an "Unterminated comment" error to `diagnostics` and saves whatever was read as an `HtmlComment` token.
-    * 
+    * 4. **If `-->` is never found (file ends early):** Adds an "Unterminated comment" error and saves whatever was read as an `HtmlComment` token.
+    *
     * @param ctx The tokenizer context. Cursor must be positioned at the `<` of the comment.
     */
    export function htmlComment(ctx: TokenizerContext) {
       const start = ctx.cursor.clone();
 
-      ctx.cursor.advance(); // <
-      ctx.cursor.advance(); // !
-      ctx.cursor.advance(); // -
-      ctx.cursor.advance(); // -
+      ctx.cursor.advance();
+      ctx.cursor.advance();
+      ctx.cursor.advance();
+      ctx.cursor.advance();
 
       while (!ctx.cursor.eof) {
-         
+
          if (is.commentOpen(ctx)) {
             ctx.diagnostics.push({
                start: ctx.cursor.position,
                end: ctx.cursor.position + 4,
-               message: "Nested comment",
+               message: "Nested comment — HTML does not support nested comments",
                code: DiagnosticCode.NestedComment,
                severity: DiagnosticSeverity.Error,
             });
@@ -541,7 +515,7 @@ export namespace consume {
       ctx.diagnostics.push({
          start: start.position,
          end: ctx.cursor.source.length,
-         message: "Unterminated comment",
+         message: "Unterminated comment — expected '-->' before end of file",
          code: DiagnosticCode.UnterminatedComment,
          severity: DiagnosticSeverity.Error,
       });
@@ -558,20 +532,18 @@ export namespace consume {
 
 
    /**
-    * Determines what kind of HTML tag or element starts at the current position 
+    * Determines what kind of HTML tag or element starts at the current position
     * and hands off processing to the right consumer function.
-    * 
+    *
     * **How it works:**
     * 1. If the cursor is at `<!--`, hands off to `consume.htmlComment`.
     * 2. If the cursor is at `<!DOCTYPE`, hands off to `consume.doctype`.
     * 3. If the cursor is at `</`, hands off to `consume.closingTag`.
     * 4. Otherwise, treats it as an opening tag and hands off to `consume.openingTag`.
-    * 
+    *
     * @param ctx The tokenizer context holding the cursor position and token list.
     */
    export function markup(ctx: TokenizerContext) {
-      const cursor = ctx.cursor;
-
       if (is.commentOpen(ctx)) {
          consume.htmlComment(ctx);
          return;
@@ -582,7 +554,7 @@ export namespace consume {
          return;
       }
 
-      if (cursor.peek() === char.lessThan && cursor.peek(1) === char.slash) {
+      if (is.closingTagStart(ctx)) {
          consume.closingTag(ctx);
          return;
       }
@@ -590,13 +562,13 @@ export namespace consume {
       const tagName = consume.openingTag(ctx);
 
       if (tagName === "script") {
-         consume.script(ctx)
-         return
+         consume.script(ctx);
+         return;
       }
 
-      if (tagName === 'style') {
-         consume.style(ctx)
-         return
+      if (tagName === "style") {
+         consume.style(ctx);
+         return;
       }
    }
 
@@ -631,7 +603,7 @@ export namespace consume {
 
          if (
             is.whitespace(code) ||
-            code === char.greaterThan ||
+            is.tagEnd(ctx) ||
             code === char.lessThan ||
             code === char.openBrace ||
             code === char.slash
@@ -646,7 +618,7 @@ export namespace consume {
          ctx.diagnostics.push({
             start: start.position,
             end: ctx.cursor.position,
-            message: "Expected tag name",
+            message: "Expected tag name after '<'",
             code: DiagnosticCode.ExpectedTagName,
             severity: DiagnosticSeverity.Error,
          });
@@ -708,10 +680,7 @@ export namespace consume {
       while (!ctx.cursor.eof) {
          const code = ctx.cursor.peek();
 
-         if (
-            code === char.singleQuote ||
-            code === char.doubleQuote
-         ) {
+         if (is.quote(code)) {
             skip.string(ctx);
             continue;
          }
@@ -721,18 +690,12 @@ export namespace consume {
             continue;
          }
 
-         if (
-            code === char.slash &&
-            ctx.cursor.peek(1) === char.slash
-         ) {
+         if (is.lineCommentStart(ctx)) {
             skip.lineComment(ctx);
             continue;
          }
 
-         if (
-            code === char.slash &&
-            ctx.cursor.peek(1) === char.asterisk
-         ) {
+         if (is.blockCommentStart(ctx)) {
             skip.blockComment(ctx);
             continue;
          }
@@ -749,7 +712,7 @@ export namespace consume {
             ctx.diagnostics.push({
                start: start.position,
                end: ctx.cursor.position,
-               message: "Unterminated script",
+               message: "Unterminated script — unexpected '<' before '</script>'",
                code: DiagnosticCode.UnterminatedScript,
                severity: DiagnosticSeverity.Error,
             });
@@ -772,7 +735,7 @@ export namespace consume {
             ctx.diagnostics.push({
                start: start.position,
                end: ctx.cursor.position,
-               message: "Unterminated script",
+               message: "Unterminated script — expected '</script>' before end of file",
                code: DiagnosticCode.UnterminatedScript,
                severity: DiagnosticSeverity.Error,
             });
@@ -820,18 +783,12 @@ export namespace consume {
       while (!ctx.cursor.eof) {
          const code = ctx.cursor.peek();
 
-         if (
-            code === char.singleQuote ||
-            code === char.doubleQuote
-         ) {
+         if (is.quote(code)) {
             skip.string(ctx);
             continue;
          }
 
-         if (
-            code === char.slash &&
-            ctx.cursor.peek(1) === char.asterisk
-         ) {
+         if (is.blockCommentStart(ctx)) {
             skip.blockComment(ctx);
             continue;
          }
@@ -848,7 +805,7 @@ export namespace consume {
             ctx.diagnostics.push({
                start: start.position,
                end: ctx.cursor.position,
-               message: "Unterminated style",
+               message: "Unterminated style — unexpected '<' before '</style>'",
                code: DiagnosticCode.UnterminatedStyle,
                severity: DiagnosticSeverity.Error,
             });
@@ -871,7 +828,7 @@ export namespace consume {
             ctx.diagnostics.push({
                start: start.position,
                end: ctx.cursor.position,
-               message: "Unterminated style",
+               message: "Unterminated style — expected '</style>' before end of file",
                code: DiagnosticCode.UnterminatedStyle,
                severity: DiagnosticSeverity.Error,
             });
@@ -945,7 +902,7 @@ export namespace consume {
       ctx.diagnostics.push({
          start: start.position,
          end: ctx.cursor.position,
-         message: "Expected '>'",
+         message: "Expected '>' to close the tag",
          code: DiagnosticCode.ExpectedTagEnd,
          severity: DiagnosticSeverity.Error,
       });

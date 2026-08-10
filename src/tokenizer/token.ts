@@ -12,18 +12,12 @@ export enum SyntaxKind {
   CloseBrace = "CloseBrace",
   TagName = "TagName",
   AttributeName = "AttributeName",
-  Equals = "Equals",
   AttributeValue = "AttributeValue",
   GreaterThan = "GreaterThan",
   SlashGreaterThan = "SlashGreaterThan",
-  ServerScript = "ServerScript",
-  ClientScript = "ClientScript",
+  Script = "Script",
   Style = "Style",
-  Expression = "Expression",
   HtmlComment = "HtmlComment",
-  Unknown = "Unknown",
-  EndOfFile = "EndOfFile",
-  Script = "Script"
 }
 
 export interface Token {
