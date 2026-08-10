@@ -1,8 +1,15 @@
+import { Diagnostic } from "../Pipeline/Context";
 import { type Maybe } from "../types/maybe";
+import { CharacterCursor } from "./cursor";
 
 export enum SyntaxKind {
+  Text = "Text",
   LessThan = "LessThan",
   Slash = "Slash",
+  OpenBrace = "OpenBrace",
+  JsExpression = "JsExpression",
+  CloseBrace = "CloseBrace",
+
 
   TagName = "TagName",
   AttributeName = "AttributeName",
@@ -20,7 +27,6 @@ export enum SyntaxKind {
 
   HtmlComment = "HtmlComment",
 
-  Text = "Text",
 
   Unknown = "Unknown",
   EndOfFile = "EndOfFile",
@@ -35,9 +41,9 @@ export interface Token {
 
 // Matcher Types
 export interface TokenizerContext {
-  readonly source: string;
-  cursor: number;
-  readonly tokens: Array<Token>
+  readonly cursor: CharacterCursor;
+  readonly tokens: Array<Token>,
+  readonly diagnostics: Array<Diagnostic>
 }
 
 export type Matcher = (ctx: TokenizerContext) => void;

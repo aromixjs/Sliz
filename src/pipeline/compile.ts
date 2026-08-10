@@ -1,31 +1,10 @@
-import { tokenize } from "../tokenizer/tokenize";
-import { CompilerContext } from "./context";
+import { Tokenize } from "../tokenizer/Tokenize";
+import { CompilerContext } from "./Context";
 
-export function compile(context: CompilerContext) {
-  const tokens = tokenize(context);
+export function Compile(Context: CompilerContext) {
+  const Tokens = Tokenize(Context);
 
-  // let placeholderStart = 0;
-  // const expressions = new Map<number, ExtractedExpression>();
-  // const processedHtml = [];
-  // for (const token of tokens) {
-  //   if (token.kind !== SyntaxKind.Html) {
-  //     continue;
-  //   }
 
-  //   const result = preprocess.expressions({
-  //     diagnostics: context.diagnostics,
-  //     source: token.value!,
-  //     start: token.start,
-  //     placeholderStart,
-  //   });
 
-  //   placeholderStart = result.nextPlaceholder;
-  //   for (const [id, expression] of result.expressions) {
-  //     expressions.set(id, expression);
-  //   }
-
-  //   processedHtml.push(result.content);
-  // }
-
-  return { tokens };
+  return { Tokens };
 }

@@ -1,69 +1,8 @@
 import { dir } from "console";
 import { tokenize } from "../src";
-import data from "./content/26";
 
 
 const source = `
-<server lang="ts">
-  type User = {
-    id: string;
-    name: string;
-    email: string;
-    avatar?: string;
-    role: "admin" | "editor" | "user";
-    active: boolean;
-  };
-
-  type Project = {
-    id: string;
-    name: string;
-    description: string;
-    status: "active" | "archived";
-    members: User[];
-  };
-
-  const userId = props.userId;
-
-  const user = await db.users.findById(userId);
-
-  if (!user) {
-    throw new Error("User not found");
-  }
-
-  const projects = await db.projects.findMany({
-    members: user.id,
-    status: "active",
-  });
-
-  const stats = {
-    projects: projects.length,
-    members: projects.reduce(
-      (total, project) => total + project.members.length,
-      0,
-    ),
-    active: user.active,
-  };
-
-  const formatDate = (date: Date) => {
-    return new Intl.DateTimeFormat("en-US", {
-      dateStyle: "medium",
-    }).format(date);
-  };
-
-  const handleArchive = async (projectId: string) => {
-    await db.projects.update(projectId, {
-      status: "archived",
-    });
-  };
-
-  const handleInvite = async (email: string) => {
-    await invitations.create({
-      email,
-      userId: user.id,
-    });
-  };
-</server>
-
 <div class="min-h-screen bg-gray-50">
   <header class="border-b bg-white">
     <div class="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
@@ -297,9 +236,9 @@ const source = `
 
 
 const result = tokenize({
-   source: source,
-   fileName: 'test.sliz',
-   diagnostics: []
+   Source: source,
+   FileName: 'test.sliz',
+   Diagnostics: []
 })
 
 

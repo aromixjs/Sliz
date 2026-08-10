@@ -1,13 +1,20 @@
 export interface CompilerContext {
-  source: string;
-  fileName: string;
-  diagnostics: Diagnostic[];
+  Source: string;
+  FileName: string;
+  Diagnostics: Diagnostic[];
+}
+
+
+export enum DiagnosticSeverity {
+  Error = 'Error',
+  Warning = 'Warning',
+  Info = 'Info'
 }
 
 export interface Diagnostic {
-  severity: "error" | "warning" | "info";
-  code: string;
-  message: string;
-  start: number;
-  end: number;
+  Severity: DiagnosticSeverity;
+  Code: string;
+  Message: string;
+  Start: number;
+  End: number;
 }

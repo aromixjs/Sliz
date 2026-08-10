@@ -1,6 +1,6 @@
 import * as fs from "fs";
-import { tokenize } from "../src/tokenizer/tokenize";
-import { CompilerContext, Diagnostic } from "../src/pipeline/context";
+import { CompilerContext, Diagnostic } from "../src/Pipeline/Context";
+import { Tokenize } from "../src/tokenizer/Tokenize";
 import { cases } from "./content";
 
 let output = "";
@@ -14,12 +14,12 @@ for (const test of cases) {
    try {
       const diagnostics: Diagnostic[] = [];
       const context: CompilerContext = {
-         fileName: `${test.name.replace(/\s+/g, "-")}.sliz`,
-         source: test.source,
-         diagnostics,
+         FileName: `${test.name.replace(/\s+/g, "-")}.sliz`,
+         Source: test.source,
+         Diagnostics: diagnostics,
       };
 
-      const tokens = tokenize(context);
+      const tokens = Tokenize(context);
 
       output += `Tokens (${tokens.length}):\n`;
       output += JSON.stringify(tokens, null, 2) + "\n";

@@ -1,9 +1,9 @@
 import char from "../scanner/char";
 import skip from "../scanner/skip";
 import {
-  ExpressionPreprocessInput,
-  ExpressionPreprocessOutput,
-  ExtractedExpression,
+    ExpressionPreprocessInput,
+    ExpressionPreprocessOutput,
+    ExtractedExpression,
 } from "./types";
 
 export function expressions(
@@ -36,11 +36,11 @@ export function expressions(
 
     if (unterminated) {
       diagnostics.push({
-        severity: "error",
-        code: "UNTERMINATED_EXPRESSION",
-        message: "Unterminated { expression — missing closing '}'",
-        start: start + expressionStart,
-        end: start + expressionEnd,
+        Severity: "error",
+        Code: "UNTERMINATED_EXPRESSION",
+        Message: "Unterminated { expression — missing closing '}'",
+        Start: start + expressionStart,
+        End: start + expressionEnd,
       });
 
       // keep `{` as text and continue scanning

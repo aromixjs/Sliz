@@ -1,4 +1,4 @@
-import { Diagnostic } from "../pipeline/context";
+import { Diagnostic } from "../Pipeline/Context";
 
 export interface ExtractedExpression {
   id: number;
