@@ -1,6 +1,6 @@
 import * as fs from "fs";
-import { CompilerContext, Diagnostic } from "../src/Pipeline/Context";
-import { Tokenize } from "../src/Tokenizer/Tokenize";
+import { CompilerContext, Diagnostic } from "../Src/Pipeline/Context";
+import { Tokenize } from "../Src/Tokenizer/Tokenize";
 import { cases } from "./content";
 
 let output = "";
