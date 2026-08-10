@@ -1,5 +1,5 @@
-import { tokenize } from "../Tokenizer/Tokenize";
-import { CompilerContext } from "./Context";
+import { tokenize } from "../tokenizer/tokenize";
+import { CompilerContext } from "./context";
 
 export function compile(context: CompilerContext) {
   const tokens = tokenize(context);

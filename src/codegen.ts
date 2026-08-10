@@ -1,5 +1,5 @@
-import { TransformedNode } from "./Transformers/Transformer";
-import { ExtractedExpression } from "./Transformers/Types";
+import { TransformedNode } from "./transformers/transformer";
+import { ExtractedExpression } from "./transformers/types";
 
 export function generate(
   nodes: TransformedNode[],

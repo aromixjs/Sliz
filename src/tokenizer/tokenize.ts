@@ -1,7 +1,7 @@
-import { CompilerContext } from "../Pipeline/Context";
-import { CharacterCursor } from "./Cursor";
-import { dispatch } from "./Dispatch";
-import { TokenizerContext } from "./Token";
+import { CompilerContext } from "../pipeline/context";
+import { CharacterCursor } from "./cursor";
+import { dispatch } from "./dispatch";
+import { TokenizerContext } from "./token";
 
 export function tokenize(context: CompilerContext) {
   const ctx: TokenizerContext = {

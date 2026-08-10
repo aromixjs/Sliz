@@ -1,8 +1,8 @@
-import Char from "../Scanner/Char";
-import { consumeExpression } from "./Consumers/Expression";
-import { consumeMarkup } from "./Consumers/Markup";
-import { consumeText } from "./Consumers/Text";
-import { TokenizerContext } from "./Token";
+import Char from "../scanner/char";
+import { consumeExpression } from "./consumers/expression";
+import { consumeMarkup } from "./consumers/markup";
+import { consumeText } from "./consumers/text";
+import { TokenizerContext } from "./token";
 
 export function dispatch(ctx: TokenizerContext) {
   const code = ctx.cursor.peek();

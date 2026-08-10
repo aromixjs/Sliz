@@ -1,5 +1,5 @@
 import { Parser } from "htmlparser2";
-import { ElementNode, HtmlAstParser, Node } from "./Types";
+import { ElementNode, HtmlAstParser, Node } from "./types";
 
 export function parse(): HtmlAstParser {
   let stack: ElementNode[] = [];

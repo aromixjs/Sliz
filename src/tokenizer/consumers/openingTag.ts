@@ -1,7 +1,7 @@
-import { DiagnosticCode, DiagnosticSeverity } from "../../Pipeline/Context";
-import char from "../../Scanner/Char";
-import is from "../../Scanner/Is";
-import { SyntaxKind, TokenizerContext } from "../Token";
+import { DiagnosticCode, DiagnosticSeverity } from "../../pipeline/context";
+import char from "../../scanner/char";
+import is from "../../scanner/is";
+import { SyntaxKind, TokenizerContext } from "../token";
 
 export function consumeOpeningTag(ctx: TokenizerContext) {
   const start = ctx.cursor.clone();

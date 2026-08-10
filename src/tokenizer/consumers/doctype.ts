@@ -1,6 +1,6 @@
-import { DiagnosticCode, DiagnosticSeverity } from "../../Pipeline/Context";
-import char from "../../Scanner/Char";
-import { SyntaxKind, TokenizerContext } from "../Token";
+import { DiagnosticCode, DiagnosticSeverity } from "../../pipeline/context";
+import char from "../../scanner/char";
+import { SyntaxKind, TokenizerContext } from "../token";
 
 export function consumeDoctype(ctx: TokenizerContext) {
   const start = ctx.cursor.clone();

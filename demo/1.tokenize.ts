@@ -1,5 +1,5 @@
 import { dir } from "console";
-import { tokenize } from "../Src/Index";
+import { tokenize } from "../src/index";
 
 const source = `
 <div class="min-h-screen bg-gray-50">

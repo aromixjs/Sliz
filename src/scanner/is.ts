@@ -1,5 +1,5 @@
-import { TokenizerContext } from "../Tokenizer/Token";
-import char from "./Char";
+import { TokenizerContext } from "../tokenizer/token";
+import char from "./char";
 
 export default {
   whitespace(code: number) {

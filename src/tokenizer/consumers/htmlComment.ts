@@ -1,5 +1,5 @@
-import char from "../../Scanner/Char";
-import { SyntaxKind, TokenizerContext } from "../Token";
+import char from "../../scanner/char";
+import { SyntaxKind, TokenizerContext } from "../token";
 
 export function consumeHtmlComment(ctx: TokenizerContext) {
   const start = ctx.cursor.clone();

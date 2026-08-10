@@ -1,5 +1,5 @@
-import char from "./Char";
-import is from "./Is";
+import char from "./char";
+import is from "./is";
 
 export default {
   whiteSpace(source: string, cursor: number) {

@@ -1,6 +1,6 @@
-import { Diagnostic } from "../Pipeline/Context";
-import { type Maybe } from "../Types/Maybe";
-import { CharacterCursor } from "./Cursor";
+import { Diagnostic } from "../pipeline/context";
+import { type Maybe } from "../types/maybe";
+import { CharacterCursor } from "./cursor";
 
 export enum SyntaxKind {
   Doctype = "Doctype",

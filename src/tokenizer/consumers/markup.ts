@@ -1,10 +1,10 @@
-import char from "../../Scanner/Char";
-import is from "../../Scanner/Is";
-import { TokenizerContext } from "../Token";
-import { consumeClosingTag } from "./ClosingTag";
-import { consumeDoctype } from "./Doctype";
-import { consumeHtmlComment } from "./HtmlComment";
-import { consumeOpeningTag } from "./OpeningTag";
+import char from "../../scanner/char";
+import is from "../../scanner/is";
+import { TokenizerContext } from "../token";
+import { consumeClosingTag } from "./closingTag";
+import { consumeDoctype } from "./doctype";
+import { consumeHtmlComment } from "./htmlComment";
+import { consumeOpeningTag } from "./openingTag";
 
 export function consumeMarkup(ctx: TokenizerContext) {
   const cursor = ctx.cursor;

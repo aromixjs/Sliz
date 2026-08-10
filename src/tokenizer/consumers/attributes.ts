@@ -1,8 +1,8 @@
-import char from "../../Scanner/Char";
-import is from "../../Scanner/Is";
-import skip from "../../Scanner/Skip";
-import { SyntaxKind, TokenizerContext } from "../Token";
-import { consumeExpression } from "./Expression";
+import char from "../../scanner/char";
+import is from "../../scanner/is";
+import skip from "../../scanner/skip";
+import { SyntaxKind, TokenizerContext } from "../token";
+import { consumeExpression } from "./expression";
 
 export function consumeAttributes(ctx: TokenizerContext) {
   while (!ctx.cursor.eof) {

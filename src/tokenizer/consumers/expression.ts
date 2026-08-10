@@ -1,6 +1,6 @@
-import { DiagnosticCode, DiagnosticSeverity } from "../../Pipeline/Context";
-import skip from "../../Scanner/Skip";
-import { SyntaxKind, TokenizerContext } from "../Token";
+import { DiagnosticCode, DiagnosticSeverity } from "../../pipeline/context";
+import skip from "../../scanner/skip";
+import { SyntaxKind, TokenizerContext } from "../token";
 
 export function consumeExpression(ctx: TokenizerContext) {
   const start = ctx.cursor.clone();

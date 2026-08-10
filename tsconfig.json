@@ -22,9 +22,9 @@
     ],
     "paths": {}
   },
-  "include": [
-    "Src/**/*.ts",
-    "Src/**/*.d.ts",
+    "include": [
+    "src/**/*.ts",
+    "src/**/*.d.ts",
     "playground/**/*.ts",
     "tests/**/*.ts",
     "demo/**/*.ts"

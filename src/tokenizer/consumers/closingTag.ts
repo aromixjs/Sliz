@@ -1,4 +1,4 @@
-import { TokenizerContext } from "../Token";
+import { TokenizerContext } from "../token";
 
 export function consumeClosingTag(ctx: TokenizerContext) {
 

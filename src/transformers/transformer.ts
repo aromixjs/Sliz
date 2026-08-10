@@ -1,9 +1,9 @@
-import { Node } from "../Parser/Types";
+import { Node } from "../parser/types";
 import {
   ExtractedExpression,
   PreProcessError,
   PreProcessResult,
-} from "./Types";
+} from "./types";
 
 export type TransformedNode = TextNode | ElementNode | ConditionalNode;
 

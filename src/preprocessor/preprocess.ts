@@ -1,11 +1,11 @@
-import { DiagnosticCode, DiagnosticSeverity } from "../Pipeline/Context";
-import char from "../Scanner/Char";
-import skip from "../Scanner/Skip";
+import { DiagnosticCode, DiagnosticSeverity } from "../pipeline/context";
+import char from "../scanner/char";
+import skip from "../scanner/skip";
 import {
   ExpressionPreprocessInput,
   ExpressionPreprocessOutput,
   ExtractedExpression,
-} from "./Types";
+} from "./types";
 
 export function expressions(
   input: ExpressionPreprocessInput,
