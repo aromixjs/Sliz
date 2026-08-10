@@ -289,7 +289,7 @@ export namespace consume {
       ctx.cursor.advance();
 
       const expressionStart = ctx.cursor.clone();
-      const end = skip.braceExpression(ctx.cursor.source, start.position);
+      const end = skip.braceExpression(ctx);
 
       if (end === -1) {
          ctx.diagnostics.push({
@@ -647,6 +647,17 @@ export namespace consume {
 
 
 
+   /**
+    * Reads a stretch of plain text content until it hits a `<` or `{` character.
+    *
+    * **How it works:**
+    * 1. Remembers where the text starts.
+    * 2. Advances character by character until it encounters `<` (markup) or `{` (expression).
+    * 3. If no characters were consumed, returns without emitting a token.
+    * 4. Otherwise, saves the consumed characters as a `Text` token.
+    *
+    * @param ctx The tokenizer context holding the cursor and token list.
+    */
    export function text(ctx: TokenizerContext) {
       const start = ctx.cursor.clone();
 

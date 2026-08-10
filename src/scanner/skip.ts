@@ -4,6 +4,11 @@ import { is } from "./is";
 
 
 export namespace skip {
+   /**
+    * Skips forward over whitespace characters (space, tab, line feed, carriage return).
+    *
+    * @param ctx The tokenizer context.
+    */
    export function whiteSpace(ctx: TokenizerContext) {
       const { cursor } = ctx;
 
@@ -23,10 +28,14 @@ export namespace skip {
       }
    }
 
+   /**
+    * Skips a single-line comment starting with `//` until end of line.
+    *
+    * @param ctx The tokenizer context. Cursor must be positioned at the first `/`.
+    */
    export function lineComment(ctx: TokenizerContext) {
       const { cursor } = ctx;
 
-      // Consume //
       cursor.advance();
       cursor.advance();
 
@@ -39,10 +48,14 @@ export namespace skip {
       }
    }
 
+   /**
+    * Skips a block comment from `/*` to `*\\/`.
+    *
+    * @param ctx The tokenizer context. Cursor must be positioned at the first `*`.
+    */
    export function blockComment(ctx: TokenizerContext) {
       const { cursor } = ctx;
 
-      // Consume /*
       cursor.advance();
       cursor.advance();
 
@@ -53,20 +66,22 @@ export namespace skip {
          ) {
             cursor.advance();
             cursor.advance();
-            return true;
+            return;
          }
 
          cursor.advance();
       }
-
-      return false;
    }
 
+   /**
+    * Skips a quoted string, handling backslash escapes.
+    *
+    * @param ctx The tokenizer context. Cursor must be positioned at the opening quote.
+    */
    export function string(ctx: TokenizerContext) {
       const { cursor } = ctx;
       const quote = cursor.peek();
 
-      // Consume opening quote
       cursor.advance();
 
       while (!cursor.eof) {
@@ -84,23 +99,21 @@ export namespace skip {
 
          if (code === quote) {
             cursor.advance();
-            return true;
+            return;
          }
 
          cursor.advance();
       }
-
-      return false;
    }
 
-
-
-
-
+   /**
+    * Skips a template literal, handling backslash escapes and `${...}` interpolations.
+    *
+    * @param ctx The tokenizer context. Cursor must be positioned at the opening backtick.
+    */
    export function template(ctx: TokenizerContext) {
       const { cursor } = ctx;
 
-      // Consume opening `
       cursor.advance();
 
       while (!cursor.eof) {
@@ -118,7 +131,7 @@ export namespace skip {
 
          if (code === char.backtick) {
             cursor.advance();
-            return true;
+            return;
          }
 
          if (
@@ -127,71 +140,42 @@ export namespace skip {
          ) {
             cursor.advance();
             cursor.advance();
-
-            if (!skip.braceExpression(ctx)) {
-               return false;
-            }
-
+            braceExpression(ctx);
             continue;
          }
 
          cursor.advance();
       }
-
-      return false;
    }
 
 
-
-
-/**
- * Finds where a `{ ... }` expression ends, safely skipping over inner braces, strings, and escape characters.
- * 
- * **How it works:**
- * 1. Starts inside the outer `{` and tracks "depth" (starts at 1).
- * 2. Ignores escaped characters (e.g., `\{`) so they don't count as real braces.
- * 3. Skips over strings `'...'`, `"..."`, and template literals `` `...` `` so braces inside text are ignored.
- * 4. Adds to `depth` for every `{` and subtracts for every `}`.
- * 5. Returns the index after the matching `}` when `depth` hits 0 (or `-1` if it never closes).
- * 
- * @param source The full source code string being parsed.
- * @param start The character index where the opening `{` is located.
- * @returns The character index immediately after the closing `}`, or `-1` if unmatched.
- */
+   /**
+    * Skips a `{ ... }` expression, safely skipping over inner braces, strings, and escape characters.
+    *
+    * @param ctx The tokenizer context. Cursor must be positioned immediately after the opening `{`.
+    */
    export function braceExpression(ctx: TokenizerContext) {
       const { cursor } = ctx;
       let depth = 1;
 
-      // Cursor is expected to be immediately after {
       while (!cursor.eof) {
          const code = cursor.peek();
 
          if (code === char.backslash) {
             cursor.advance();
-
             if (!cursor.eof) {
                cursor.advance();
             }
-
             continue;
          }
 
-         if (
-            code === char.singleQuote ||
-            code === char.doubleQuote
-         ) {
-            if (!string(ctx)) {
-               return false;
-            }
-
+         if (code === char.singleQuote || code === char.doubleQuote) {
+            string(ctx);
             continue;
          }
 
          if (code === char.backtick) {
-            if (!template(ctx)) {
-               return false;
-            }
-
+            template(ctx);
             continue;
          }
 
@@ -206,7 +190,7 @@ export namespace skip {
             cursor.advance();
 
             if (depth === 0) {
-               return true;
+               return;
             }
 
             continue;
@@ -214,17 +198,17 @@ export namespace skip {
 
          cursor.advance();
       }
-
-      return false;
    }
 
-
-
+   /**
+    * Skips a regex literal from opening `/` to closing `/`, handling character classes and escapes.
+    *
+    * @param ctx The tokenizer context. Cursor must be positioned at the opening `/`.
+    */
    export function regex(ctx: TokenizerContext) {
       const { cursor } = ctx;
       let inCharClass = false;
 
-      // Consume opening /
       cursor.advance();
 
       while (!cursor.eof) {
@@ -241,7 +225,7 @@ export namespace skip {
          }
 
          if (code === char.lineFeed) {
-            return false;
+            return;
          }
 
          if (code === char.openBracket) {
@@ -263,12 +247,10 @@ export namespace skip {
                cursor.advance();
             }
 
-            return true;
+            return;
          }
 
          cursor.advance();
       }
-
-      return false;
    }
 };
