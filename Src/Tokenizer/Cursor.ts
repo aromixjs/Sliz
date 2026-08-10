@@ -1,55 +1,55 @@
 export class CharacterCursor {
-  private index = 0;
+  private Index = 0;
 
   constructor(
-    readonly source: string,
-    index = 0,
+    readonly Source: string,
+    Index = 0,
   ) {
-    this.index = index;
+    this.Index = Index;
   }
 
   /** Reset the cursor to the beginning. */
-  init(): void {
-    this.index = 0;
+  Init(): void {
+    this.Index = 0;
   }
 
   /** Character at the current position. */
-  peek(offset = 0): number {
-    return this.source.charCodeAt(this.index + offset);
+  Peek(offset = 0): number {
+    return this.Source.charCodeAt(this.Index + offset);
   }
 
   /** Advance by one character. */
-  advance(): void {
-    this.index++;
+  Advance(): void {
+    this.Index++;
   }
 
   /** Current position. */
-  get position(): number {
-    return this.index;
+  get Position(): number {
+    return this.Index;
   }
 
   /** Number of characters remaining. */
-  get charsLeft(): number {
-    return this.source.length - this.index;
+  get CharsLeft(): number {
+    return this.Source.length - this.Index;
   }
 
   /** Create a cursor at the current position. */
-  clone(): CharacterCursor {
-    return new CharacterCursor(this.source, this.index);
+  Clone(): CharacterCursor {
+    return new CharacterCursor(this.Source, this.Index);
   }
 
   /** Number of characters between two cursors. */
-  diff(other: CharacterCursor): number {
-    return this.index - other.index;
+  Diff(other: CharacterCursor): number {
+    return this.Index - other.Index;
   }
 
   /** Source text between another cursor and this cursor. */
-  getChars(start: CharacterCursor): string {
-    return this.source.slice(start.index, this.index);
+  GetChars(start: CharacterCursor): string {
+    return this.Source.slice(start.Index, this.Index);
   }
 
   /** Whether the cursor reached the end. */
-  get eof(): boolean {
-    return this.index >= this.source.length;
+  get Eof(): boolean {
+    return this.Index >= this.Source.length;
   }
 }

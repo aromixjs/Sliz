@@ -6,14 +6,14 @@ import { TokenizerContext } from "./Token";
 
 export function Tokenize(Context: CompilerContext) {
   const Ctx: TokenizerContext = {
-    cursor: new CharacterCursor(Context.Source),
-    tokens: [],
-    diagnostics: Context.Diagnostics
+    Cursor: new CharacterCursor(Context.Source),
+    Tokens: [],
+    Diagnostics: Context.Diagnostics
   }
 
-  while (!Ctx.cursor.eof) {
+  while (!Ctx.Cursor.Eof) {
     Dispatch(Ctx);
   }
 
-  return Ctx.tokens;
+  return Ctx.Tokens;
 }

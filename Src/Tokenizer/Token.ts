@@ -27,23 +27,20 @@ export enum SyntaxKind {
 
   HtmlComment = "HtmlComment",
 
-
   Unknown = "Unknown",
   EndOfFile = "EndOfFile",
 }
 
 export interface Token {
-  kind: SyntaxKind;
-  start: number;
-  end: number;
-  value: Maybe<string>;
+  Kind: SyntaxKind;
+  Start: number;
+  End: number;
+  Value: Maybe<string>;
 }
 
 // Matcher Types
 export interface TokenizerContext {
-  readonly cursor: CharacterCursor;
-  readonly tokens: Array<Token>,
-  readonly diagnostics: Array<Diagnostic>
+  readonly Cursor: CharacterCursor;
+  readonly Tokens: Array<Token>,
+  readonly Diagnostics: Array<Diagnostic>
 }
-
-export type Matcher = (Ctx: TokenizerContext) => void;

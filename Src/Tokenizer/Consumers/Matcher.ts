@@ -24,10 +24,10 @@ if (
 
    if (Ctx.cursor > Start) {
       Ctx.tokens.push({
-         kind: SyntaxKind.Text,
-         start: Start,
-         end: Ctx.cursor,
-         value: Ctx.source.slice(Start, Ctx.cursor),
+         Kind: SyntaxKind.Text,
+         Start: Start,
+         End: Ctx.cursor,
+         Value: Ctx.source.slice(Start, Ctx.cursor),
       });
    }
 };
@@ -38,10 +38,10 @@ export const LessThan: Matcher = (C) => {
 
    if (Current === Char.lessThan) {
       C.tokens.push({
-         kind: SyntaxKind.LessThan,
-         start: cursor,
-         end: cursor + 1,
-         value: "<",
+         Kind: SyntaxKind.LessThan,
+         Start: cursor,
+         End: cursor + 1,
+         Value: "<",
       });
 
       C.cursor++;
@@ -53,10 +53,10 @@ export const OpenBrace: Matcher = (C) => {
 
    if (source.charCodeAt(cursor) === Char.openBrace) {
       C.tokens.push({
-         kind: SyntaxKind.OpenBrace,
-         start: cursor,
-         end: cursor + 1,
-         value: "{",
+         Kind: SyntaxKind.OpenBrace,
+         Start: cursor,
+         End: cursor + 1,
+         Value: "{",
       });
 
       C.cursor++;
@@ -68,26 +68,26 @@ export const JsExpression: Matcher = (C) => {
    const { source, cursor, tokens } = C;
 
    const LastToken = tokens.at(-1)
-   if (LastToken?.kind !== SyntaxKind.OpenBrace) {
+   if (LastToken?.Kind !== SyntaxKind.OpenBrace) {
       return
    }
 
    const End = Skip.braceExpression(source, cursor - 1);
    if (End === -1) {
       tokens.push({
-         kind: SyntaxKind.JsExpression,
-         start: cursor,
-         end: source.length,
-         value: source.slice(cursor),
+         Kind: SyntaxKind.JsExpression,
+         Start: cursor,
+         End: source.length,
+         Value: source.slice(cursor),
       });
 
       C.cursor = source.length
    } else {
       tokens.push({
-         kind: SyntaxKind.JsExpression,
-         start: cursor,
-         end: End - 1,
-         value: source.slice(cursor, End - 1),
+         Kind: SyntaxKind.JsExpression,
+         Start: cursor,
+         End: End - 1,
+         Value: source.slice(cursor, End - 1),
       })
 
       C.cursor = End - 1
@@ -100,10 +100,10 @@ export const CloseBrace: Matcher = (C) => {
    if (source.charCodeAt(cursor) === Char.closeBrace) {
 
       tokens.push({
-         kind: SyntaxKind.CloseBrace,
-         start: cursor,
-         end: cursor + 1,
-         value: "}",
+         Kind: SyntaxKind.CloseBrace,
+         Start: cursor,
+         End: cursor + 1,
+         Value: "}",
       })
       C.cursor++
    }
@@ -116,10 +116,10 @@ export const Slash: Matcher = (C) => {
    if (source.charCodeAt(cursor) === Char.slash) {
 
       C.tokens.push({
-         kind: SyntaxKind.Slash,
-         start: cursor,
-         end: cursor + 1,
-         value: "/",
+         Kind: SyntaxKind.Slash,
+         Start: cursor,
+         End: cursor + 1,
+         Value: "/",
       });
 
       C.cursor++;
@@ -132,7 +132,7 @@ export const TagName: Matcher = (C) => {
 
    const Previous = tokens.at(-1);
    const BeforePrevious = tokens.at(-2);
-   const IsTagName = Previous?.kind === SyntaxKind.LessThan || (Previous?.kind === SyntaxKind.Slash && BeforePrevious?.kind === SyntaxKind.LessThan)
+   const IsTagName = Previous?.Kind === SyntaxKind.LessThan || (Previous?.Kind === SyntaxKind.Slash && BeforePrevious?.Kind === SyntaxKind.LessThan)
 
    if (!IsTagName) {
       return;
@@ -152,10 +152,10 @@ export const TagName: Matcher = (C) => {
 
    if (End > cursor) {
       C.tokens.push({
-         kind: SyntaxKind.TagName,
-         start: cursor,
-         end: End,
-         value: source.slice(cursor, End),
+         Kind: SyntaxKind.TagName,
+         Start: cursor,
+         End: End,
+         Value: source.slice(cursor, End),
       });
 
       C.cursor = End;

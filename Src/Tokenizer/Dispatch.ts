@@ -1,21 +1,20 @@
 import Char from "../Scanner/Char";
+import { ConsumeExpression } from "./Consumers/Expression";
+import { ConsumeMarkup } from "./Consumers/Markup";
+import { ConsumeText } from "./Consumers/Text";
 import { TokenizerContext } from "./Token";
 
 export function Dispatch(Ctx: TokenizerContext) {
-   const Code = Ctx.cursor.peek()
-
-
+   const Code = Ctx.Cursor.Peek()
    switch (Code) {
       case Char.lessThan:
-
-         break;
+         ConsumeMarkup(Ctx)
+         return;
       case Char.openBrace:
-         
-         break;
+         ConsumeExpression(Ctx)
+         return;
       default:
-         break;
+         ConsumeText(Ctx)
+         return;
    }
-
-
-
 }
