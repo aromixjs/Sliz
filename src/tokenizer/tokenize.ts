@@ -1,8 +1,6 @@
 import { CompilerContext } from "../pipeline/context";
 import char from "../scanner/char";
-import { consumeExpression } from "./consumers/expression";
-import { consumeMarkup } from "./consumers/markup";
-import { consumeText } from "./consumers/text";
+import { consume } from "./consumer";
 import { CharacterCursor } from "./cursor";
 import { TokenizerContext } from "./token";
 
@@ -10,13 +8,13 @@ function dispatch(ctx: TokenizerContext) {
   const code = ctx.cursor.peek();
   switch (code) {
     case char.lessThan:
-      consumeMarkup(ctx);
+      consume.markup(ctx);
       return;
     case char.openBrace:
-      consumeExpression(ctx);
+      consume.expression(ctx);
       return;
     default:
-      consumeText(ctx);
+      consume.text(ctx);
       return;
   }
 }
