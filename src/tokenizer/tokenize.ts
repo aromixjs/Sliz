@@ -2,7 +2,7 @@ import { CompilerContext } from "../pipeline/context";
 import char from "../scanner/char";
 import { consume } from "./consumer";
 import { CharacterCursor } from "./cursor";
-import { TokenizerContext } from "./token";
+import { SyntaxKind, TokenizerContext } from "./token";
 
 function dispatch(ctx: TokenizerContext) {
   const code = ctx.cursor.peek();
@@ -29,6 +29,13 @@ export function tokenize(context: CompilerContext) {
   while (!ctx.cursor.eof) {
     dispatch(ctx);
   }
+
+  ctx.tokens.push({
+    kind: SyntaxKind.EndOfFile,
+    start: ctx.cursor.source.length,
+    end: ctx.cursor.source.length,
+    value: undefined,
+  });
 
   return ctx.tokens;
 }
