@@ -8,6 +8,8 @@ export enum DiagnosticCode {
   UnterminatedExpression = "SLIZ001",
   UnterminatedDoctype = "SLIZ002",
   ExpectedTagName = "SLIZ003",
+  UnterminatedAttributeValue = 'SLIZ004',
+  ExpectedTagEnd = 'SLIZ005'
 }
 
 export interface Diagnostic {

@@ -1,24 +1,24 @@
+import { CharacterCursor } from "../tokenizer/cursor";
 import char from "./char";
-import is from "./is";
+import { is } from "./is";
+
 
 export namespace skip {
-  export function whiteSpace(source: string, cursor: number) {
-    while (cursor < source.length) {
-      const code = source.charCodeAt(cursor);
+  export function whiteSpace(cursor:CharacterCursor) {
+    while (!cursor.eof) {
+       const code = cursor.peek();
 
-      if (
-        code !== char.space &&
-        code !== char.tab &&
-        code !== char.lineFeed &&
-        code !== char.carriageReturn
-      ) {
-        break;
-      }
-
-      cursor++;
+    if (
+      code !== char.space &&
+      code !== char.tab &&
+      code !== char.lineFeed &&
+      code !== char.carriageReturn
+    ) {
+      break;
     }
 
-    return cursor;
+      cursor.advance();
+    }
   }
 
   export function lineComment(source: string, start: number) {

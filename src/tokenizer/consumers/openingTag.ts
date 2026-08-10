@@ -2,6 +2,8 @@ import { DiagnosticCode, DiagnosticSeverity } from "../../pipeline/context";
 import char from "../../scanner/char";
 import { is } from "../../scanner/is";
 import { SyntaxKind, TokenizerContext } from "../token";
+import { consumeAttributes } from "./attributes";
+import { consumeTagEnd } from "./tagEnd";
 
 export function consumeOpeningTag(ctx: TokenizerContext) {
   const start = ctx.cursor.clone();
@@ -50,4 +52,10 @@ export function consumeOpeningTag(ctx: TokenizerContext) {
     end: ctx.cursor.position,
     value: ctx.cursor.getChars(tagStart),
   });
+
+
+  consumeAttributes(ctx)
+  consumeTagEnd(ctx)
 }
+
+
