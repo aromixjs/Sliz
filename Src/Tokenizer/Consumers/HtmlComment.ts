@@ -1,37 +1,33 @@
-import Char from "../../Scanner/Char";
+import char from "../../Scanner/Char";
 import { SyntaxKind, TokenizerContext } from "../Token";
 
+export function consumeHtmlComment(ctx: TokenizerContext) {
+  const start = ctx.cursor.clone();
 
-export function ConsumeHtmlComment(Ctx: TokenizerContext) {
-   const Start = Ctx.Cursor.Clone();
+  ctx.cursor.advance(); // <
+  ctx.cursor.advance(); // !
+  ctx.cursor.advance(); // -
+  ctx.cursor.advance(); // -
 
-   Ctx.Cursor.Advance(); // <
-   Ctx.Cursor.Advance(); // !
-   Ctx.Cursor.Advance(); // -
-   Ctx.Cursor.Advance(); // -
+  while (!ctx.cursor.eof) {
+    if (
+      ctx.cursor.peek() === char.minus &&
+      ctx.cursor.peek(1) === char.minus &&
+      ctx.cursor.peek(2) === char.greaterThan
+    ) {
+      ctx.cursor.advance();
+      ctx.cursor.advance();
+      ctx.cursor.advance();
+      break;
+    }
 
-   while (!Ctx.Cursor.Eof) {
-      if (
-         Ctx.Cursor.Peek() === Char.Minus &&
-         Ctx.Cursor.Peek(1) === Char.Minus &&
-         Ctx.Cursor.Peek(2) === Char.GreaterThan
-      ) {
-         Ctx.Cursor.Advance();
-         Ctx.Cursor.Advance();
-         Ctx.Cursor.Advance();
-         break;
-      }
+    ctx.cursor.advance();
+  }
 
-      Ctx.Cursor.Advance();
-   }
-
-   Ctx.Tokens.push({
-      Kind: SyntaxKind.HtmlComment,
-      Start: Start.Position,
-      End: Ctx.Cursor.Position,
-      Value: Ctx.Cursor.GetChars(Start),
-   });
+  ctx.tokens.push({
+    kind: SyntaxKind.HtmlComment,
+    start: start.position,
+    end: ctx.cursor.position,
+    value: ctx.cursor.getChars(start),
+  });
 }
-
-
-

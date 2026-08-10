@@ -1,82 +1,79 @@
 import { TokenizerContext } from "../Tokenizer/Token";
-import Char from "./Char";
+import char from "./Char";
 
 export default {
-  Whitespace(Code: number) {
-    return Code === Char.Space || Code === Char.Tab || Code === Char.LineFeed ||
-      Code === Char.CarriageReturn;
+  whitespace(code: number) {
+    return code === char.space || code === char.tab || code === char.lineFeed ||
+      code === char.carriageReturn;
   },
 
-  Alpha(Code: number) {
-    return (Code >= Char.LowerA && Code <= Char.LowerZ) ||
-      (Code >= Char.UpperA && Code <= Char.UpperZ);
+  alpha(code: number) {
+    return (code >= char.lowerA && code <= char.lowerZ) ||
+      (code >= char.upperA && code <= char.upperZ);
   },
 
-  Quote(Code: number): boolean {
-    return Code === Char.SingleQuote || Code === Char.DoubleQuote ||
-      Code === Char.Backtick;
+  quote(code: number): boolean {
+    return code === char.singleQuote || code === char.doubleQuote ||
+      code === char.backtick;
   },
 
-  RegexStart(Source: string, Position: number) {
-    let LocalPosition = Position - 1;
-    while (LocalPosition >= 0) {
-      const Code = Source.charCodeAt(LocalPosition);
-      if (!this.Whitespace(Code)) {
-        switch (Code) {
-          case Char.Equals:
-          case Char.OpenParen:
-          case Char.OpenBracket:
-          case Char.OpenBrace:
-          case Char.Semicolon:
-          case Char.Comma:
-          case Char.ExclamationMark:
-          case Char.Ampersand:
-          case Char.Pipe:
-          case Char.QuestionMark:
-          case Char.Caret:
-          case Char.Plus:
-          case Char.Minus:
-          case Char.Percent:
-          case Char.Asterisk:
-          case Char.Colon:
+  regexStart(source: string, position: number) {
+    let localPosition = position - 1;
+    while (localPosition >= 0) {
+      const code = source.charCodeAt(localPosition);
+      if (!this.whitespace(code)) {
+        switch (code) {
+          case char.equals:
+          case char.openParen:
+          case char.openBracket:
+          case char.openBrace:
+          case char.semicolon:
+          case char.comma:
+          case char.exclamationMark:
+          case char.ampersand:
+          case char.pipe:
+          case char.questionMark:
+          case char.caret:
+          case char.plus:
+          case char.minus:
+          case char.percent:
+          case char.asterisk:
+          case char.colon:
             return true;
           default:
             return false;
         }
       }
-      LocalPosition--;
+      localPosition--;
     }
 
     return true;
   },
 
-  IdentifierStart(Code: number) {
-    return this.Alpha(Code) || Code === Char.Underscore || Code === Char.Dollar;
+  identifierStart(code: number) {
+    return this.alpha(code) || code === char.underscore || code === char.dollar;
   },
 
-  AttributeName(Code: number) {
-    return (Code > Char.Space && Code !== Char.Equals &&
-      Code !== Char.GreaterThan && Code !== Char.DoubleQuote &&
-      Code !== Char.SingleQuote && Code !== Char.Slash &&
-      Code !== Char.OpenBrace && Code !== Char.CloseBrace);
+  attributeName(code: number) {
+    return (code > char.space && code !== char.equals &&
+      code !== char.greaterThan && code !== char.doubleQuote &&
+      code !== char.singleQuote && code !== char.slash &&
+      code !== char.openBrace && code !== char.closeBrace);
   },
 
-
-  Doctype(Ctx: TokenizerContext) {
-    const Cursor = Ctx.Cursor;
+  doctype(ctx: TokenizerContext) {
+    const cursor = ctx.cursor;
 
     return (
-      Cursor.Peek() === Char.LessThan &&
-      Cursor.Peek(1) === Char.ExclamationMark &&
-      (Cursor.Peek(2) === Char.UpperD || Cursor.Peek(2) === Char.LowerD) &&
-      (Cursor.Peek(3) === Char.UpperO || Cursor.Peek(3) === Char.LowerO) &&
-      (Cursor.Peek(4) === Char.UpperC || Cursor.Peek(4) === Char.LowerC) &&
-      (Cursor.Peek(5) === Char.UpperT || Cursor.Peek(5) === Char.LowerT) &&
-      (Cursor.Peek(6) === Char.UpperY || Cursor.Peek(6) === Char.LowerY) &&
-      (Cursor.Peek(7) === Char.UpperP || Cursor.Peek(7) === Char.LowerP) &&
-      (Cursor.Peek(8) === Char.UpperE || Cursor.Peek(8) === Char.LowerE)
+      cursor.peek() === char.lessThan &&
+      cursor.peek(1) === char.exclamationMark &&
+      (cursor.peek(2) === char.upperD || cursor.peek(2) === char.lowerD) &&
+      (cursor.peek(3) === char.upperO || cursor.peek(3) === char.lowerO) &&
+      (cursor.peek(4) === char.upperC || cursor.peek(4) === char.lowerC) &&
+      (cursor.peek(5) === char.upperT || cursor.peek(5) === char.lowerT) &&
+      (cursor.peek(6) === char.upperY || cursor.peek(6) === char.lowerY) &&
+      (cursor.peek(7) === char.upperP || cursor.peek(7) === char.lowerP) &&
+      (cursor.peek(8) === char.upperE || cursor.peek(8) === char.lowerE)
     );
-  }
-
-
+  },
 };

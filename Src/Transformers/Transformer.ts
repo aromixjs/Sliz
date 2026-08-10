@@ -1,4 +1,4 @@
-import { Node } from "../Parser/Parse";
+import { Node } from "../Parser/Types";
 import {
   ExtractedExpression,
   PreProcessError,
@@ -30,52 +30,54 @@ export interface TransformResult {
   errors: PreProcessError[];
 }
 
-export function Transform(HtmlAst: Node[], Results: PreProcessResult[]) {
-  const Expressions = new Map<string, ExtractedExpression>();
-  const Errors: PreProcessError[] = [];
+export function transform(htmlAst: Node[], results: PreProcessResult[]) {
+  const expressions = new Map<string, ExtractedExpression>();
+  const errors: PreProcessError[] = [];
 
-  for (const Result of Results) {
-    for (const [Id, Expr] of Result.expressions) {
-      Expressions.set(Id, Expr);
+  for (const result of results) {
+    for (const [id, expr] of result.expressions) {
+      expressions.set(id, expr);
     }
-    Errors.push(...Result.errors);
+    errors.push(...result.errors);
   }
 
-  const Ast = HtmlAst.map((Node) => TransformNode(Node, Expressions, Errors));
-  return { ast: Ast, errors: Errors };
+  const ast = htmlAst.map((node) => transformNode(node, expressions, errors));
+  return { ast, errors };
 }
 
-function TransformNode(
-  Node: Node,
-  Expressions: Map<string, ExtractedExpression>,
-  Errors: PreProcessError[],
+function transformNode(
+  node: Node,
+  expressions: Map<string, ExtractedExpression>,
+  errors: PreProcessError[],
 ): TransformedNode {
-  console.log(Node);
-
-  if (Node.type === "text") {
-    return Node;
+  if (node.type === "text") {
+    return node;
   }
 
-  const { ".when": WhenId, ...Rest } = Node.attributes;
-  const Children = Node.children.map((C) =>
-    TransformNode(C, Expressions, Errors)
+  if (node.type !== "element") {
+    return { type: "text", value: "" };
+  }
+
+  const { ".when": whenId, ...rest } = node.attributes;
+  const children = node.children.map((c: Node) =>
+    transformNode(c, expressions, errors)
   );
 
-  let Current: TransformedNode = {
+  let current: TransformedNode = {
     type: "element",
-    tag: Node.tag,
-    attributes: Rest,
-    children: Children,
+    tag: node.tag,
+    attributes: rest,
+    children,
   };
 
-  if (WhenId) {
-    const Expr = Expressions.get(WhenId);
-    if (!Expr) {
-      Errors.push({ message: `Unresolved .when expression`, start: 0 });
+  if (whenId) {
+    const expr = expressions.get(whenId);
+    if (!expr) {
+      errors.push({ message: `Unresolved .when expression`, start: 0 });
     } else {
-      Current = { type: "conditional", expr: Expr.source, consequent: Current };
+      current = { type: "conditional", expr: expr.source, consequent: current };
     }
   }
 
-  return Current;
+  return current;
 }

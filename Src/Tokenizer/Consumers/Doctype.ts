@@ -1,44 +1,41 @@
 import { DiagnosticCode, DiagnosticSeverity } from "../../Pipeline/Context";
-import Char from "../../Scanner/Char";
+import char from "../../Scanner/Char";
 import { SyntaxKind, TokenizerContext } from "../Token";
 
-export function ConsumeDoctype(Ctx: TokenizerContext) {
-   const Start = Ctx.Cursor.Clone();
+export function consumeDoctype(ctx: TokenizerContext) {
+  const start = ctx.cursor.clone();
 
-   while (!Ctx.Cursor.Eof) {
-      if (Ctx.Cursor.Peek() === Char.GreaterThan) {
-         Ctx.Cursor.Advance();
+  while (!ctx.cursor.eof) {
+    if (ctx.cursor.peek() === char.greaterThan) {
+      ctx.cursor.advance();
 
-         Ctx.Tokens.push({
-            Kind: SyntaxKind.Doctype,
-            Start: Start.Position,
-            End: Ctx.Cursor.Position,
-            Value: Ctx.Cursor.GetChars(Start),
-         });
+      ctx.tokens.push({
+        kind: SyntaxKind.Doctype,
+        start: start.position,
+        end: ctx.cursor.position,
+        value: ctx.cursor.getChars(start),
+      });
 
+      break;
+    }
 
-         break;
-      }
+    ctx.cursor.advance();
+  }
 
-      Ctx.Cursor.Advance();
-   }
+  ctx.diagnostics.push({
+    start: start.position,
+    end: ctx.cursor.source.length,
+    message: "Unterminated doctype",
+    code: DiagnosticCode.UnterminatedDoctype,
+    severity: DiagnosticSeverity.Error,
+  });
 
+  ctx.tokens.push({
+    kind: SyntaxKind.Doctype,
+    start: start.position,
+    end: ctx.cursor.source.length,
+    value: ctx.cursor.getChars(start),
+  });
 
-   Ctx.Diagnostics.push({
-      Start: Start.Position,
-      End: Ctx.Cursor.Source.length,
-      Message: "Unterminated doctype",
-      Code: DiagnosticCode.UnterminatedDoctype,
-      Severity: DiagnosticSeverity.Error,
-   });
-   Ctx.Tokens.push({
-      Kind: SyntaxKind.Doctype,
-      Start: Start.Position,
-      End: Ctx.Cursor.Source.length,
-      Value: Ctx.Cursor.GetChars(Start),
-   });
-
-   Ctx.Cursor.AdvanceToEnd();
-
+  ctx.cursor.advanceToEnd();
 }
-

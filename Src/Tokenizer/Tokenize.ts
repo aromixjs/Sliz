@@ -1,18 +1,18 @@
 import { CompilerContext } from "../Pipeline/Context";
 import { CharacterCursor } from "./Cursor";
-import { Dispatch } from "./Dispatch";
+import { dispatch } from "./Dispatch";
 import { TokenizerContext } from "./Token";
 
-export function Tokenize(Context: CompilerContext) {
-  const Ctx: TokenizerContext = {
-    Cursor: new CharacterCursor(Context.Source),
-    Tokens: [],
-    Diagnostics: Context.Diagnostics,
+export function tokenize(context: CompilerContext) {
+  const ctx: TokenizerContext = {
+    cursor: new CharacterCursor(context.source),
+    tokens: [],
+    diagnostics: context.diagnostics,
   };
 
-  while (!Ctx.Cursor.Eof) {
-    Dispatch(Ctx);
+  while (!ctx.cursor.eof) {
+    dispatch(ctx);
   }
 
-  return Ctx.Tokens;
+  return ctx.tokens;
 }

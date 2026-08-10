@@ -1,176 +1,178 @@
-import Char from "./Char";
-import Is from "./Is";
+import char from "./Char";
+import is from "./Is";
 
 export default {
-  whiteSpace(Source: string, Cursor: number) {
-    while (Cursor < Source.length) {
-      const Code = Source.charCodeAt(Cursor);
+  whiteSpace(source: string, cursor: number) {
+    while (cursor < source.length) {
+      const code = source.charCodeAt(cursor);
 
       if (
-        Code !== Char.Space &&
-        Code !== Char.Tab &&
-        Code !== Char.LineFeed &&
-        Code !== Char.CarriageReturn
+        code !== char.space &&
+        code !== char.tab &&
+        code !== char.lineFeed &&
+        code !== char.carriageReturn
       ) {
         break;
       }
 
-      Cursor++;
+      cursor++;
     }
 
-    return Cursor;
+    return cursor;
   },
 
-  LineComment(Source: string, Start: number) {
-    let Position = Start + 2;
+  lineComment(source: string, start: number) {
+    let position = start + 2;
     while (
-      Position < Source.length && Source.charCodeAt(Position) !== Char.LineFeed
+      position < source.length && source.charCodeAt(position) !== char.lineFeed
     ) {
-      Position++;
+      position++;
     }
 
-    return Position;
+    return position;
   },
-  blockComment(Source: string, Start: number) {
-    let Position = Start + 2;
 
-    while (Position < Source.length) {
+  blockComment(source: string, start: number) {
+    let position = start + 2;
+
+    while (position < source.length) {
       if (
-        Source.charCodeAt(Position) === Char.Asterisk &&
-        Source.charCodeAt(Position + 1) === Char.Slash
+        source.charCodeAt(position) === char.asterisk &&
+        source.charCodeAt(position + 1) === char.slash
       ) {
-        return Position + 2;
+        return position + 2;
       }
 
-      Position++;
+      position++;
     }
 
-    return Position;
+    return position;
   },
-  string(Source: string, Start: number) {
-    const QuoteCode = Source.charCodeAt(Start);
-    let Position = Start + 1;
 
-    while (Position < Source.length) {
-      const Code = Source.charCodeAt(Position);
+  string(source: string, start: number) {
+    const quoteCode = source.charCodeAt(start);
+    let position = start + 1;
 
-      if (Code === Char.Backslash) {
-        Position += 2;
-      } else if (Code === QuoteCode) {
-        return Position + 1;
+    while (position < source.length) {
+      const code = source.charCodeAt(position);
+
+      if (code === char.backslash) {
+        position += 2;
+      } else if (code === quoteCode) {
+        return position + 1;
       } else {
-        Position++;
+        position++;
       }
     }
 
-    return Position;
+    return position;
   },
 
-  template(Source: string, Start: number) {
-    let Position = Start + 1;
+  template(source: string, start: number) {
+    let position = start + 1;
 
-    while (Position < Source.length) {
-      const Code = Source.charCodeAt(Position);
+    while (position < source.length) {
+      const code = source.charCodeAt(position);
 
-      if (Code === Char.Backslash) {
-        Position += 2;
+      if (code === char.backslash) {
+        position += 2;
         continue;
       }
 
-      if (Code === Char.Backtick) {
-        return Position + 1;
+      if (code === char.backtick) {
+        return position + 1;
       }
 
       if (
-        Code === Char.Dollar &&
-        Source.charCodeAt(Position + 1) === Char.OpenBrace
+        code === char.dollar &&
+        source.charCodeAt(position + 1) === char.openBrace
       ) {
-        Position = this.BraceExpression(Source, Position + 2);
+        position = this.braceExpression(source, position + 2);
         continue;
       }
 
-      Position++;
+      position++;
     }
 
-    return Position;
+    return position;
   },
 
-  BraceExpression(Source: string, Start: number) {
-    let Position = Start + 1;
-    let Depth = 1;
+  braceExpression(source: string, start: number) {
+    let position = start + 1;
+    let depth = 1;
 
-    while (Position < Source.length) {
-      const Code = Source.charCodeAt(Position);
+    while (position < source.length) {
+      const code = source.charCodeAt(position);
 
-      if (Code === Char.Backslash) {
-        Position += 2;
+      if (code === char.backslash) {
+        position += 2;
         continue;
       }
 
-      if (Code === Char.SingleQuote || Code === Char.DoubleQuote) {
-        Position = this.string(Source, Position);
+      if (code === char.singleQuote || code === char.doubleQuote) {
+        position = this.string(source, position);
         continue;
       }
 
-      if (Code === Char.Backtick) {
-        Position = this.template(Source, Position);
+      if (code === char.backtick) {
+        position = this.template(source, position);
         continue;
       }
 
-      if (Code === Char.OpenBrace) {
-        Depth++;
-      } else if (Code === Char.CloseBrace) {
-        Depth--;
+      if (code === char.openBrace) {
+        depth++;
+      } else if (code === char.closeBrace) {
+        depth--;
 
-        if (Depth === 0) {
-          return Position + 1;
+        if (depth === 0) {
+          return position + 1;
         }
       }
 
-      Position++;
+      position++;
     }
 
     return -1;
   },
 
-  Regex(Source: string, Start: number) {
-    let Position = Start + 1;
-    let InCharClass = false;
+  regex(source: string, start: number) {
+    let position = start + 1;
+    let inCharClass = false;
 
-    while (Position < Source.length) {
-      const Code = Source.charCodeAt(Position);
+    while (position < source.length) {
+      const code = source.charCodeAt(position);
 
-      if (Code === Char.Backslash) {
-        Position += 2;
+      if (code === char.backslash) {
+        position += 2;
         continue;
       }
 
-      if (Code === Char.LineFeed) {
-        return Start + 1;
+      if (code === char.lineFeed) {
+        return start + 1;
       }
 
-      if (Code === Char.OpenBracket) {
-        InCharClass = true;
+      if (code === char.openBracket) {
+        inCharClass = true;
       }
 
-      if (Code === Char.CloseBracket) {
-        InCharClass = false;
+      if (code === char.closeBracket) {
+        inCharClass = false;
       }
 
-      if (Code === Char.Slash && !InCharClass) {
-        Position++;
+      if (code === char.slash && !inCharClass) {
+        position++;
 
-        const Code = Source.charCodeAt(Position);
-        while (Position < Source.length && Is.Alpha(Code)) {
-          Position++;
+        const code = source.charCodeAt(position);
+        while (position < source.length && is.alpha(code)) {
+          position++;
         }
 
-        return Position;
+        return position;
       }
 
-      Position++;
+      position++;
     }
 
-    return Position;
+    return position;
   },
 };

@@ -1,5 +1,5 @@
 import { dir } from "console";
-import { tokenize } from "../src";
+import { tokenize } from "../Src/Index";
 
 const source = `
 <div class="min-h-screen bg-gray-50">
@@ -234,9 +234,9 @@ const source = `
 `;
 
 const result = tokenize({
-  Source: source,
-  FileName: "test.sliz",
-  Diagnostics: [],
+  source: source,
+  fileName: "test.sliz",
+  diagnostics: [],
 });
 
 dir(result, { depth: null });

@@ -1,56 +1,55 @@
 import { TransformedNode } from "./Transformers/Transformer";
 import { ExtractedExpression } from "./Transformers/Types";
 
-export function Generate(
-  Nodes: TransformedNode[],
-  Expressions: Map<string, ExtractedExpression>,
+export function generate(
+  nodes: TransformedNode[],
+  expressions: Map<string, ExtractedExpression>,
 ) {
-  let Output = "";
+  let output = "";
 
-  for (const Node of Nodes) {
-    Output += GenerateNode(Node, Expressions);
+  for (const node of nodes) {
+    output += generateNode(node, expressions);
   }
 
-  return Output;
+  return output;
 }
 
-function GenerateNode(
-  Node: TransformedNode,
-  Expressions: Map<string, ExtractedExpression>,
+function generateNode(
+  node: TransformedNode,
+  expressions: Map<string, ExtractedExpression>,
 ): string {
-  switch (Node.type) {
+  switch (node.type) {
     case "text":
-      return EmitAppend(resolveText(Node.value, Expressions));
-      break;
+      return emitAppend(resolveText(node.value, expressions));
     case "element": {
-      const Attrs = Object.entries(Node.attributes)
+      const attrs = Object.entries(node.attributes)
         .map(([k, v]) => ` ${k}="${v}"`)
         .join("");
-      const Open = EmitAppend(`<${Node.tag}${Attrs}>`);
-      const Children = Node.children.map((c) => GenerateNode(c, Expressions))
+      const open = emitAppend(`<${node.tag}${attrs}>`);
+      const children = node.children.map((c) => generateNode(c, expressions))
         .join("");
-      const Close = EmitAppend(`</${Node.tag}>`);
-      return Open + Children + Close;
+      const close = emitAppend(`</${node.tag}>`);
+      return open + children + close;
     }
     case "conditional":
-      return `if (${Node.expr}) {\n${
-        GenerateNode(Node.consequent, Expressions)
+      return `if (${node.expr}) {\n${
+        generateNode(node.consequent, expressions)
       }}\n`;
   }
 }
 
-function ResolveText(
-  Value: string,
-  Expressions: Map<string, ExtractedExpression>,
+function resolveText(
+  value: string,
+  expressions: Map<string, ExtractedExpression>,
 ): string {
-  const UuidPattern =
+  const uuidPattern =
     /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/g;
-  return Value.replace(UuidPattern, (Id) => {
-    const Expr = Expressions.get(Id);
-    return Expr ? `\${${Expr.source}}` : Id;
+  return value.replace(uuidPattern, (id) => {
+    const expr = expressions.get(id);
+    return expr ? `\${${expr.source}}` : id;
   });
 }
 
-function EmitAppend(Text: string): string {
-  return `html += \`${Text.replace(/`/g, "\\`")}\`;\n`;
+function emitAppend(text: string): string {
+  return `html += \`${text.replace(/`/g, "\\`")}\`;\n`;
 }

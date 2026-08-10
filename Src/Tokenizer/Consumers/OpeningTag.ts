@@ -1,57 +1,53 @@
 import { DiagnosticCode, DiagnosticSeverity } from "../../Pipeline/Context";
-import Char from "../../Scanner/Char";
-import Is from "../../Scanner/Is";
+import char from "../../Scanner/Char";
+import is from "../../Scanner/Is";
 import { SyntaxKind, TokenizerContext } from "../Token";
 
-export function ConsumeOpeningTag(Ctx: TokenizerContext) {
-   const Start = Ctx.Cursor.Clone();
+export function consumeOpeningTag(ctx: TokenizerContext) {
+  const start = ctx.cursor.clone();
 
-   // Consume <
-   Ctx.Cursor.Advance();
+  ctx.cursor.advance();
 
-   const TagStart = Ctx.Cursor.Clone();
+  const tagStart = ctx.cursor.clone();
 
-   while (!Ctx.Cursor.Eof) {
-      const Code = Ctx.Cursor.Peek();
+  while (!ctx.cursor.eof) {
+    const code = ctx.cursor.peek();
 
-      if (
-         Is.Whitespace(Code) ||
-         Code === Char.GreaterThan ||
-         Code === Char.Slash
-      ) {
-         break;
-      }
+    if (
+      is.whitespace(code) ||
+      code === char.greaterThan ||
+      code === char.slash
+    ) {
+      break;
+    }
 
-      Ctx.Cursor.Advance();
-   }
+    ctx.cursor.advance();
+  }
 
-   if (Ctx.Cursor.Position === TagStart.Position) {
-      Ctx.Diagnostics.push({
-         Start: Start.Position,
-         End: Ctx.Cursor.Position,
-         Message: "Expected tag name",
-         Code: DiagnosticCode.ExpectedTagName,
-         Severity: DiagnosticSeverity.Error,
-      });
+  if (ctx.cursor.position === tagStart.position) {
+    ctx.diagnostics.push({
+      start: start.position,
+      end: ctx.cursor.position,
+      message: "Expected tag name",
+      code: DiagnosticCode.ExpectedTagName,
+      severity: DiagnosticSeverity.Error,
+    });
 
-      Ctx.Cursor.AdvanceTo(Ctx.Cursor.Position + 1);
-      return;
-   }
+    ctx.cursor.advanceTo(ctx.cursor.position + 1);
+    return;
+  }
 
+  ctx.tokens.push({
+    kind: SyntaxKind.LessThan,
+    start: start.position,
+    end: tagStart.position,
+    value: "<",
+  });
 
-   Ctx.Tokens.push({
-      Kind: SyntaxKind.LessThan,
-      Start: Start.Position,
-      End: TagStart.Position,
-      Value: "<",
-   });
-
-
-   Ctx.Tokens.push({
-      Kind: SyntaxKind.TagName,
-      Start: TagStart.Position,
-      End: Ctx.Cursor.Position,
-      Value: Ctx.Cursor.GetChars(TagStart),
-   });
-
+  ctx.tokens.push({
+    kind: SyntaxKind.TagName,
+    start: tagStart.position,
+    end: ctx.cursor.position,
+    value: ctx.cursor.getChars(tagStart),
+  });
 }

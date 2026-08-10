@@ -1,72 +1,67 @@
-import Char from "../Scanner/Char";
-import Skip from "../Scanner/Skip";
+import { DiagnosticCode, DiagnosticSeverity } from "../Pipeline/Context";
+import char from "../Scanner/Char";
+import skip from "../Scanner/Skip";
 import {
   ExpressionPreprocessInput,
   ExpressionPreprocessOutput,
   ExtractedExpression,
 } from "./Types";
 
-export function Expressions(
-  Input: ExpressionPreprocessInput,
+export function expressions(
+  input: ExpressionPreprocessInput,
 ): ExpressionPreprocessOutput {
-  const { start, source, placeholderStart, diagnostics } = Input;
+  const { start, source, placeholderStart, diagnostics } = input;
 
-  const Expressions = new Map<number, ExtractedExpression>();
-  let Position = 0;
-  let Output = "";
-  let Placeholder = placeholderStart;
+  const expressions = new Map<number, ExtractedExpression>();
+  let position = 0;
+  let output = "";
+  let placeholder = placeholderStart;
 
-  while (Position < source.length) {
-    const Code = source.charCodeAt(Position);
+  while (position < source.length) {
+    const code = source.charCodeAt(position);
 
-    if (Code !== Char.openBrace) {
-      Output += source[Position];
-      Position++;
+    if (code !== char.openBrace) {
+      output += source[position];
+      position++;
       continue;
     }
 
-    const ExpressionStart = Position;
-    const ExpressionEnd = Skip.braceExpression(
-      source,
-      ExpressionStart + 1,
-    );
+    const expressionStart = position;
+    const expressionEnd = skip.braceExpression(source, expressionStart + 1);
 
-    const Unterminated =
-      source.charCodeAt(ExpressionEnd - 1) !== Char.closeBrace;
+    const unterminated =
+      source.charCodeAt(expressionEnd - 1) !== char.closeBrace;
 
-    if (Unterminated) {
+    if (unterminated) {
       diagnostics.push({
-        Severity: "error",
-        Code: "UNTERMINATED_EXPRESSION",
-        Message: "Unterminated { expression — missing closing '}'",
-        Start: start + ExpressionStart,
-        End: start + ExpressionEnd,
+        severity: DiagnosticSeverity.Error,
+        code: DiagnosticCode.UnterminatedExpression,
+        message: "Unterminated { expression — missing closing '}'",
+        start: start + expressionStart,
+        end: start + expressionEnd,
       });
 
-      Output += source[Position];
-      Position++;
+      output += source[position];
+      position++;
       continue;
     }
 
-    const Id = Placeholder++;
+    const id = placeholder++;
 
-    Expressions.set(Id, {
-      id: Id,
-      source: source.slice(
-        ExpressionStart + 1,
-        ExpressionEnd - 1,
-      ),
-      start: start + ExpressionStart,
-      end: start + ExpressionEnd,
+    expressions.set(id, {
+      id,
+      source: source.slice(expressionStart + 1, expressionEnd - 1),
+      start: start + expressionStart,
+      end: start + expressionEnd,
     });
 
-    Output += `__expr_${Id}__`;
-    Position = ExpressionEnd;
+    output += `__expr_${id}__`;
+    position = expressionEnd;
   }
 
   return {
-    content: Output,
-    expressions: Expressions,
-    nextPlaceholder: Placeholder,
+    content: output,
+    expressions,
+    nextPlaceholder: placeholder,
   };
 }

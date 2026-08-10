@@ -1,66 +1,54 @@
 export class CharacterCursor {
-  private Index = 0;
+  private index = 0;
 
   constructor(
-    readonly Source: string,
-    Index = 0,
+    readonly source: string,
+    index = 0,
   ) {
-    this.Index = Index;
+    this.index = index;
   }
 
-  /** Reset the cursor to the beginning. */
-  Reset(): void {
-    this.Index = 0;
+  reset(): void {
+    this.index = 0;
   }
 
-  /** Character at the current position. */
-  Peek(offset = 0): number {
-    return this.Source.charCodeAt(this.Index + offset);
+  peek(offset = 0): number {
+    return this.source.charCodeAt(this.index + offset);
   }
 
-  /** Advance by one character. */
-  Advance(): void {
-    this.Index++;
+  advance(): void {
+    this.index++;
   }
 
-
-  /** Advance the cursor to the end of the source. */
-  AdvanceToEnd(): void {
-    this.Index = this.Source.length;
+  advanceToEnd(): void {
+    this.index = this.source.length;
   }
 
-
-AdvanceTo(Position: number): void {
-  this.Index = Position;
-}
-
-  /** Current position. */
-  get Position(): number {
-    return this.Index;
+  advanceTo(position: number): void {
+    this.index = position;
   }
 
-  /** Number of characters remaining. */
-  get CharsLeft(): number {
-    return this.Source.length - this.Index;
+  get position(): number {
+    return this.index;
   }
 
-  /** Create a cursor at the current position. */
-  Clone(): CharacterCursor {
-    return new CharacterCursor(this.Source, this.Index);
+  get charsLeft(): number {
+    return this.source.length - this.index;
   }
 
-  /** Number of characters between two cursors. */
-  Diff(other: CharacterCursor): number {
-    return this.Index - other.Index;
+  clone(): CharacterCursor {
+    return new CharacterCursor(this.source, this.index);
   }
 
-  /** Source text between another cursor and this cursor. */
-  GetChars(start: CharacterCursor): string {
-    return this.Source.slice(start.Index, this.Index);
+  diff(other: CharacterCursor): number {
+    return this.index - other.index;
   }
 
-  /** Whether the cursor reached the end. */
-  get Eof(): boolean {
-    return this.Index >= this.Source.length;
+  getChars(start: CharacterCursor): string {
+    return this.source.slice(start.index, this.index);
+  }
+
+  get eof(): boolean {
+    return this.index >= this.source.length;
   }
 }

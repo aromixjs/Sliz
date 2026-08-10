@@ -1,27 +1,27 @@
-import Char from "../../Scanner/Char";
+import char from "../../Scanner/Char";
 import { SyntaxKind, TokenizerContext } from "../Token";
 
-export function ConsumeText(Ctx: TokenizerContext) {
-  const Start = Ctx.Cursor.Clone();
+export function consumeText(ctx: TokenizerContext) {
+  const start = ctx.cursor.clone();
 
-  while (!Ctx.Cursor.Eof) {
-    const Code = Ctx.Cursor.Peek();
-    
-    if (Code === Char.LessThan || Code === Char.OpenBrace) {
+  while (!ctx.cursor.eof) {
+    const code = ctx.cursor.peek();
+
+    if (code === char.lessThan || code === char.openBrace) {
       break;
     }
 
-    Ctx.Cursor.Advance();
+    ctx.cursor.advance();
   }
 
-  if (Ctx.Cursor.Position === Start.Position) {
+  if (ctx.cursor.position === start.position) {
     return;
   }
 
-  Ctx.Tokens.push({
-    Kind: SyntaxKind.Text,
-    Start: Start.Position,
-    End: Ctx.Cursor.Position,
-    Value: Ctx.Cursor.GetChars(Start),
+  ctx.tokens.push({
+    kind: SyntaxKind.Text,
+    start: start.position,
+    end: ctx.cursor.position,
+    value: ctx.cursor.getChars(start),
   });
 }

@@ -1,66 +1,62 @@
 import { DiagnosticCode, DiagnosticSeverity } from "../../Pipeline/Context";
-import Skip from "../../Scanner/Skip";
+import skip from "../../Scanner/Skip";
 import { SyntaxKind, TokenizerContext } from "../Token";
 
-export function ConsumeExpression(Ctx: TokenizerContext) {
-   const Start = Ctx.Cursor.Clone();
-   // Consume { 
-   Ctx.Cursor.Advance();
+export function consumeExpression(ctx: TokenizerContext) {
+  const start = ctx.cursor.clone();
+  ctx.cursor.advance();
 
-   const ExpressionStart = Ctx.Cursor.Clone()
-   const End = Skip.BraceExpression(Ctx.Cursor.Source, Start.Position)
+  const expressionStart = ctx.cursor.clone();
+  const end = skip.braceExpression(ctx.cursor.source, start.position);
 
-   if (End === -1) {
-      Ctx.Diagnostics.push({
-         Start: Start.Position,
-         End: Ctx.Cursor.Source.length,
-         Message: "Unterminated expression",
-         Code: DiagnosticCode.UnterminatedExpression,
-         Severity: DiagnosticSeverity.Error,
-      });
+  if (end === -1) {
+    ctx.diagnostics.push({
+      start: start.position,
+      end: ctx.cursor.source.length,
+      message: "Unterminated expression",
+      code: DiagnosticCode.UnterminatedExpression,
+      severity: DiagnosticSeverity.Error,
+    });
 
-      Ctx.Tokens.push({
-         Kind: SyntaxKind.OpenBrace,
-         Start: Start.Position,
-         End: Start.Position + 1,
-         Value: "{",
-      });
+    ctx.tokens.push({
+      kind: SyntaxKind.OpenBrace,
+      start: start.position,
+      end: start.position + 1,
+      value: "{",
+    });
 
-      Ctx.Tokens.push({
-         Kind: SyntaxKind.JsExpression,
-         Start: ExpressionStart.Position,
-         End: Ctx.Cursor.Source.length,
-         Value: Ctx.Cursor.GetChars(ExpressionStart),
-      });
+    ctx.tokens.push({
+      kind: SyntaxKind.JsExpression,
+      start: expressionStart.position,
+      end: ctx.cursor.source.length,
+      value: ctx.cursor.getChars(expressionStart),
+    });
 
-      Ctx.Cursor.AdvanceToEnd();
-      return;
-   }
+    ctx.cursor.advanceToEnd();
+    return;
+  }
 
+  const closeBrace = end - 1;
+  ctx.tokens.push({
+    kind: SyntaxKind.OpenBrace,
+    start: start.position,
+    end: start.position + 1,
+    value: "{",
+  });
 
-   const CloseBrace = End - 1;
-   Ctx.Tokens.push({
-      Kind: SyntaxKind.OpenBrace,
-      Start: Start.Position,
-      End: Start.Position + 1,
-      Value: "{",
-   });
+  ctx.tokens.push({
+    kind: SyntaxKind.JsExpression,
+    start: expressionStart.position,
+    end: closeBrace,
+    value: ctx.cursor.source.slice(expressionStart.position, closeBrace),
+  });
 
-   Ctx.Tokens.push({
-      Kind: SyntaxKind.JsExpression,
-      Start: ExpressionStart.Position,
-      End: CloseBrace,
-      Value: Ctx.Cursor.Source.slice(
-         ExpressionStart.Position,
-         CloseBrace,
-      ),
-   });
-   Ctx.Tokens.push({
-      Kind: SyntaxKind.CloseBrace,
-      Start: CloseBrace,
-      End,
-      Value: "}",
-   });
-   Ctx.Cursor.AdvanceTo(End);
+  ctx.tokens.push({
+    kind: SyntaxKind.CloseBrace,
+    start: closeBrace,
+    end,
+    value: "}",
+  });
+
+  ctx.cursor.advanceTo(end);
 }
-

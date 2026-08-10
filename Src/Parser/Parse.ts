@@ -1,43 +1,43 @@
 import { Parser } from "htmlparser2";
 import { ElementNode, HtmlAstParser, Node } from "./Types";
 
-export function Parse(): HtmlAstParser {
-  let Stack: ElementNode[] = [];
-  let Root: Node[] = [];
+export function parse(): HtmlAstParser {
+  let stack: ElementNode[] = [];
+  let root: Node[] = [];
 
-  const PushNode = (Node: Node) => {
-    const Parent = Stack.at(-1);
-    if (Parent) {
-      Parent.children.push(Node);
+  const pushNode = (node: Node) => {
+    const parent = stack.at(-1);
+    if (parent) {
+      parent.children.push(node);
     } else {
-      Root.push(Node);
+      root.push(node);
     }
   };
 
-  const HtmlParser = new Parser({
-    onopentag: (Name, Attributes) => {
-      const Node: ElementNode = {
+  const htmlParser = new Parser({
+    onopentag: (name, attributes) => {
+      const node: ElementNode = {
         type: "element",
-        tag: Name,
-        attributes: Attributes,
+        tag: name,
+        attributes,
         children: [],
       };
-      PushNode(Node);
-      Stack.push(Node);
+      pushNode(node);
+      stack.push(node);
     },
     onclosetag: () => {
-      Stack.pop();
+      stack.pop();
     },
-    ontext: (Text) => {
-      if (Text.length === 0) return;
-      PushNode({ type: "text", value: Text });
+    ontext: (text) => {
+      if (text.length === 0) return;
+      pushNode({ type: "text", value: text });
     },
-    oncomment(Data) {
-      PushNode({ type: "comment", value: Data });
+    oncomment(data) {
+      pushNode({ type: "comment", value: data });
     },
-    onprocessinginstruction(Name, Data) {
-      if (Name.toLowerCase() === "!doctype") {
-        PushNode({ type: "doctype", value: Data });
+    onprocessinginstruction(name, data) {
+      if (name.toLowerCase() === "!doctype") {
+        pushNode({ type: "doctype", value: data });
       }
     },
   }, {
@@ -48,17 +48,17 @@ export function Parse(): HtmlAstParser {
   });
 
   return {
-    write(Chunk: string) {
-      HtmlParser.write(Chunk);
+    write(chunk: string) {
+      htmlParser.write(chunk);
     },
     end(): Node[] {
-      HtmlParser.end();
-      return Root;
+      htmlParser.end();
+      return root;
     },
     reset() {
-      Stack = [];
-      Root = [];
-      HtmlParser.reset();
+      stack = [];
+      root = [];
+      htmlParser.reset();
     },
   };
 }

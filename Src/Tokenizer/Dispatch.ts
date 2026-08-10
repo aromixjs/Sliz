@@ -1,20 +1,20 @@
 import Char from "../Scanner/Char";
-import { ConsumeExpression } from "./Consumers/Expression";
-import { ConsumeMarkup } from "./Consumers/Markup";
-import { ConsumeText } from "./Consumers/Text";
+import { consumeExpression } from "./Consumers/Expression";
+import { consumeMarkup } from "./Consumers/Markup";
+import { consumeText } from "./Consumers/Text";
 import { TokenizerContext } from "./Token";
 
-export function Dispatch(Ctx: TokenizerContext) {
-  const Code = Ctx.Cursor.Peek();
-  switch (Code) {
-    case Char.LessThan:
-      ConsumeMarkup(Ctx);
+export function dispatch(ctx: TokenizerContext) {
+  const code = ctx.cursor.peek();
+  switch (code) {
+    case Char.lessThan:
+      consumeMarkup(ctx);
       return;
-    case Char.OpenBrace:
-      ConsumeExpression(Ctx);
+    case Char.openBrace:
+      consumeExpression(ctx);
       return;
     default:
-      ConsumeText(Ctx);
+      consumeText(ctx);
       return;
   }
 }
