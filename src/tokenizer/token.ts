@@ -23,6 +23,7 @@ export enum SyntaxKind {
   HtmlComment = "HtmlComment",
   Unknown = "Unknown",
   EndOfFile = "EndOfFile",
+  Script = "Script"
 }
 
 export interface Token {

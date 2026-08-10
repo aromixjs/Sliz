@@ -1,101 +1,145 @@
-import { CharacterCursor } from "../tokenizer/cursor";
+import { TokenizerContext } from "../tokenizer/token";
 import char from "./char";
 import { is } from "./is";
 
 
 export namespace skip {
-  export function whiteSpace(cursor:CharacterCursor) {
-    while (!cursor.eof) {
-       const code = cursor.peek();
+   export function whiteSpace(ctx: TokenizerContext) {
+      const { cursor } = ctx;
 
-    if (
-      code !== char.space &&
-      code !== char.tab &&
-      code !== char.lineFeed &&
-      code !== char.carriageReturn
-    ) {
-      break;
-    }
+      while (!cursor.eof) {
+         const code = cursor.peek();
 
+         if (
+            code !== char.space &&
+            code !== char.tab &&
+            code !== char.lineFeed &&
+            code !== char.carriageReturn
+         ) {
+            break;
+         }
+
+         cursor.advance();
+      }
+   }
+
+   export function lineComment(ctx: TokenizerContext) {
+      const { cursor } = ctx;
+
+      // Consume //
       cursor.advance();
-    }
-  }
+      cursor.advance();
 
-  export function lineComment(source: string, start: number) {
-    let position = start + 2;
-    while (
-      position < source.length && source.charCodeAt(position) !== char.lineFeed
-    ) {
-      position++;
-    }
+      while (!cursor.eof) {
+         if (cursor.peek() === char.lineFeed) {
+            break;
+         }
 
-    return position;
-  }
+         cursor.advance();
+      }
+   }
 
-  export function blockComment(source: string, start: number) {
-    let position = start + 2;
+   export function blockComment(ctx: TokenizerContext) {
+      const { cursor } = ctx;
 
-    while (position < source.length) {
-      if (
-        source.charCodeAt(position) === char.asterisk &&
-        source.charCodeAt(position + 1) === char.slash
-      ) {
-        return position + 2;
+      // Consume /*
+      cursor.advance();
+      cursor.advance();
+
+      while (!cursor.eof) {
+         if (
+            cursor.peek() === char.asterisk &&
+            cursor.peek(1) === char.slash
+         ) {
+            cursor.advance();
+            cursor.advance();
+            return true;
+         }
+
+         cursor.advance();
       }
 
-      position++;
-    }
+      return false;
+   }
 
-    return position;
-  }
+   export function string(ctx: TokenizerContext) {
+      const { cursor } = ctx;
+      const quote = cursor.peek();
 
-  export function string(source: string, start: number) {
-    const quoteCode = source.charCodeAt(start);
-    let position = start + 1;
+      // Consume opening quote
+      cursor.advance();
 
-    while (position < source.length) {
-      const code = source.charCodeAt(position);
+      while (!cursor.eof) {
+         const code = cursor.peek();
 
-      if (code === char.backslash) {
-        position += 2;
-      } else if (code === quoteCode) {
-        return position + 1;
-      } else {
-        position++;
-      }
-    }
+         if (code === char.backslash) {
+            cursor.advance();
 
-    return position;
-  }
+            if (!cursor.eof) {
+               cursor.advance();
+            }
 
-  export function template(source: string, start: number) {
-    let position = start + 1;
+            continue;
+         }
 
-    while (position < source.length) {
-      const code = source.charCodeAt(position);
+         if (code === quote) {
+            cursor.advance();
+            return true;
+         }
 
-      if (code === char.backslash) {
-        position += 2;
-        continue;
+         cursor.advance();
       }
 
-      if (code === char.backtick) {
-        return position + 1;
+      return false;
+   }
+
+
+
+
+
+   export function template(ctx: TokenizerContext) {
+      const { cursor } = ctx;
+
+      // Consume opening `
+      cursor.advance();
+
+      while (!cursor.eof) {
+         const code = cursor.peek();
+
+         if (code === char.backslash) {
+            cursor.advance();
+
+            if (!cursor.eof) {
+               cursor.advance();
+            }
+
+            continue;
+         }
+
+         if (code === char.backtick) {
+            cursor.advance();
+            return true;
+         }
+
+         if (
+            code === char.dollar &&
+            cursor.peek(1) === char.openBrace
+         ) {
+            cursor.advance();
+            cursor.advance();
+
+            if (!skip.braceExpression(ctx)) {
+               return false;
+            }
+
+            continue;
+         }
+
+         cursor.advance();
       }
 
-      if (
-        code === char.dollar &&
-        source.charCodeAt(position + 1) === char.openBrace
-      ) {
-        position = skip.braceExpression(source, position + 2);
-        continue;
-      }
-
-      position++;
-    }
-
-    return position;
-  }
+      return false;
+   }
 
 
 
@@ -114,82 +158,117 @@ export namespace skip {
  * @param start The character index where the opening `{` is located.
  * @returns The character index immediately after the closing `}`, or `-1` if unmatched.
  */
-  export function braceExpression(source: string, start: number) {
-    let position = start + 1;
-    let depth = 1;
+   export function braceExpression(ctx: TokenizerContext) {
+      const { cursor } = ctx;
+      let depth = 1;
 
-    while (position < source.length) {
-      const code = source.charCodeAt(position);
+      // Cursor is expected to be immediately after {
+      while (!cursor.eof) {
+         const code = cursor.peek();
 
-      if (code === char.backslash) {
-        position += 2;
-        continue;
+         if (code === char.backslash) {
+            cursor.advance();
+
+            if (!cursor.eof) {
+               cursor.advance();
+            }
+
+            continue;
+         }
+
+         if (
+            code === char.singleQuote ||
+            code === char.doubleQuote
+         ) {
+            if (!string(ctx)) {
+               return false;
+            }
+
+            continue;
+         }
+
+         if (code === char.backtick) {
+            if (!template(ctx)) {
+               return false;
+            }
+
+            continue;
+         }
+
+         if (code === char.openBrace) {
+            depth++;
+            cursor.advance();
+            continue;
+         }
+
+         if (code === char.closeBrace) {
+            depth--;
+            cursor.advance();
+
+            if (depth === 0) {
+               return true;
+            }
+
+            continue;
+         }
+
+         cursor.advance();
       }
 
-      if (code === char.singleQuote || code === char.doubleQuote) {
-        position = skip.string(source, position);
-        continue;
+      return false;
+   }
+
+
+
+   export function regex(ctx: TokenizerContext) {
+      const { cursor } = ctx;
+      let inCharClass = false;
+
+      // Consume opening /
+      cursor.advance();
+
+      while (!cursor.eof) {
+         const code = cursor.peek();
+
+         if (code === char.backslash) {
+            cursor.advance();
+
+            if (!cursor.eof) {
+               cursor.advance();
+            }
+
+            continue;
+         }
+
+         if (code === char.lineFeed) {
+            return false;
+         }
+
+         if (code === char.openBracket) {
+            inCharClass = true;
+            cursor.advance();
+            continue;
+         }
+
+         if (code === char.closeBracket) {
+            inCharClass = false;
+            cursor.advance();
+            continue;
+         }
+
+         if (code === char.slash && !inCharClass) {
+            cursor.advance();
+
+            while (!cursor.eof && is.alpha(cursor.peek())) {
+               cursor.advance();
+            }
+
+            return true;
+         }
+
+         cursor.advance();
       }
 
-      if (code === char.backtick) {
-        position = skip.template(source, position);
-        continue;
-      }
-
-      if (code === char.openBrace) {
-        depth++;
-      } else if (code === char.closeBrace) {
-        depth--;
-
-        if (depth === 0) {
-          return position + 1;
-        }
-      }
-
-      position++;
-    }
-
-    return -1;
-  }
-
-  export function regex(source: string, start: number) {
-    let position = start + 1;
-    let inCharClass = false;
-
-    while (position < source.length) {
-      const code = source.charCodeAt(position);
-
-      if (code === char.backslash) {
-        position += 2;
-        continue;
-      }
-
-      if (code === char.lineFeed) {
-        return start + 1;
-      }
-
-      if (code === char.openBracket) {
-        inCharClass = true;
-      }
-
-      if (code === char.closeBracket) {
-        inCharClass = false;
-      }
-
-      if (code === char.slash && !inCharClass) {
-        position++;
-
-        const code = source.charCodeAt(position);
-        while (position < source.length && is.alpha(code)) {
-          position++;
-        }
-
-        return position;
-      }
-
-      position++;
-    }
-
-    return position;
-  }
+      return false;
+   }
 };

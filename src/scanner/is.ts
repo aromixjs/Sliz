@@ -85,4 +85,77 @@ export namespace is {
       (cursor.peek(8) === char.upperE || cursor.peek(8) === char.lowerE)
     );
   }
+
+export function scriptClosingTag(ctx: TokenizerContext) {
+   const cursor = ctx.cursor;
+
+   if (
+      cursor.peek() !== char.lessThan ||
+      cursor.peek(1) !== char.slash
+   ) {
+      return false;
+   }
+
+   const s = cursor.peek(2);
+   const c = cursor.peek(3);
+   const r = cursor.peek(4);
+   const i = cursor.peek(5);
+   const p = cursor.peek(6);
+   const t = cursor.peek(7);
+
+   const isS = s === char.lowerS || s === char.upperS;
+   const isC = c === char.lowerC || c === char.upperC;
+   const isR = r === char.lowerR || r === char.upperR;
+   const isI = i === char.lowerI || i === char.upperI;
+   const isP = p === char.lowerP || p === char.upperP;
+   const isT = t === char.lowerT || t === char.upperT;
+
+   return (
+      isS &&
+      isC &&
+      isR &&
+      isI &&
+      isP &&
+      isT &&
+      (
+         is.whitespace(cursor.peek(8)) ||
+         cursor.peek(8) === char.greaterThan
+      )
+   );
+}
+
+
+
+export function styleClosingTag(ctx: TokenizerContext) {
+   const cursor = ctx.cursor;
+
+   if (
+      cursor.peek() !== char.lessThan ||
+      cursor.peek(1) !== char.slash
+   ) {
+      return false;
+   }
+
+   const s = cursor.peek(2);
+   const t = cursor.peek(3);
+   const y = cursor.peek(4);
+   const l = cursor.peek(5);
+   const e = cursor.peek(6);
+
+   return (
+      (s === char.lowerS || s === char.upperS) &&
+      (t === char.lowerT || t === char.upperT) &&
+      (y === char.lowerY || y === char.upperY) &&
+      (l === char.lowerL || l === char.upperL) &&
+      (e === char.lowerE || e === char.upperE) &&
+      (
+         is.whitespace(cursor.peek(7)) ||
+         cursor.peek(7) === char.greaterThan
+      )
+   );
+}
+
+
+
+
 };
