@@ -1,8 +1,8 @@
 import char from "./char";
 import is from "./is";
 
-export default {
-  whiteSpace(source: string, cursor: number) {
+export namespace skip {
+  export function whiteSpace(source: string, cursor: number) {
     while (cursor < source.length) {
       const code = source.charCodeAt(cursor);
 
@@ -19,9 +19,9 @@ export default {
     }
 
     return cursor;
-  },
+  }
 
-  lineComment(source: string, start: number) {
+  export function lineComment(source: string, start: number) {
     let position = start + 2;
     while (
       position < source.length && source.charCodeAt(position) !== char.lineFeed
@@ -30,9 +30,9 @@ export default {
     }
 
     return position;
-  },
+  }
 
-  blockComment(source: string, start: number) {
+  export function blockComment(source: string, start: number) {
     let position = start + 2;
 
     while (position < source.length) {
@@ -47,9 +47,9 @@ export default {
     }
 
     return position;
-  },
+  }
 
-  string(source: string, start: number) {
+  export function string(source: string, start: number) {
     const quoteCode = source.charCodeAt(start);
     let position = start + 1;
 
@@ -66,9 +66,9 @@ export default {
     }
 
     return position;
-  },
+  }
 
-  template(source: string, start: number) {
+  export function template(source: string, start: number) {
     let position = start + 1;
 
     while (position < source.length) {
@@ -87,7 +87,7 @@ export default {
         code === char.dollar &&
         source.charCodeAt(position + 1) === char.openBrace
       ) {
-        position = this.braceExpression(source, position + 2);
+        position = skip.braceExpression(source, position + 2);
         continue;
       }
 
@@ -95,9 +95,26 @@ export default {
     }
 
     return position;
-  },
+  }
 
-  braceExpression(source: string, start: number) {
+
+
+
+/**
+ * Finds where a `{ ... }` expression ends, safely skipping over inner braces, strings, and escape characters.
+ * 
+ * **How it works:**
+ * 1. Starts inside the outer `{` and tracks "depth" (starts at 1).
+ * 2. Ignores escaped characters (e.g., `\{`) so they don't count as real braces.
+ * 3. Skips over strings `'...'`, `"..."`, and template literals `` `...` `` so braces inside text are ignored.
+ * 4. Adds to `depth` for every `{` and subtracts for every `}`.
+ * 5. Returns the index after the matching `}` when `depth` hits 0 (or `-1` if it never closes).
+ * 
+ * @param source The full source code string being parsed.
+ * @param start The character index where the opening `{` is located.
+ * @returns The character index immediately after the closing `}`, or `-1` if unmatched.
+ */
+  export function braceExpression(source: string, start: number) {
     let position = start + 1;
     let depth = 1;
 
@@ -110,12 +127,12 @@ export default {
       }
 
       if (code === char.singleQuote || code === char.doubleQuote) {
-        position = this.string(source, position);
+        position = skip.string(source, position);
         continue;
       }
 
       if (code === char.backtick) {
-        position = this.template(source, position);
+        position = skip.template(source, position);
         continue;
       }
 
@@ -133,9 +150,9 @@ export default {
     }
 
     return -1;
-  },
+  }
 
-  regex(source: string, start: number) {
+  export function regex(source: string, start: number) {
     let position = start + 1;
     let inCharClass = false;
 
@@ -174,5 +191,5 @@ export default {
     }
 
     return position;
-  },
+  }
 };

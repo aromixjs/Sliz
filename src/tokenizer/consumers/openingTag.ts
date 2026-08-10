@@ -1,6 +1,6 @@
 import { DiagnosticCode, DiagnosticSeverity } from "../../pipeline/context";
 import char from "../../scanner/char";
-import is from "../../scanner/is";
+import { is } from "../../scanner/is";
 import { SyntaxKind, TokenizerContext } from "../token";
 
 export function consumeOpeningTag(ctx: TokenizerContext) {

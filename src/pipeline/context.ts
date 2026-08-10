@@ -1,9 +1,3 @@
-export interface CompilerContext {
-  source: string;
-  fileName: string;
-  diagnostics: Diagnostic[];
-}
-
 export enum DiagnosticSeverity {
   Error = "Error",
   Warning = "Warning",
@@ -11,9 +5,9 @@ export enum DiagnosticSeverity {
 }
 
 export enum DiagnosticCode {
-  UnterminatedExpression = 'SLIZ001',
-  UnterminatedDoctype = 'SLIZ002',
-  ExpectedTagName = 'SLIZ003',
+  UnterminatedExpression = "SLIZ001",
+  UnterminatedDoctype = "SLIZ002",
+  ExpectedTagName = "SLIZ003",
 }
 
 export interface Diagnostic {
@@ -22,4 +16,9 @@ export interface Diagnostic {
   message: string;
   start: number;
   end: number;
+}
+export interface CompilerContext {
+  source: string;
+  fileName: string;
+  diagnostics: Diagnostic[];
 }

@@ -1,6 +1,6 @@
 import char from "../../scanner/char";
-import is from "../../scanner/is";
-import skip from "../../scanner/skip";
+import { is } from "../../scanner/is";
+
 import { SyntaxKind, TokenizerContext } from "../token";
 import { consumeExpression } from "./expression";
 

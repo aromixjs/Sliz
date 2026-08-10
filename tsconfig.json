@@ -22,7 +22,7 @@
     ],
     "paths": {}
   },
-    "include": [
+  "include": [
     "src/**/*.ts",
     "src/**/*.d.ts",
     "playground/**/*.ts",

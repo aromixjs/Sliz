@@ -8,9 +8,9 @@ export class CharacterCursor {
     this.index = index;
   }
 
-  reset(): void {
-    this.index = 0;
-  }
+  // reset(): void {
+  //   this.index = 0;
+  // }
 
   peek(offset = 0): number {
     return this.source.charCodeAt(this.index + offset);
@@ -32,17 +32,17 @@ export class CharacterCursor {
     return this.index;
   }
 
-  get charsLeft(): number {
-    return this.source.length - this.index;
-  }
+  // get charsLeft(): number {
+  //   return this.source.length - this.index;
+  // }
 
   clone(): CharacterCursor {
     return new CharacterCursor(this.source, this.index);
   }
 
-  diff(other: CharacterCursor): number {
-    return this.index - other.index;
-  }
+  // diff(other: CharacterCursor): number {
+  //   return this.index - other.index;
+  // }
 
   getChars(start: CharacterCursor): string {
     return this.source.slice(start.index, this.index);

@@ -1,27 +1,27 @@
 import { TokenizerContext } from "../tokenizer/token";
 import char from "./char";
 
-export default {
-  whitespace(code: number) {
+export namespace is {
+  export function whitespace(code: number) {
     return code === char.space || code === char.tab || code === char.lineFeed ||
       code === char.carriageReturn;
-  },
+  }
 
-  alpha(code: number) {
+  export function alpha(code: number) {
     return (code >= char.lowerA && code <= char.lowerZ) ||
       (code >= char.upperA && code <= char.upperZ);
-  },
+  }
 
-  quote(code: number): boolean {
+  export function quote(code: number): boolean {
     return code === char.singleQuote || code === char.doubleQuote ||
       code === char.backtick;
-  },
+  }
 
-  regexStart(source: string, position: number) {
+  export function regexStart(source: string, position: number) {
     let localPosition = position - 1;
     while (localPosition >= 0) {
       const code = source.charCodeAt(localPosition);
-      if (!this.whitespace(code)) {
+      if (!is.whitespace(code)) {
         switch (code) {
           case char.equals:
           case char.openParen:
@@ -48,20 +48,29 @@ export default {
     }
 
     return true;
-  },
+  }
 
-  identifierStart(code: number) {
-    return this.alpha(code) || code === char.underscore || code === char.dollar;
-  },
+  export function identifierStart(code: number) {
+    return is.alpha(code) || code === char.underscore || code === char.dollar;
+  }
 
-  attributeName(code: number) {
+  export function attributeName(code: number) {
     return (code > char.space && code !== char.equals &&
       code !== char.greaterThan && code !== char.doubleQuote &&
       code !== char.singleQuote && code !== char.slash &&
       code !== char.openBrace && code !== char.closeBrace);
-  },
+  }
 
-  doctype(ctx: TokenizerContext) {
+  /**
+   * Checks whether the cursor is currently standing at the start of a `<!DOCTYPE` or `<!doctype` tag.
+   * 
+   * **How it works:**
+   * Performs a case-insensitive check across 9 characters to match `<!DOCTYPE` or `<!doctype`.
+   * 
+   * @param ctx The tokenizer context containing the cursor.
+   * @returns `true` if the upcoming characters match `<!doctype`, otherwise `false`.
+   */
+  export function doctype(ctx: TokenizerContext) {
     const cursor = ctx.cursor;
 
     return (
@@ -75,5 +84,5 @@ export default {
       (cursor.peek(7) === char.upperP || cursor.peek(7) === char.lowerP) &&
       (cursor.peek(8) === char.upperE || cursor.peek(8) === char.lowerE)
     );
-  },
+  }
 };
