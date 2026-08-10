@@ -289,9 +289,9 @@ export namespace consume {
       ctx.cursor.advance();
 
       const expressionStart = ctx.cursor.clone();
-      const end = skip.braceExpression(ctx);
+      skip.braceExpression(ctx);
 
-      if (end === -1) {
+      if (ctx.cursor.eof) {
          ctx.diagnostics.push({
             start: start.position,
             end: ctx.cursor.source.length,
@@ -318,7 +318,8 @@ export namespace consume {
          return;
       }
 
-      const closeBrace = end - 1;
+      const closeBrace = ctx.cursor.position - 1;
+
       ctx.tokens.push({
          kind: SyntaxKind.OpenBrace,
          start: start.position,
@@ -336,11 +337,9 @@ export namespace consume {
       ctx.tokens.push({
          kind: SyntaxKind.CloseBrace,
          start: closeBrace,
-         end,
+         end: ctx.cursor.position,
          value: "}",
       });
-
-      ctx.cursor.advanceTo(end);
    }
 
    /**
