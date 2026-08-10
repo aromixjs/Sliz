@@ -152,6 +152,13 @@ export namespace skip {
    /**
     * Skips a `{ ... }` expression, safely skipping over inner braces, strings, and escape characters.
     *
+    * **How it works:**
+    * 1. Tracks brace depth to handle nested `{ }`.
+    * 2. Skips over strings and template literals so braces inside them are ignored.
+    * 3. Skips over escaped characters (e.g., `\}`) so they don't count.
+    * 4. Stops at `</` (closing tag pattern) — expressions shouldn't contain closing tags.
+    * 5. Returns when depth reaches 0 (closing `}` found), at `</`, or at EOF.
+    *
     * @param ctx The tokenizer context. Cursor must be positioned immediately after the opening `{`.
     */
    export function braceExpression(ctx: TokenizerContext) {
@@ -177,6 +184,10 @@ export namespace skip {
          if (code === char.backtick) {
             template(ctx);
             continue;
+         }
+
+         if (code === char.lessThan && cursor.peek(1) === char.slash) {
+            return;
          }
 
          if (code === char.openBrace) {

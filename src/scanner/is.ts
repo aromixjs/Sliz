@@ -146,7 +146,7 @@ export function styleClosingTag(ctx: TokenizerContext) {
       (s === char.lowerS || s === char.upperS) &&
       (t === char.lowerT || t === char.upperT) &&
       (y === char.lowerY || y === char.upperY) &&
-      (l === char.lowerL || l === char.upperL) &&
+      (l === char.lowerL || s === char.upperL) &&
       (e === char.lowerE || e === char.upperE) &&
       (
          is.whitespace(cursor.peek(7)) ||
@@ -155,6 +155,38 @@ export function styleClosingTag(ctx: TokenizerContext) {
    );
 }
 
+  /**
+   * Checks whether the cursor is at an opening `<!--` sequence.
+   *
+   * @param ctx The tokenizer context containing the cursor.
+   * @returns `true` if the next four characters are `<!--`.
+   */
+  export function commentOpen(ctx: TokenizerContext) {
+    const cursor = ctx.cursor;
+
+    return (
+      cursor.peek() === char.lessThan &&
+      cursor.peek(1) === char.exclamationMark &&
+      cursor.peek(2) === char.minus &&
+      cursor.peek(3) === char.minus
+    );
+  }
+
+  /**
+   * Checks whether the cursor is at a closing `-->` sequence.
+   *
+   * @param ctx The tokenizer context containing the cursor.
+   * @returns `true` if the next three characters are `-->`.
+   */
+  export function commentClose(ctx: TokenizerContext) {
+    const cursor = ctx.cursor;
+
+    return (
+      cursor.peek() === char.minus &&
+      cursor.peek(1) === char.minus &&
+      cursor.peek(2) === char.greaterThan
+    );
+  }
 
 
 

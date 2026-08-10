@@ -9,7 +9,9 @@ export enum DiagnosticCode {
   UnterminatedDoctype = "SLIZ002",
   ExpectedTagName = "SLIZ003",
   UnterminatedAttributeValue = 'SLIZ004',
-  ExpectedTagEnd = 'SLIZ005'
+  ExpectedTagEnd = 'SLIZ005',
+  UnterminatedComment = 'SLIZ006',
+  NestedComment = 'SLIZ007'
 }
 
 export interface Diagnostic {
