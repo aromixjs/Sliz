@@ -6,6 +6,16 @@ import { SyntaxKind, TokenizerContext } from "./token";
 
 export namespace consume {
 
+   /**
+    * Reads all attributes on a tag until the closing `>` or `/>` is reached.
+    * 
+    * **How it works:**
+    * 1. Loops while not at EOF.
+    * 2. If it encounters `>` or `/>`, the tag is done — returns immediately.
+    * 3. Otherwise, hands off to `consume.attribute` to read one attribute, then loops again.
+    * 
+    * @param ctx The tokenizer context. Cursor must be positioned after the tag name.
+    */
    export function attributes(ctx: TokenizerContext) {
       while (!ctx.cursor.eof) {
          const code = ctx.cursor.peek();
@@ -22,6 +32,20 @@ export namespace consume {
    }
 
 
+   /**
+    * Reads a single attribute: its name, optional `=` sign, and optional value.
+    * 
+    * **How it works:**
+    * 1. Remembers where the cursor started.
+    * 2. Reads characters until whitespace, `=`, `>`, or `/` is hit — these characters form the attribute name.
+    * 3. **If no name was read** (cursor didn't move): returns early, nothing to emit.
+    * 4. Saves the attribute name as an `AttributeName` token.
+    * 5. Skips any whitespace after the name.
+    * 6. If the next character is `=`, advances past it, skips whitespace, and hands off to `consume.attributeValue` to read the value.
+    * 7. **If there is no `=`:** returns early — this is a boolean attribute like `disabled`.
+    * 
+    * @param ctx The tokenizer context. Cursor must be positioned at the start of the attribute name.
+    */
    export function attribute(ctx: TokenizerContext) {
       const start = ctx.cursor.clone();
 
@@ -52,19 +76,30 @@ export namespace consume {
       });
 
 
-      skip.whiteSpace(ctx.cursor)
+      skip.whiteSpace(ctx)
 
       if (ctx.cursor.peek() !== char.equals) {
          return;
       }
 
       ctx.cursor.advance();
-      skip.whiteSpace(ctx.cursor)
+      skip.whiteSpace(ctx)
       consume.attributeValue(ctx);
    }
 
 
 
+   /**
+    * Reads an attribute value after the `=` sign, dispatching to the right reader based on what character the value starts with.
+    * 
+    * **How it works:**
+    * 1. Peeks at the first character of the value.
+    * 2. **If `{`:** reads it as a JS expression via `consume.expression`.
+    * 3. **If `'` or `"`:** reads it as a quoted string via `consume.quotedAttributeValue`.
+    * 4. **Otherwise:** reads it as an unquoted value via `consume.unquotedAttributeValue`.
+    * 
+    * @param ctx The tokenizer context. Cursor must be positioned at the start of the value.
+    */
    export function attributeValue(ctx: TokenizerContext) {
       const code = ctx.cursor.peek();
 
@@ -84,7 +119,18 @@ export namespace consume {
       consume.unquotedAttributeValue(ctx);
    }
 
-  export  function quotedAttributeValue(ctx: TokenizerContext) {
+   /**
+    * Reads a quoted attribute value from the opening quote to the matching closing quote.
+    * 
+    * **How it works:**
+    * 1. Remembers the opening quote character and advances past it.
+    * 2. Advances character by character looking for the matching closing quote:
+    *    - **If found:** Saves an `AttributeValue` token (including the quotes) and stops.
+    * 3. **If the closing quote is never found (file ends early):** Adds an "Unterminated attribute value" error message to `diagnostics`, saves whatever content was read as an `AttributeValue` token, and moves the cursor to the end of the file.
+    * 
+    * @param ctx The tokenizer context. Cursor must be positioned at the opening quote.
+    */
+   export function quotedAttributeValue(ctx: TokenizerContext) {
       const start = ctx.cursor.clone();
       const quote = ctx.cursor.peek();
 
@@ -125,7 +171,18 @@ export namespace consume {
       ctx.cursor.advanceToEnd();
    }
 
-  export  function unquotedAttributeValue(ctx: TokenizerContext) {
+   /**
+    * Reads an unquoted attribute value until whitespace, `>`, or `/` is hit.
+    * 
+    * **How it works:**
+    * 1. Remembers where the value starts.
+    * 2. Advances character by character until a delimiter (whitespace, `>`, or `/`) is hit.
+    * 3. **If no characters were consumed** (cursor didn't move): returns early, nothing to emit.
+    * 4. Otherwise, saves the consumed characters as an `AttributeValue` token.
+    * 
+    * @param ctx The tokenizer context. Cursor must be positioned at the start of the value.
+    */
+   export function unquotedAttributeValue(ctx: TokenizerContext) {
       const start = ctx.cursor.clone();
 
       while (!ctx.cursor.eof) {
@@ -158,6 +215,19 @@ export namespace consume {
 
 
 
+   /**
+    * Reads a closing tag like `</div>` or `</br>`.
+    * 
+    * **How it works:**
+    * 1. Remembers where the tag started, then advances past the `</` characters.
+    * 2. Reads the tag name until whitespace or `>` is hit.
+    * 3. **If no tag name was found:** Adds an "Expected tag name" error to `diagnostics`, advances past one character, and returns.
+    * 4. Emits three tokens: `LessThan` for `<`, `Slash` for `/`, and `TagName` for the tag name.
+    * 5. Skips any whitespace after the tag name.
+    * 6. Calls `consume.tagEnd` to read the closing `>` or `/>`.
+    * 
+    * @param ctx The tokenizer context. Cursor must be positioned at the `<` of the closing tag.
+    */
    export function closingTag(ctx: TokenizerContext) {
       const start = ctx.cursor.clone();
 
@@ -215,7 +285,7 @@ export namespace consume {
          end: ctx.cursor.position,
          value: ctx.cursor.getChars(tagStart),
       });
-      skip.whiteSpace(ctx.cursor);
+      skip.whiteSpace(ctx);
       consume.tagEnd(ctx);
    }
 
@@ -245,7 +315,7 @@ export namespace consume {
                value: ctx.cursor.getChars(start),
             });
 
-            break;
+            return;
          }
 
          ctx.cursor.advance();
@@ -437,6 +507,21 @@ export namespace consume {
    }
 
 
+   /**
+    * Reads an opening tag like `<div>` or `<br/>`, returning its name for further dispatch.
+    * 
+    * **How it works:**
+    * 1. Remembers where the tag started, then advances past the `<` character.
+    * 2. Reads the tag name until whitespace, `>`, or `/` is hit.
+    * 3. **If no tag name was found:** Adds an "Expected tag name" error to `diagnostics`, advances past one character, and returns `undefined`.
+    * 4. Emits a `LessThan` token for `<` and a `TagName` token for the tag name.
+    * 5. Calls `consume.attributes` to read all attributes on the tag.
+    * 6. Calls `consume.tagEnd` to read the closing `>` or `/>`.
+    * 7. Returns the lowercased tag name so callers can dispatch on it (e.g., `"script"` or `"style"`).
+    * 
+    * @param ctx The tokenizer context. Cursor must be positioned at the `<` of the opening tag.
+    * @returns The lowercased tag name, or `undefined` if no tag name was found.
+    */
    export function openingTag(ctx: TokenizerContext) {
       const start = ctx.cursor.clone();
       ctx.cursor.advance();
@@ -495,6 +580,21 @@ export namespace consume {
 
 
 
+   /**
+    * Reads the raw content of a `<script>` tag until the closing `</script>` tag is found.
+    * 
+    * **How it works:**
+    * 1. Remembers where the script content starts.
+    * 2. Advances character by character, skipping over anything that could contain `</script>` by accident:
+    *    - **Single or double quotes:** skips the entire string via `skip.string`.
+    *    - **Backticks:** skips the entire template literal via `skip.template`.
+    *    - **`//`:** skips the entire line comment via `skip.lineComment`.
+    *    - **`/*`:** skips the entire block comment via `skip.blockComment`.
+    * 3. If it encounters `</script>` (case-insensitive), stops — the script content is done.
+    * 4. **If anything was read:** saves the raw content as a `Script` token.
+    * 
+    * @param ctx The tokenizer context. Cursor must be positioned right after the opening `<script>` tag.
+    */
    export function script(ctx: TokenizerContext) {
       const start = ctx.cursor.clone();
 
@@ -552,6 +652,19 @@ export namespace consume {
    }
 
 
+   /**
+    * Reads the raw content of a `<style>` tag until the closing `</style>` tag is found.
+    * 
+    * **How it works:**
+    * 1. Remembers where the style content starts.
+    * 2. Advances character by character, skipping over anything that could contain `</style>` by accident:
+    *    - **Single or double quotes:** skips the entire string via `skip.string`.
+    *    - **`/*`:** skips the entire block comment via `skip.blockComment`.
+    * 3. If it encounters `</style>` (case-insensitive), stops — the style content is done.
+    * 4. **If anything was read:** saves the raw content as a `Style` token.
+    * 
+    * @param ctx The tokenizer context. Cursor must be positioned right after the opening `<style>` tag.
+    */
    export function style(ctx: TokenizerContext) {
       const start = ctx.cursor.clone();
 
@@ -599,6 +712,17 @@ export namespace consume {
    }
 
 
+   /**
+    * Reads the closing `>` or `/>` of a tag.
+    * 
+    * **How it works:**
+    * 1. Remembers where the cursor started.
+    * 2. **If the next two characters are `/>`:** advances past both and saves a `GreaterThan` token with value `"/>`.
+    * 3. **If the next character is `>`:** advances past it and saves a `GreaterThan` token with value `">"`.
+    * 4. **If neither is found:** Adds an "Expected '>'" error to `diagnostics`.
+    * 
+    * @param ctx The tokenizer context. Cursor must be positioned at the `>` or `/>` of the tag.
+    */
    export function tagEnd(ctx: TokenizerContext) {
       const start = ctx.cursor.clone();
       // Self-closing tag: />
