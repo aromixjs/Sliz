@@ -163,11 +163,11 @@ describe('consume.expression', () => {
          t.kind === SyntaxKind.UnterminatedExpression
       );
       expect(errorTokens).toHaveLength(1);
-      expect(errorTokens[0].start).toBe(0);
+      expect(errorTokens[0].start).toBe(8);
       expect(ctx.tokens).toEqual([
          { kind: SyntaxKind.OpenBrace, start: 0, end: 1, value: "{" },
          { kind: SyntaxKind.JsExpression, start: 1, end: 8, value: "data.id" },
-         { kind: SyntaxKind.UnterminatedExpression, start: 0, end: 8 },
+         { kind: SyntaxKind.UnterminatedExpression, start: 8, end: 8 },
       ]);
    });
 
@@ -179,11 +179,11 @@ describe('consume.expression', () => {
          t.kind === SyntaxKind.UnterminatedExpression
       );
       expect(errorTokens).toHaveLength(1);
-      expect(errorTokens[0].start).toBe(0);
+      expect(errorTokens[0].start).toBe(8);
       expect(ctx.tokens).toEqual([
          { kind: SyntaxKind.OpenBrace, start: 0, end: 1, value: "{" },
          { kind: SyntaxKind.JsExpression, start: 1, end: 8, value: "data.id" },
-         { kind: SyntaxKind.UnterminatedExpression, start: 0, end: 8 },
+         { kind: SyntaxKind.UnterminatedExpression, start: 8, end: 8 },
       ]);
    });
 
@@ -197,7 +197,6 @@ describe('consume.expression', () => {
       expect(errorTokens).toHaveLength(0);
       expect(ctx.tokens).toEqual([
          { kind: SyntaxKind.OpenBrace, start: 0, end: 1, value: "{" },
-         { kind: SyntaxKind.JsExpression, start: 1, end: 1, value: "" },
          { kind: SyntaxKind.CloseBrace, start: 1, end: 2, value: "}" },
       ]);
    });

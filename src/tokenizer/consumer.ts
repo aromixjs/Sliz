@@ -5,6 +5,19 @@ import { SyntaxKind, TokenizerContext } from "./token";
 
 export namespace consume {
 
+   function emitWhiteSpace(ctx: TokenizerContext) {
+      const start = ctx.cursor.clone();
+      skip.whiteSpace(ctx);
+      if (ctx.cursor.position > start.position) {
+         ctx.emit({
+            kind: SyntaxKind.Whitespace,
+            start: start.position,
+            end: ctx.cursor.position,
+            value: ctx.cursor.getChars(start),
+         });
+      }
+   }
+
    /**
     * Reads all attributes on a tag until the closing `>` or `/>` is reached.
     */
@@ -26,7 +39,7 @@ export namespace consume {
          }
 
          if (is.whitespace(code)) {
-            skip.whiteSpace(ctx);
+            emitWhiteSpace(ctx);
             continue;
          }
 
@@ -77,7 +90,7 @@ export namespace consume {
          value: ctx.cursor.getChars(start),
       });
 
-      skip.whiteSpace(ctx);
+      emitWhiteSpace(ctx);
 
       if (ctx.cursor.peek() !== char.equals) {
          return;
@@ -93,7 +106,7 @@ export namespace consume {
          value: "=",
       });
 
-      skip.whiteSpace(ctx);
+      emitWhiteSpace(ctx);
       consume.attributeValue(ctx);
    }
 
@@ -213,7 +226,21 @@ export namespace consume {
       ctx.cursor.advance();
       ctx.cursor.advance();
 
-      skip.whiteSpace(ctx);
+      ctx.emit({
+         kind: SyntaxKind.LessThan,
+         start: start.position,
+         end: start.position + 1,
+         value: "<",
+      });
+
+      ctx.emit({
+         kind: SyntaxKind.Slash,
+         start: start.position + 1,
+         end: start.position + 2,
+         value: "/",
+      });
+
+      emitWhiteSpace(ctx);
 
       const tagStart = ctx.cursor.clone();
 
@@ -236,27 +263,13 @@ export namespace consume {
       if (ctx.cursor.position === tagStart.position) {
          ctx.emit({
             kind: SyntaxKind.ExpectedTagName,
-            start: start.position,
+            start: ctx.cursor.position,
             end: ctx.cursor.position,
          });
 
-         ctx.cursor.advanceTo(ctx.cursor.position + 1);
+         consume.tagEnd(ctx);
          return;
       }
-
-      ctx.emit({
-         kind: SyntaxKind.LessThan,
-         start: start.position,
-         end: start.position + 1,
-         value: "<",
-      });
-
-      ctx.emit({
-         kind: SyntaxKind.Slash,
-         start: start.position + 1,
-         end: start.position + 2,
-         value: "/",
-      });
 
       ctx.emit({
          kind: SyntaxKind.TagName,
@@ -265,7 +278,7 @@ export namespace consume {
          value: ctx.cursor.getChars(tagStart),
       });
 
-      skip.whiteSpace(ctx);
+      emitWhiteSpace(ctx);
 
       consume.tagEnd(ctx);
    }
@@ -426,7 +439,14 @@ export namespace consume {
       const start = ctx.cursor.clone();
       ctx.cursor.advance();
 
-      skip.whiteSpace(ctx);
+      ctx.emit({
+         kind: SyntaxKind.LessThan,
+         start: start.position,
+         end: start.position + 1,
+         value: "<",
+      });
+
+      emitWhiteSpace(ctx);
 
       const tagStart = ctx.cursor.clone();
 
@@ -449,22 +469,15 @@ export namespace consume {
       if (ctx.cursor.position === tagStart.position) {
          ctx.emit({
             kind: SyntaxKind.ExpectedTagName,
-            start: start.position,
+            start: ctx.cursor.position,
             end: ctx.cursor.position,
          });
 
-         ctx.cursor.advanceTo(ctx.cursor.position + 1);
+         consume.tagEnd(ctx);
          return;
       }
 
       const tagName = ctx.cursor.getChars(tagStart).toLowerCase();
-
-      ctx.emit({
-         kind: SyntaxKind.LessThan,
-         start: start.position,
-         end: tagStart.position,
-         value: "<",
-      });
 
       ctx.emit({
          kind: SyntaxKind.TagName,
@@ -691,16 +704,18 @@ export namespace consume {
             value: "{",
          });
 
-         ctx.emit({
-            kind: SyntaxKind.JsExpression,
-            start: expressionStart.position,
-            end: ctx.cursor.position,
-            value: ctx.cursor.getChars(expressionStart),
-         });
+         if (expressionStart.position < ctx.cursor.position) {
+            ctx.emit({
+               kind: SyntaxKind.JsExpression,
+               start: expressionStart.position,
+               end: ctx.cursor.position,
+               value: ctx.cursor.getChars(expressionStart),
+            });
+         }
 
          ctx.emit({
             kind: SyntaxKind.UnterminatedExpression,
-            start: start.position,
+            start: ctx.cursor.position,
             end: ctx.cursor.position,
          });
 
@@ -714,12 +729,14 @@ export namespace consume {
          value: "{",
       });
 
-      ctx.emit({
-         kind: SyntaxKind.JsExpression,
-         start: expressionStart.position,
-         end: closeBrace,
-         value: ctx.cursor.source.slice(expressionStart.position, closeBrace),
-      });
+      if (expressionStart.position < closeBrace) {
+         ctx.emit({
+            kind: SyntaxKind.JsExpression,
+            start: expressionStart.position,
+            end: closeBrace,
+            value: ctx.cursor.source.slice(expressionStart.position, closeBrace),
+         });
+      }
 
       ctx.emit({
          kind: SyntaxKind.CloseBrace,

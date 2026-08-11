@@ -10,6 +10,7 @@ describe("tag attribute anomalies", () => {
       expect(kinds).toEqual([
          SyntaxKind.LessThan,
          SyntaxKind.TagName,
+         SyntaxKind.Whitespace,
          SyntaxKind.AttributeName,
          SyntaxKind.Equals,
          SyntaxKind.OpenBrace,
@@ -27,6 +28,7 @@ describe("tag attribute anomalies", () => {
       expect(kinds).toEqual([
          SyntaxKind.LessThan,
          SyntaxKind.TagName,
+         SyntaxKind.Whitespace,
          SyntaxKind.AttributeName,
          SyntaxKind.Equals,
          SyntaxKind.OpenBrace,
@@ -44,6 +46,7 @@ describe("tag attribute anomalies", () => {
       expect(kinds).toEqual([
          SyntaxKind.LessThan,
          SyntaxKind.TagName,
+         SyntaxKind.Whitespace,
          SyntaxKind.AttributeName,
          SyntaxKind.Equals,
          SyntaxKind.OpenBrace,
@@ -61,6 +64,7 @@ describe("tag attribute anomalies", () => {
       expect(kinds).toEqual([
          SyntaxKind.LessThan,
          SyntaxKind.TagName,
+         SyntaxKind.Whitespace,
          SyntaxKind.AttributeName,
          SyntaxKind.Equals,
          SyntaxKind.OpenBrace,
@@ -78,11 +82,13 @@ describe("tag attribute anomalies", () => {
       expect(kinds).toEqual([
          SyntaxKind.LessThan,
          SyntaxKind.TagName,
+         SyntaxKind.Whitespace,
          SyntaxKind.AttributeName,
          SyntaxKind.Equals,
          SyntaxKind.OpenBrace,
          SyntaxKind.JsExpression,
          SyntaxKind.CloseBrace,
+         SyntaxKind.Whitespace,
          SyntaxKind.AttributeName,
          SyntaxKind.Equals,
          SyntaxKind.OpenBrace,
@@ -100,6 +106,7 @@ describe("tag attribute anomalies", () => {
       expect(kinds).toEqual([
          SyntaxKind.LessThan,
          SyntaxKind.TagName,
+         SyntaxKind.Whitespace,
          SyntaxKind.AttributeName,
          SyntaxKind.Equals,
          SyntaxKind.OpenBrace,
@@ -116,6 +123,7 @@ describe("tag attribute anomalies", () => {
       expect(kinds).toEqual([
          SyntaxKind.LessThan,
          SyntaxKind.TagName,
+         SyntaxKind.Whitespace,
          SyntaxKind.AttributeName,
          SyntaxKind.Equals,
          SyntaxKind.OpenBrace,
@@ -130,11 +138,12 @@ describe("tag attribute anomalies", () => {
 
       expect(tokens[0]).toEqual({ kind: SyntaxKind.LessThan, start: 0, end: 1, value: "<" });
       expect(tokens[1]).toEqual({ kind: SyntaxKind.TagName, start: 1, end: 4, value: "div" });
-      expect(tokens[2]).toEqual({ kind: SyntaxKind.AttributeName, start: 5, end: 10, value: "class" });
-      expect(tokens[3]).toEqual({ kind: SyntaxKind.Equals, start: 10, end: 11, value: "=" });
-      expect(tokens[4]).toEqual({ kind: SyntaxKind.AttributeValue, start: 11, end: 16, value: "test}" });
-      expect(tokens[5]).toEqual({ kind: SyntaxKind.GreaterThan, start: 16, end: 17, value: ">" });
-      expect(tokens[6].kind).toBe(SyntaxKind.EndOfFile);
+      expect(tokens[2]).toEqual({ kind: SyntaxKind.Whitespace, start: 4, end: 5, value: " " });
+      expect(tokens[3]).toEqual({ kind: SyntaxKind.AttributeName, start: 5, end: 10, value: "class" });
+      expect(tokens[4]).toEqual({ kind: SyntaxKind.Equals, start: 10, end: 11, value: "=" });
+      expect(tokens[5]).toEqual({ kind: SyntaxKind.AttributeValue, start: 11, end: 16, value: "test}" });
+      expect(tokens[6]).toEqual({ kind: SyntaxKind.GreaterThan, start: 16, end: 17, value: ">" });
+      expect(tokens[7].kind).toBe(SyntaxKind.EndOfFile);
    });
 
    it("} in attribute value then expression", () => {
@@ -144,6 +153,7 @@ describe("tag attribute anomalies", () => {
       expect(kinds).toEqual([
          SyntaxKind.LessThan,
          SyntaxKind.TagName,
+         SyntaxKind.Whitespace,
          SyntaxKind.AttributeName,
          SyntaxKind.Equals,
          SyntaxKind.AttributeValue,
@@ -166,11 +176,13 @@ describe("tag attribute anomalies", () => {
       expect(kinds).toEqual([
          SyntaxKind.LessThan,
          SyntaxKind.TagName,
+         SyntaxKind.Whitespace,
          SyntaxKind.AttributeName,
          SyntaxKind.Equals,
          SyntaxKind.OpenBrace,
          SyntaxKind.JsExpression,
          SyntaxKind.CloseBrace,
+         SyntaxKind.Whitespace,
          SyntaxKind.SlashGreaterThan,
          SyntaxKind.EndOfFile,
       ]);
@@ -183,6 +195,7 @@ describe("tag attribute anomalies", () => {
       expect(kinds).toEqual([
          SyntaxKind.LessThan,
          SyntaxKind.TagName,
+         SyntaxKind.Whitespace,
          SyntaxKind.AttributeName,
          SyntaxKind.Equals,
          SyntaxKind.OpenBrace,
@@ -208,6 +221,7 @@ describe("tag attribute anomalies", () => {
       expect(kinds).toEqual([
          SyntaxKind.LessThan,
          SyntaxKind.TagName,
+         SyntaxKind.Whitespace,
          SyntaxKind.AttributeName,
          SyntaxKind.GreaterThan,
          SyntaxKind.EndOfFile,
@@ -221,8 +235,10 @@ describe("tag attribute anomalies", () => {
       expect(kinds).toEqual([
          SyntaxKind.LessThan,
          SyntaxKind.TagName,
+         SyntaxKind.Whitespace,
          SyntaxKind.AttributeName,
          SyntaxKind.Equals,
+         SyntaxKind.Whitespace,
          SyntaxKind.GreaterThan,
          SyntaxKind.EndOfFile,
       ]);
@@ -235,6 +251,7 @@ describe("tag attribute anomalies", () => {
       expect(kinds).toEqual([
          SyntaxKind.LessThan,
          SyntaxKind.TagName,
+         SyntaxKind.Whitespace,
          SyntaxKind.AttributeName,
          SyntaxKind.Equals,
          SyntaxKind.AttributeValue,
@@ -250,11 +267,14 @@ describe("tag attribute anomalies", () => {
       expect(kinds).toEqual([
          SyntaxKind.LessThan,
          SyntaxKind.TagName,
+         SyntaxKind.Whitespace,
          SyntaxKind.AttributeName,
          SyntaxKind.Equals,
          SyntaxKind.AttributeValue,
+         SyntaxKind.Whitespace,
          SyntaxKind.UnexpectedCharacter,
          SyntaxKind.UnexpectedCharacter,
+         SyntaxKind.Whitespace,
          SyntaxKind.UnexpectedCharacter,
          SyntaxKind.UnexpectedCharacter,
          SyntaxKind.GreaterThan,
@@ -277,6 +297,7 @@ describe("malformed tags", () => {
       const kinds = tokens.map(t => t.kind);
 
       expect(kinds).toEqual([
+         SyntaxKind.LessThan,
          SyntaxKind.ExpectedTagName,
          SyntaxKind.EndOfFile,
       ]);
@@ -287,6 +308,8 @@ describe("malformed tags", () => {
       const kinds = tokens.map(t => t.kind);
 
       expect(kinds).toEqual([
+         SyntaxKind.LessThan,
+         SyntaxKind.Slash,
          SyntaxKind.ExpectedTagName,
          SyntaxKind.EndOfFile,
       ]);
@@ -297,7 +320,10 @@ describe("malformed tags", () => {
       const kinds = tokens.map(t => t.kind);
 
       expect(kinds).toEqual([
+         SyntaxKind.LessThan,
+         SyntaxKind.Slash,
          SyntaxKind.ExpectedTagName,
+         SyntaxKind.GreaterThan,
          SyntaxKind.EndOfFile,
       ]);
    });
@@ -309,6 +335,7 @@ describe("malformed tags", () => {
       expect(kinds).toEqual([
          SyntaxKind.LessThan,
          SyntaxKind.TagName,
+         SyntaxKind.Whitespace,
          SyntaxKind.UnexpectedCharacter,
          SyntaxKind.GreaterThan,
          SyntaxKind.Text,
@@ -323,6 +350,7 @@ describe("malformed tags", () => {
       expect(kinds).toEqual([
          SyntaxKind.LessThan,
          SyntaxKind.TagName,
+         SyntaxKind.Whitespace,
          SyntaxKind.UnexpectedCharacter,
          SyntaxKind.UnexpectedCharacter,
          SyntaxKind.GreaterThan,
@@ -430,6 +458,7 @@ describe("full tag lifecycle", () => {
       expect(kinds).toEqual([
          SyntaxKind.LessThan,
          SyntaxKind.TagName,
+         SyntaxKind.Whitespace,
          SyntaxKind.AttributeName,
          SyntaxKind.Equals,
          SyntaxKind.OpenBrace,

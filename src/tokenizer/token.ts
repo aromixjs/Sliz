@@ -5,6 +5,7 @@ export enum SyntaxKind {
   // Structural tokens
   Doctype = "Doctype",
   Text = "Text",
+  Whitespace = "Whitespace",
   LessThan = "LessThan",
   Slash = "Slash",
   OpenBrace = "OpenBrace",
