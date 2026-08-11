@@ -10,12 +10,7 @@ const content = readFileSync(
 
 )
 
-const context = {
-  source: content.toString(),
-  fileName: "test.sliz",
-  diagnostics: [],
-}
 
-const result = tokenize(context);
+const result = tokenize(content.toString());
 
-dir({result, diagnostics:context.diagnostics}, { depth: null });
+dir({result}, { depth: null });

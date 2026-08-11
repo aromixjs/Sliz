@@ -1,8 +1,8 @@
-import { Diagnostic } from "../pipeline/context";
 import { type Maybe } from "../types/maybe";
 import { CharacterCursor } from "./cursor";
 
 export enum SyntaxKind {
+  // Structural tokens
   Doctype = "Doctype",
   Text = "Text",
   LessThan = "LessThan",
@@ -19,25 +19,35 @@ export enum SyntaxKind {
   Style = "Style",
   HtmlComment = "HtmlComment",
   EndOfFile = "EndOfFile",
+
+  // Error tokens — malformed content that was still lexed
+  UnterminatedString = "UnterminatedString",
+  UnterminatedComment = "UnterminatedComment",
+  UnterminatedExpression = "UnterminatedExpression",
+  UnterminatedScript = "UnterminatedScript",
+  UnterminatedStyle = "UnterminatedStyle",
+  UnterminatedDoctype = "UnterminatedDoctype",
+  ExpectedTagName = "ExpectedTagName",
+  ExpectedTagEnd = "ExpectedTagEnd",
 }
 
 export interface Token {
   kind: SyntaxKind;
   start: number;
   end: number;
-  value: Maybe<string>;
+  value?: string;
 }
-
 
 export class TokenizerContext {
   readonly cursor: CharacterCursor
   readonly tokens: Array<Token>;
-  readonly diagnostics: Array<Diagnostic>;
 
-  constructor(source: string, tokens:Array<Token> = [], diagnostics:Array<Diagnostic> = []) {
+  constructor(source: string, tokens:Array<Token> = []) {
     this.cursor = new CharacterCursor(source)
-    this.diagnostics = diagnostics
     this.tokens = tokens
   }
-}
 
+  emit(token: Token): void {
+    this.tokens.push(token);
+  }
+}
