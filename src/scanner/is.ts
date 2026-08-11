@@ -19,9 +19,7 @@ export namespace is {
          (code >= char.upperA && code <= char.upperZ);
    }
 
-   /**
-    * Checks whether a character code is a single or double quote (not backtick).
-    */
+
    export function quote(code: number) {
       return code === char.singleQuote || code === char.doubleQuote;
    }

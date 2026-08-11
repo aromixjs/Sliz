@@ -146,7 +146,7 @@ export namespace skip {
    /**
     * Skips a `{ ... }` expression, safely skipping over inner braces, strings, and escape characters.
     *
-    * **How it works:**
+    * How it works:
     * 1. Tracks brace depth to handle nested `{ }`.
     * 2. Skips over strings and template literals so braces inside them are ignored.
     * 3. Skips over escaped characters (e.g., `\}`) so they don't count.
@@ -162,6 +162,7 @@ export namespace skip {
       while (!cursor.eof) {
          const code = cursor.peek();
 
+
          if (code === char.backslash) {
             cursor.advance();
             if (!cursor.eof) {
@@ -169,6 +170,7 @@ export namespace skip {
             }
             continue;
          }
+
 
          if (is.quote(code)) {
             string(ctx);

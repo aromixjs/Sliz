@@ -384,10 +384,10 @@ export namespace consume {
    /**
     * Reads a JavaScript expression enclosed in curly braces like `{ name }` or `{ count + 1 }`.
     *
-    * **How it works:**
+    * How it works:
     * 1. Remembers where the opening `{` starts and advances past it.
     * 2. Uses `skip.braceExpression` to scan ahead and find the matching closing `}`.
-    *    - `braceExpression` stops at `}`, `</` (closing tag), or EOF.
+    *    - `skip.braceExpression` stops at `}`, `</` (closing tag), or EOF.
     * 3. **If `</` is found:** the expression is malformed — adds an "Unterminated expression" error, saves partial tokens, and stops. Cursor stays at `<` so the outer loop handles the closing tag.
     * 4. **If EOF is reached:** adds an "Unterminated expression" error, saves partial tokens, and stops.
     * 5. **If `}` is found:** saves three tokens: the opening `{`, the expression content, and the closing `}`.

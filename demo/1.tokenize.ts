@@ -4,16 +4,18 @@ import { readFileSync } from "fs";
 import { join } from "path";
 
 
-const content =readFileSync(
+const content = readFileSync(
 
-join(import.meta.dirname, 't.html')
+  join(import.meta.dirname, 't.html')
 
 )
 
-const result = tokenize({
+const context = {
   source: content.toString(),
   fileName: "test.sliz",
   diagnostics: [],
-});
+}
 
-dir(result, { depth: null });
+const result = tokenize(context);
+
+dir({result, diagnostics:context.diagnostics}, { depth: null });

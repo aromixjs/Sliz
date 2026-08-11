@@ -28,8 +28,16 @@ export interface Token {
   value: Maybe<string>;
 }
 
-export interface TokenizerContext {
-  readonly cursor: CharacterCursor;
+
+export class TokenizerContext {
+  readonly cursor: CharacterCursor
   readonly tokens: Array<Token>;
   readonly diagnostics: Array<Diagnostic>;
+
+  constructor(source: string, tokens:Array<Token> = [], diagnostics:Array<Diagnostic> = []) {
+    this.cursor = new CharacterCursor(source)
+    this.diagnostics = diagnostics
+    this.tokens = tokens
+  }
 }
+

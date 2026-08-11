@@ -20,7 +20,9 @@
       "node",
       "vitest/globals"
     ],
-    "paths": {}
+    "paths": {
+      "@/src":["./src"]
+    }
   },
   "include": [
     "src/**/*.ts",
