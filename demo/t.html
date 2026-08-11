@@ -1,1 +1,29 @@
-<div class=test} || }}>{{data 123</div>
+<script>
+  const title = "Products";
+  const showItems = true;
+
+  function formatPrice(price) {
+    return `$${price.toFixed(2)}`;
+  }
+</script>
+
+<div class="products">
+  <h1>{title}</h1>
+
+  <section .if={showItems}>
+    <ul>
+      <li .for={item of items}>
+        <span>{item.name}</span>
+        <span>{formatPrice(item.price)}</span>
+      </li>
+    </ul>
+  </section>
+
+  <p .if={items.length === 0}>
+    No products found.
+  </p>
+
+  <button .if={items.length > 0}>
+    Count: {items.length}
+  </button>
+</div>

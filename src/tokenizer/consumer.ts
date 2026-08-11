@@ -5,7 +5,7 @@ import { SyntaxKind, TokenizerContext } from "./token";
 
 export namespace consume {
 
-   function emitWhiteSpace(ctx: TokenizerContext) {
+   export function whiteSpace(ctx: TokenizerContext) {
       const start = ctx.cursor.clone();
       skip.whiteSpace(ctx);
       if (ctx.cursor.position > start.position) {
@@ -39,7 +39,7 @@ export namespace consume {
          }
 
          if (is.whitespace(code)) {
-            emitWhiteSpace(ctx);
+            consume.whiteSpace(ctx);
             continue;
          }
 
@@ -90,7 +90,7 @@ export namespace consume {
          value: ctx.cursor.getChars(start),
       });
 
-      emitWhiteSpace(ctx);
+      consume.whiteSpace(ctx);
 
       if (ctx.cursor.peek() !== char.equals) {
          return;
@@ -106,7 +106,7 @@ export namespace consume {
          value: "=",
       });
 
-      emitWhiteSpace(ctx);
+      consume.whiteSpace(ctx);
       consume.attributeValue(ctx);
    }
 
@@ -240,7 +240,7 @@ export namespace consume {
          value: "/",
       });
 
-      emitWhiteSpace(ctx);
+      consume.whiteSpace(ctx);
 
       const tagStart = ctx.cursor.clone();
 
@@ -278,7 +278,7 @@ export namespace consume {
          value: ctx.cursor.getChars(tagStart),
       });
 
-      emitWhiteSpace(ctx);
+      consume.whiteSpace(ctx);
 
       consume.tagEnd(ctx);
    }
@@ -396,42 +396,6 @@ export namespace consume {
       });
    }
 
-
-
-
-   /**
-    * Determines what kind of HTML tag or element starts at the current position.
-    */
-   export function markup(ctx: TokenizerContext) {
-      if (is.commentOpen(ctx)) {
-         consume.htmlComment(ctx);
-         return;
-      }
-
-      if (is.doctype(ctx)) {
-         consume.doctype(ctx);
-         return;
-      }
-
-      if (is.closingTagStart(ctx)) {
-         consume.closingTag(ctx);
-         return;
-      }
-
-      const tagName = consume.openingTag(ctx);
-
-      if (tagName === "script") {
-         consume.script(ctx);
-         return;
-      }
-
-      if (tagName === "style") {
-         consume.style(ctx);
-         return;
-      }
-   }
-
-
    /**
     * Reads an opening tag like `<div>` or `<br/>`, returning its name for further dispatch.
     */
@@ -446,7 +410,7 @@ export namespace consume {
          value: "<",
       });
 
-      emitWhiteSpace(ctx);
+      consume.whiteSpace(ctx);
 
       const tagStart = ctx.cursor.clone();
 
@@ -656,8 +620,40 @@ export namespace consume {
 
    /*======  These Are Trigger Consumers  =====*/
 
+   // Determines what kind of HTML tag or element starts at the current position.
+   export function markup(ctx: TokenizerContext) {
+      if (is.commentOpen(ctx)) {
+         consume.htmlComment(ctx);
+         return;
+      }
 
-   // Reads plain text content until it hits a `<` or `{` character.
+      if (is.doctype(ctx)) {
+         consume.doctype(ctx);
+         return;
+      }
+
+      if (is.closingTagStart(ctx)) {
+         consume.closingTag(ctx);
+         return;
+      }
+
+      const tagName = consume.openingTag(ctx);
+
+      if (tagName === "script") {
+         consume.script(ctx);
+         return;
+      }
+
+      if (tagName === "style") {
+         consume.style(ctx);
+         return;
+      }
+   }
+
+
+
+
+   // Reads plain text content until it hits a < or { character.
    export function text(ctx: TokenizerContext) {
       const start = ctx.cursor.clone();
 
@@ -745,9 +741,4 @@ export namespace consume {
          value: "}",
       });
    }
-
-
-
-
-
 }

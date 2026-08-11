@@ -5,11 +5,7 @@ import { is } from "./is";
 
 export namespace skip {
 
-   /**
-    * Skips forward over whitespace characters (space, tab, line feed, carriage return).
-    *
-    * @param ctx The tokenizer context.
-    */
+   // Skips forward over whitespace characters (space, tab, line feed, carriage return).
    export function whiteSpace(ctx: TokenizerContext) {
       const { cursor } = ctx;
 
