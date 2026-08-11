@@ -13,8 +13,9 @@ export enum SyntaxKind {
   TagName = "TagName",
   AttributeName = "AttributeName",
   AttributeValue = "AttributeValue",
-  GreaterThan = "GreaterThan",
-  SlashGreaterThan = "SlashGreaterThan",
+   GreaterThan = "GreaterThan",
+   SlashGreaterThan = "SlashGreaterThan",
+   Equals = "Equals",
   Script = "Script",
   Style = "Style",
   HtmlComment = "HtmlComment",
@@ -27,8 +28,9 @@ export enum SyntaxKind {
   UnterminatedScript = "UnterminatedScript",
   UnterminatedStyle = "UnterminatedStyle",
   UnterminatedDoctype = "UnterminatedDoctype",
-  ExpectedTagName = "ExpectedTagName",
-  ExpectedTagEnd = "ExpectedTagEnd",
+   ExpectedTagName = "ExpectedTagName",
+   ExpectedTagEnd = "ExpectedTagEnd",
+   UnexpectedCharacter = "UnexpectedCharacter",
 }
 
 export interface Token {

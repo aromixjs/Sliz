@@ -11,6 +11,7 @@ describe("tag attribute anomalies", () => {
          SyntaxKind.LessThan,
          SyntaxKind.TagName,
          SyntaxKind.AttributeName,
+         SyntaxKind.Equals,
          SyntaxKind.OpenBrace,
          SyntaxKind.JsExpression,
          SyntaxKind.CloseBrace,
@@ -27,6 +28,7 @@ describe("tag attribute anomalies", () => {
          SyntaxKind.LessThan,
          SyntaxKind.TagName,
          SyntaxKind.AttributeName,
+         SyntaxKind.Equals,
          SyntaxKind.OpenBrace,
          SyntaxKind.JsExpression,
          SyntaxKind.CloseBrace,
@@ -43,6 +45,7 @@ describe("tag attribute anomalies", () => {
          SyntaxKind.LessThan,
          SyntaxKind.TagName,
          SyntaxKind.AttributeName,
+         SyntaxKind.Equals,
          SyntaxKind.OpenBrace,
          SyntaxKind.JsExpression,
          SyntaxKind.CloseBrace,
@@ -59,6 +62,7 @@ describe("tag attribute anomalies", () => {
          SyntaxKind.LessThan,
          SyntaxKind.TagName,
          SyntaxKind.AttributeName,
+         SyntaxKind.Equals,
          SyntaxKind.OpenBrace,
          SyntaxKind.JsExpression,
          SyntaxKind.CloseBrace,
@@ -75,10 +79,12 @@ describe("tag attribute anomalies", () => {
          SyntaxKind.LessThan,
          SyntaxKind.TagName,
          SyntaxKind.AttributeName,
+         SyntaxKind.Equals,
          SyntaxKind.OpenBrace,
          SyntaxKind.JsExpression,
          SyntaxKind.CloseBrace,
          SyntaxKind.AttributeName,
+         SyntaxKind.Equals,
          SyntaxKind.OpenBrace,
          SyntaxKind.JsExpression,
          SyntaxKind.CloseBrace,
@@ -95,10 +101,10 @@ describe("tag attribute anomalies", () => {
          SyntaxKind.LessThan,
          SyntaxKind.TagName,
          SyntaxKind.AttributeName,
+         SyntaxKind.Equals,
          SyntaxKind.OpenBrace,
          SyntaxKind.JsExpression,
          SyntaxKind.UnterminatedExpression,
-         SyntaxKind.ExpectedTagEnd,
          SyntaxKind.EndOfFile,
       ]);
    });
@@ -111,10 +117,10 @@ describe("tag attribute anomalies", () => {
          SyntaxKind.LessThan,
          SyntaxKind.TagName,
          SyntaxKind.AttributeName,
+         SyntaxKind.Equals,
          SyntaxKind.OpenBrace,
          SyntaxKind.JsExpression,
          SyntaxKind.UnterminatedExpression,
-         SyntaxKind.ExpectedTagEnd,
          SyntaxKind.EndOfFile,
       ]);
    });
@@ -125,9 +131,10 @@ describe("tag attribute anomalies", () => {
       expect(tokens[0]).toEqual({ kind: SyntaxKind.LessThan, start: 0, end: 1, value: "<" });
       expect(tokens[1]).toEqual({ kind: SyntaxKind.TagName, start: 1, end: 4, value: "div" });
       expect(tokens[2]).toEqual({ kind: SyntaxKind.AttributeName, start: 5, end: 10, value: "class" });
-      expect(tokens[3]).toEqual({ kind: SyntaxKind.AttributeValue, start: 11, end: 16, value: "test}" });
-      expect(tokens[4]).toEqual({ kind: SyntaxKind.GreaterThan, start: 16, end: 17, value: ">" });
-      expect(tokens[5].kind).toBe(SyntaxKind.EndOfFile);
+      expect(tokens[3]).toEqual({ kind: SyntaxKind.Equals, start: 10, end: 11, value: "=" });
+      expect(tokens[4]).toEqual({ kind: SyntaxKind.AttributeValue, start: 11, end: 16, value: "test}" });
+      expect(tokens[5]).toEqual({ kind: SyntaxKind.GreaterThan, start: 16, end: 17, value: ">" });
+      expect(tokens[6].kind).toBe(SyntaxKind.EndOfFile);
    });
 
    it("} in attribute value then expression", () => {
@@ -138,6 +145,7 @@ describe("tag attribute anomalies", () => {
          SyntaxKind.LessThan,
          SyntaxKind.TagName,
          SyntaxKind.AttributeName,
+         SyntaxKind.Equals,
          SyntaxKind.AttributeValue,
          SyntaxKind.GreaterThan,
          SyntaxKind.OpenBrace,
@@ -159,6 +167,7 @@ describe("tag attribute anomalies", () => {
          SyntaxKind.LessThan,
          SyntaxKind.TagName,
          SyntaxKind.AttributeName,
+         SyntaxKind.Equals,
          SyntaxKind.OpenBrace,
          SyntaxKind.JsExpression,
          SyntaxKind.CloseBrace,
@@ -175,6 +184,7 @@ describe("tag attribute anomalies", () => {
          SyntaxKind.LessThan,
          SyntaxKind.TagName,
          SyntaxKind.AttributeName,
+         SyntaxKind.Equals,
          SyntaxKind.OpenBrace,
          SyntaxKind.JsExpression,
          SyntaxKind.CloseBrace,
@@ -212,6 +222,7 @@ describe("tag attribute anomalies", () => {
          SyntaxKind.LessThan,
          SyntaxKind.TagName,
          SyntaxKind.AttributeName,
+         SyntaxKind.Equals,
          SyntaxKind.GreaterThan,
          SyntaxKind.EndOfFile,
       ]);
@@ -225,9 +236,35 @@ describe("tag attribute anomalies", () => {
          SyntaxKind.LessThan,
          SyntaxKind.TagName,
          SyntaxKind.AttributeName,
+         SyntaxKind.Equals,
          SyntaxKind.AttributeValue,
          SyntaxKind.UnterminatedString,
-         SyntaxKind.ExpectedTagEnd,
+         SyntaxKind.EndOfFile,
+      ]);
+   });
+
+   it("unquoted value with || after } does not loop", () => {
+      const tokens = tokenize("<div class=test} || }}>{{data 123</div>");
+      const kinds = tokens.map(t => t.kind);
+
+      expect(kinds).toEqual([
+         SyntaxKind.LessThan,
+         SyntaxKind.TagName,
+         SyntaxKind.AttributeName,
+         SyntaxKind.Equals,
+         SyntaxKind.AttributeValue,
+         SyntaxKind.UnexpectedCharacter,
+         SyntaxKind.UnexpectedCharacter,
+         SyntaxKind.UnexpectedCharacter,
+         SyntaxKind.UnexpectedCharacter,
+         SyntaxKind.GreaterThan,
+         SyntaxKind.OpenBrace,
+         SyntaxKind.JsExpression,
+         SyntaxKind.UnterminatedExpression,
+         SyntaxKind.LessThan,
+         SyntaxKind.Slash,
+         SyntaxKind.TagName,
+         SyntaxKind.GreaterThan,
          SyntaxKind.EndOfFile,
       ]);
    });
@@ -272,7 +309,8 @@ describe("malformed tags", () => {
       expect(kinds).toEqual([
          SyntaxKind.LessThan,
          SyntaxKind.TagName,
-         SyntaxKind.ExpectedTagEnd,
+         SyntaxKind.UnexpectedCharacter,
+         SyntaxKind.GreaterThan,
          SyntaxKind.Text,
          SyntaxKind.EndOfFile,
       ]);
@@ -285,8 +323,9 @@ describe("malformed tags", () => {
       expect(kinds).toEqual([
          SyntaxKind.LessThan,
          SyntaxKind.TagName,
-         SyntaxKind.ExpectedTagEnd,
-         SyntaxKind.Text,
+         SyntaxKind.UnexpectedCharacter,
+         SyntaxKind.UnexpectedCharacter,
+         SyntaxKind.GreaterThan,
          SyntaxKind.EndOfFile,
       ]);
    });
@@ -392,6 +431,7 @@ describe("full tag lifecycle", () => {
          SyntaxKind.LessThan,
          SyntaxKind.TagName,
          SyntaxKind.AttributeName,
+         SyntaxKind.Equals,
          SyntaxKind.OpenBrace,
          SyntaxKind.JsExpression,
          SyntaxKind.CloseBrace,

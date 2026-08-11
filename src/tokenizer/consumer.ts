@@ -30,7 +30,18 @@ export namespace consume {
             continue;
          }
 
+         const before = ctx.cursor.position;
          consume.attribute(ctx);
+
+         if (ctx.cursor.position === before) {
+            ctx.emit({
+               kind: SyntaxKind.UnexpectedCharacter,
+               start: ctx.cursor.position,
+               end: ctx.cursor.position + 1,
+               value: String.fromCharCode(code),
+            });
+            ctx.cursor.advance();
+         }
       }
    }
 
@@ -72,7 +83,16 @@ export namespace consume {
          return;
       }
 
+      const equalsStart = ctx.cursor.position;
       ctx.cursor.advance();
+
+      ctx.emit({
+         kind: SyntaxKind.Equals,
+         start: equalsStart,
+         end: ctx.cursor.position,
+         value: "=",
+      });
+
       skip.whiteSpace(ctx);
       consume.attributeValue(ctx);
    }
@@ -247,12 +267,7 @@ export namespace consume {
 
       skip.whiteSpace(ctx);
 
-      const tagEndStart = ctx.cursor.position;
       consume.tagEnd(ctx);
-
-      if (ctx.cursor.position === tagEndStart && ctx.cursor.peek() !== char.lessThan) {
-         ctx.cursor.advance();
-      }
    }
 
 
@@ -460,12 +475,7 @@ export namespace consume {
 
       consume.attributes(ctx);
 
-      const tagEndStart = ctx.cursor.position;
       consume.tagEnd(ctx);
-
-      if (ctx.cursor.position === tagEndStart && ctx.cursor.peek() !== char.lessThan) {
-         ctx.cursor.advance();
-      }
 
       return tagName;
    }
@@ -582,45 +592,51 @@ export namespace consume {
 
    /**
     * Reads the closing `>` or `/>` of a tag.
+    * Emits UnexpectedCharacter for any unexpected chars before the closing delimiter.
     */
    export function tagEnd(ctx: TokenizerContext) {
-      const start = ctx.cursor.clone();
+      while (!ctx.cursor.eof) {
+         const start = ctx.cursor.clone();
 
-      if (
-         ctx.cursor.peek() === char.slash &&
-         ctx.cursor.peek(1) === char.greaterThan
-      ) {
-         ctx.cursor.advance();
-         ctx.cursor.advance();
+         if (
+            ctx.cursor.peek() === char.slash &&
+            ctx.cursor.peek(1) === char.greaterThan
+         ) {
+            ctx.cursor.advance();
+            ctx.cursor.advance();
+
+            ctx.emit({
+               kind: SyntaxKind.SlashGreaterThan,
+               start: start.position,
+               end: ctx.cursor.position,
+               value: "/>",
+            });
+
+            return;
+         }
+
+         if (ctx.cursor.peek() === char.greaterThan) {
+            ctx.cursor.advance();
+
+            ctx.emit({
+               kind: SyntaxKind.GreaterThan,
+               start: start.position,
+               end: ctx.cursor.position,
+               value: ">",
+            });
+
+            return;
+         }
 
          ctx.emit({
-            kind: SyntaxKind.SlashGreaterThan,
-            start: start.position,
-            end: ctx.cursor.position,
-            value: "/>",
+            kind: SyntaxKind.UnexpectedCharacter,
+            start: ctx.cursor.position,
+            end: ctx.cursor.position + 1,
+            value: String.fromCharCode(ctx.cursor.peek()),
          });
 
-         return;
-      }
-
-      if (ctx.cursor.peek() === char.greaterThan) {
          ctx.cursor.advance();
-
-         ctx.emit({
-            kind: SyntaxKind.GreaterThan,
-            start: start.position,
-            end: ctx.cursor.position,
-            value: ">",
-         });
-
-         return;
       }
-
-      ctx.emit({
-         kind: SyntaxKind.ExpectedTagEnd,
-         start: start.position,
-         end: ctx.cursor.position,
-      });
    }
 
 
