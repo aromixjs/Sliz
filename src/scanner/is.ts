@@ -25,6 +25,20 @@ export namespace is {
    }
 
    /**
+    * Checks whether a character is valid inside an HTML attribute name.
+    * HTML spec: letters, digits, hyphen, underscore, colon, dot.
+    */
+   export function attributeNameChar(code: number) {
+      return (code >= char.lowerA && code <= char.lowerZ) ||
+         (code >= char.upperA && code <= char.upperZ) ||
+         (code >= 48 && code <= 57) ||  // 0-9
+         code === char.minus ||
+         code === char.underscore ||
+         code === 58 ||  // colon
+         code === char.dot;
+   }
+
+   /**
     * Checks whether a character code is the end of a tag: `>` or `/>`.
     */
    export function tagEnd(ctx: TokenizerContext) {

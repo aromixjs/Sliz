@@ -19,6 +19,7 @@ export namespace consume {
          if (
             code === char.lessThan ||
             code === char.openBrace ||
+            code === char.closeBrace ||
             code === char.slash
          ) {
             return;
@@ -44,12 +45,9 @@ export namespace consume {
          const code = ctx.cursor.peek();
 
          if (
-            is.whitespace(code) ||
+            !is.attributeNameChar(code) ||
             code === char.equals ||
-            is.tagEnd(ctx) ||
-            code === char.lessThan ||
-            code === char.openBrace ||
-            code === char.slash
+            is.tagEnd(ctx)
          ) {
             break;
          }
@@ -252,7 +250,7 @@ export namespace consume {
       const tagEndStart = ctx.cursor.position;
       consume.tagEnd(ctx);
 
-      if (ctx.cursor.position === tagEndStart) {
+      if (ctx.cursor.position === tagEndStart && ctx.cursor.peek() !== char.lessThan) {
          ctx.cursor.advance();
       }
    }
@@ -263,6 +261,16 @@ export namespace consume {
     */
    export function doctype(ctx: TokenizerContext) {
       const start = ctx.cursor.clone();
+
+      ctx.cursor.advance();
+      ctx.cursor.advance();
+      ctx.cursor.advance();
+      ctx.cursor.advance();
+      ctx.cursor.advance();
+      ctx.cursor.advance();
+      ctx.cursor.advance();
+      ctx.cursor.advance();
+      ctx.cursor.advance();
 
       while (!ctx.cursor.eof) {
          const code = ctx.cursor.peek();
@@ -455,7 +463,7 @@ export namespace consume {
       const tagEndStart = ctx.cursor.position;
       consume.tagEnd(ctx);
 
-      if (ctx.cursor.position === tagEndStart) {
+      if (ctx.cursor.position === tagEndStart && ctx.cursor.peek() !== char.lessThan) {
          ctx.cursor.advance();
       }
 

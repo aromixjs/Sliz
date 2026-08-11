@@ -147,7 +147,7 @@ export namespace skip {
     * Skips a `{ ... }` expression, safely skipping over inner braces, strings, and escape characters.
     *
     * How it works:
-    * 1. Tracks brace depth to handle nested `{ }`.
+    * 1. It Tracks brace depth to handle nested `{ }`.
     * 2. Skips over strings and template literals so braces inside them are ignored.
     * 3. Skips over escaped characters (e.g., `\}`) so they don't count.
     * 4. Stops at `</` (closing tag pattern) — expressions shouldn't contain closing tags.
