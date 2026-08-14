@@ -48,6 +48,7 @@
     "@types/node": "^22.10.2",
     "@vue/compiler-core": "^3.5.41",
     "beachball": "^2.65.5",
+    "biome": "^0.3.3",
     "fast-check": "^4.9.0",
     "htmlparser2": "^12.0.0",
     "tsup": "^8.3.5",

@@ -645,38 +645,12 @@ export namespace consume {
 
 
 
-   // Reads plain text content until it hits a valid tag start or { character.
-   export function text(ctx: TokenizerContext) {
-      const start = ctx.cursor.clone();
 
-      while (!ctx.cursor.eof) {
-         const code = ctx.cursor.peek();
-
-         if (is.tagStart(ctx) || code === char.openBrace) {
-            break;
-         }
-
-         ctx.cursor.advance();
-      }
-
-      //  No Text Found
-      if (ctx.cursor.position === start.position) {
-         return;
-      }
-
-      ctx.emit({
-         kind: SyntaxKind.Text,
-         start: start.position,
-         end: ctx.cursor.position,
-         value: ctx.cursor.getChars(start),
-      });
-   }
-
-
-   // Reads a JavaScript expression enclosed in curly braces like `{ name }` or `{ count + 1 }`.
+   // Consumes a JavaScript expression enclosed in curly braces like `{ name }` or `{ count + 1 }`.
    export function expression(ctx: TokenizerContext) {
       const start = ctx.cursor.clone();
-      ctx.cursor.advance(); // get past the {
+      // get past Opening Brace
+      ctx.cursor.advance();
 
       const expressionStart = ctx.cursor.clone();
       skip.braceExpression(ctx.cursor);
@@ -733,4 +707,33 @@ export namespace consume {
          value: "}",
       });
    }
+
+
+   // Consumes plain text content until it hits a valid tagLike token or { token.
+   export function text(ctx: TokenizerContext) {
+      const start = ctx.cursor.clone();
+
+      while (!ctx.cursor.eof) {
+         const code = ctx.cursor.peek();
+
+         if (is.tagLike(ctx.cursor) || code === char.openBrace) {
+            break;
+         }
+
+         ctx.cursor.advance();
+      }
+
+      //  No Text Found
+      if (ctx.cursor.position === start.position) {
+         return;
+      }
+
+      ctx.emit({
+         kind: SyntaxKind.Text,
+         start: start.position,
+         end: ctx.cursor.position,
+         value: ctx.cursor.getChars(start),
+      });
+   }
+
 }

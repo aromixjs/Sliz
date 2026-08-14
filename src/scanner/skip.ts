@@ -53,7 +53,7 @@ export namespace skip {
       while (!cursor.eof) {
          if (
             cursor.peek() === char.asterisk &&
-            cursor.peek(1) === char.slash
+            cursor.peekAtOffset(1) === char.slash
          ) {
             cursor.advance();
             cursor.advance();
@@ -64,19 +64,29 @@ export namespace skip {
       }
    }
 
-   /**
-    * Skips a quoted string, handling backslash escapes.
-    *
-    * @param ctx The tokenizer context. Cursor must be positioned at the opening quote.
-    */
-   export function string(cursor:CharacterCursor) {
-      const quote = cursor.peek();
 
+
+
+   // DONE =====>
+
+   /**
+    * Advances the cursor through a JS template literal (e.g., `` `hello ${name}` ``), 
+    * handling backslash escape sequences and recursively skipping embedded JS 
+    * interpolation expressions (`${...}`).
+    *
+    * @param cursor - The character cursor, expected to be positioned at the opening backtick (`\``).
+    */
+   export function template(cursor: CharacterCursor) {
+      // Skip the opening backtick
       cursor.advance();
+
+
+
 
       while (!cursor.eof) {
          const code = cursor.peek();
 
+         // Skip escaped characters (e.g., \` or \\)
          if (code === char.backslash) {
             cursor.advance();
 
@@ -87,45 +97,21 @@ export namespace skip {
             continue;
          }
 
-         if (code === quote) {
-            cursor.advance();
-            return;
-         }
 
-         cursor.advance();
-      }
-   }
 
-   /**
-    * Skips a template literal, handling backslash escapes and `${...}` interpolations.
-    *
-    * @param ctx The tokenizer context. Cursor must be positioned at the opening backtick.
-    */
-   export function template(cursor:CharacterCursor) {
-      cursor.advance();
 
-      while (!cursor.eof) {
-         const code = cursor.peek();
-
-         if (code === char.backslash) {
-            cursor.advance();
-
-            if (!cursor.eof) {
-               cursor.advance();
-            }
-
-            continue;
-         }
-
+         // Exit when reaching the closing backtick
          if (code === char.backtick) {
             cursor.advance();
             return;
          }
 
+         // Handle JS string interpolation (${...})
          if (
             code === char.dollar &&
-            cursor.peek(1) === char.openBrace
+            cursor.peekAtOffset(1) === char.openBrace
          ) {
+            // Consume ${
             cursor.advance();
             cursor.advance();
             skip.braceExpression(cursor);
@@ -137,17 +123,54 @@ export namespace skip {
    }
 
 
+
    /**
-    * Skips a `{ ... }` expression, safely skipping over inner braces, strings, and escape characters.
+    * Advances the cursor through a single- or double-quoted string literal,
+    * skipping escaped characters until the matching closing quote is found.
     *
-    * How it works:
-    * 1. It Tracks brace depth to handle nested `{ }`.
-    * 2. Skips over strings and template literals so braces inside them are ignored.
-    * 3. Skips over escaped characters (e.g., `\}`) so they don't count.
-    * 4. Stops at `</` (closing tag pattern) — expressions shouldn't contain closing tags.
-    * 5. Returns when depth reaches 0 (closing `}` found), at `</`, or at EOF.
+    * @param cursor - The character cursor, expected to be positioned at the opening quote (`'` or `"`).
+    */
+   export function string(cursor: CharacterCursor) {
+      const quote = cursor.peek();
+      // Skip the opening quote
+      cursor.advance();
+
+      while (!cursor.eof) {
+         const code = cursor.peek();
+
+         // Skip escaped characters (e.g., \" or \\)
+         if (code === char.backslash) {
+            cursor.advance();
+
+            if (!cursor.eof) {
+               cursor.advance();
+            }
+
+            continue;
+         }
+
+
+         // Exit when reaching the matching closing quote
+         if (code === quote) {
+            cursor.advance();
+            return;
+         }
+
+         cursor.advance();
+      }
+   }
+
+
+
+
+   /**
+    * Scans through a brace-enclosed JavaScript expression `{ ... }`, tracking
+    * nested brace depth until the matching outer closing brace is found.
     *
-    * @param ctx The tokenizer context. Cursor must be positioned immediately after the opening `{`.
+    * Accounts for escaped characters, string literals, template literals, and 
+    * premature HTML tags to safely ignore non-structural braces.
+    *
+    * @param cursor - The character cursor, expected to be positioned inside an open brace expression.
     */
    export function braceExpression(cursor: CharacterCursor) {
       let depth = 1;
@@ -155,7 +178,7 @@ export namespace skip {
       while (!cursor.eof) {
          const code = cursor.peek();
 
-// ignore `\{` 
+         // Skip escaped character sequences (e.g., inside regexes or raw tokens)
          if (code === char.backslash) {
             cursor.advance();
             if (!cursor.eof) {
@@ -164,27 +187,29 @@ export namespace skip {
             continue;
          }
 
-
+         // Skip string literals so braces inside quotes are ignored
          if (is.quote(code)) {
-            string(cursor);
+            skip.string(cursor);
             continue;
          }
 
+         // Skip template literals so interpolated string contents are ignored
          if (code === char.backtick) {
-            template(cursor);
+            skip.template(cursor);
             continue;
          }
 
-         if (code === char.lessThan && cursor.peek(1) === char.slash) {
+         // Exit early if an unescaped HTML tag start is encountered, indicating an unclosed brace 
+         if (is.tagLike(cursor)) {
             return;
          }
-
+         // Increment depth for nested opening braces
          if (code === char.openBrace) {
             depth++;
             cursor.advance();
             continue;
          }
-
+         // Decrement depth for closing braces; exit when the matching outer brace is reached
          if (code === char.closeBrace) {
             depth--;
             cursor.advance();
@@ -201,3 +226,5 @@ export namespace skip {
    }
 
 };
+
+

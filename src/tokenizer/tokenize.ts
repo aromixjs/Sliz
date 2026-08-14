@@ -1,12 +1,13 @@
 import char from "../scanner/char";
 import { is } from "../scanner/is";
 import { consume } from "./consumer";
+import { CharacterCursor } from "./cursor";
 import { SyntaxKind, Token, TokenizerContext } from "./token";
 
 function dispatch(ctx: TokenizerContext) {
   const code = ctx.cursor.peek();
 
-  if (is.tagStart(ctx)) {
+  if (is.tagLike(ctx.cursor)) {
     consume.markup(ctx);
     return;
   }
@@ -20,7 +21,8 @@ function dispatch(ctx: TokenizerContext) {
 }
 
 export function tokenize(source: string): Token[] {
-  const ctx = new TokenizerContext(source);
+  const cursor = new CharacterCursor(source, 0)
+  const ctx = new TokenizerContext([], cursor);
 
   while (!ctx.cursor.eof) {
     dispatch(ctx);
@@ -30,6 +32,7 @@ export function tokenize(source: string): Token[] {
     kind: SyntaxKind.EndOfFile,
     start: ctx.cursor.source.length,
     end: ctx.cursor.source.length,
+    value: undefined
   });
 
   return ctx.tokens;

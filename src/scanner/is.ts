@@ -1,8 +1,8 @@
+import { CharacterCursor } from "../tokenizer/cursor";
 import { TokenizerContext } from "../tokenizer/token";
 import char from "./char";
 
 export namespace is {
-
    /**
     * Checks whether a character code is whitespace (space, tab, line feed, carriage return).
     */
@@ -20,9 +20,7 @@ export namespace is {
    }
 
 
-   export function quote(code: number) {
-      return code === char.singleQuote || code === char.doubleQuote;
-   }
+
 
    /**
     * Checks whether a character is valid inside an HTML attribute name.
@@ -49,20 +47,11 @@ export namespace is {
       );
    }
 
-   /**
-    * Checks whether the cursor is at a valid HTML tag start:
-    * - `<[A-Za-z]` (opening tag)
-    * - `</[A-Za-z]` (closing tag)
-    * - `<!` (comment, doctype, or bogus comment)
-    *
-    * `<` followed by anything else (space, `>`, digit, etc.) is NOT a tag — it's text.
-    */
-   export function tagStart(ctx: TokenizerContext) {
-      const { cursor } = ctx;
-      if (cursor.peek() !== char.lessThan) return false;
-      const next = cursor.peek(1);
-      return is.alpha(next) || next === char.slash || next === char.exclamationMark;
-   }
+
+
+
+
+
 
    /**
     * Checks whether the cursor is at a valid HTML closing tag start: `</[A-Za-z]`.
@@ -213,5 +202,35 @@ export namespace is {
          cursor.peek(2) === char.greaterThan
       );
    }
+
+
+// done
+
+      /**
+    * Checks whether the cursor is at the start of a valid HTML tag-like sequence.
+    *
+    * According to the HTML specification, a tag start is valid only when the opening
+    * angle bracket (`<`) is immediately followed by an alphabetic character, a slash (`/`),
+    * or an exclamation mark (`!`), with no intervening whitespace.
+    *
+    * @param cursor - The character cursor positioned at the current token/character to inspect.
+    * @returns `true` if the cursor is at a valid HTML tag start; otherwise, `false`.
+    */
+   export function tagLike(cursor: CharacterCursor) {
+      if (cursor.peek() !== char.lessThan){
+         return false;
+      }    
+
+      const next = cursor.peekAtOffset(1);
+      return is.alpha(next) || next === char.slash || next === char.exclamationMark;
+   }
+
+
+
+
+   export function quote(code: number) {
+      return code === char.singleQuote || code === char.doubleQuote;
+   }
+
 
 }
