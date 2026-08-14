@@ -50,11 +50,30 @@ export namespace is {
    }
 
    /**
-    * Checks whether the cursor is at the start of a closing tag: `</`.
+    * Checks whether the cursor is at a valid HTML tag start:
+    * - `<[A-Za-z]` (opening tag)
+    * - `</[A-Za-z]` (closing tag)
+    * - `<!` (comment, doctype, or bogus comment)
+    *
+    * `<` followed by anything else (space, `>`, digit, etc.) is NOT a tag — it's text.
+    */
+   export function tagStart(ctx: TokenizerContext) {
+      const { cursor } = ctx;
+      if (cursor.peek() !== char.lessThan) return false;
+      const next = cursor.peek(1);
+      return is.alpha(next) || next === char.slash || next === char.exclamationMark;
+   }
+
+   /**
+    * Checks whether the cursor is at a valid HTML closing tag start: `</[A-Za-z]`.
     */
    export function closingTagStart(ctx: TokenizerContext) {
       const { cursor } = ctx;
-      return cursor.peek() === char.lessThan && cursor.peek(1) === char.slash;
+      return (
+         cursor.peek() === char.lessThan &&
+         cursor.peek(1) === char.slash &&
+         is.alpha(cursor.peek(2))
+      );
    }
 
    /**

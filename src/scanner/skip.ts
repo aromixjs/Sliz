@@ -1,3 +1,4 @@
+import { CharacterCursor } from "../tokenizer/cursor";
 import { TokenizerContext } from "../tokenizer/token";
 import char from "./char";
 import { is } from "./is";
@@ -68,8 +69,7 @@ export namespace skip {
     *
     * @param ctx The tokenizer context. Cursor must be positioned at the opening quote.
     */
-   export function string(ctx: TokenizerContext) {
-      const { cursor } = ctx;
+   export function string(cursor:CharacterCursor) {
       const quote = cursor.peek();
 
       cursor.advance();
@@ -101,9 +101,7 @@ export namespace skip {
     *
     * @param ctx The tokenizer context. Cursor must be positioned at the opening backtick.
     */
-   export function template(ctx: TokenizerContext) {
-      const { cursor } = ctx;
-
+   export function template(cursor:CharacterCursor) {
       cursor.advance();
 
       while (!cursor.eof) {
@@ -130,7 +128,7 @@ export namespace skip {
          ) {
             cursor.advance();
             cursor.advance();
-            braceExpression(ctx);
+            skip.braceExpression(cursor);
             continue;
          }
 
@@ -151,14 +149,13 @@ export namespace skip {
     *
     * @param ctx The tokenizer context. Cursor must be positioned immediately after the opening `{`.
     */
-   export function braceExpression(ctx: TokenizerContext) {
-      const { cursor } = ctx;
+   export function braceExpression(cursor: CharacterCursor) {
       let depth = 1;
 
       while (!cursor.eof) {
          const code = cursor.peek();
 
-
+// ignore `\{` 
          if (code === char.backslash) {
             cursor.advance();
             if (!cursor.eof) {
@@ -169,12 +166,12 @@ export namespace skip {
 
 
          if (is.quote(code)) {
-            string(ctx);
+            string(cursor);
             continue;
          }
 
          if (code === char.backtick) {
-            template(ctx);
+            template(cursor);
             continue;
          }
 

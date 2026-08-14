@@ -297,8 +297,7 @@ describe("malformed tags", () => {
       const kinds = tokens.map(t => t.kind);
 
       expect(kinds).toEqual([
-         SyntaxKind.LessThan,
-         SyntaxKind.ExpectedTagName,
+         SyntaxKind.Text,
          SyntaxKind.EndOfFile,
       ]);
    });
@@ -309,8 +308,8 @@ describe("malformed tags", () => {
 
       expect(kinds).toEqual([
          SyntaxKind.LessThan,
-         SyntaxKind.Slash,
          SyntaxKind.ExpectedTagName,
+         SyntaxKind.UnexpectedCharacter,
          SyntaxKind.EndOfFile,
       ]);
    });
@@ -321,9 +320,8 @@ describe("malformed tags", () => {
 
       expect(kinds).toEqual([
          SyntaxKind.LessThan,
-         SyntaxKind.Slash,
          SyntaxKind.ExpectedTagName,
-         SyntaxKind.GreaterThan,
+         SyntaxKind.SlashGreaterThan,
          SyntaxKind.EndOfFile,
       ]);
    });

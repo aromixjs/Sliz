@@ -30,7 +30,6 @@ export namespace consume {
          }
 
          if (
-            code === char.lessThan ||
             code === char.openBrace ||
             code === char.closeBrace ||
             code === char.slash
@@ -133,6 +132,8 @@ export namespace consume {
 
    /**
     * Reads a quoted attribute value from the opening quote to the matching closing quote.
+    * Browser behavior: unclosed quote consumes everything until matching quote or EOF.
+    * `<` and `{` inside quoted values are literal — they do NOT end the value.
     */
    export function quotedAttributeValue(ctx: TokenizerContext) {
       const start = ctx.cursor.clone();
@@ -156,13 +157,6 @@ export namespace consume {
             return;
          }
 
-         if (
-            code === char.lessThan ||
-            code === char.openBrace
-         ) {
-            break;
-         }
-
          ctx.cursor.advance();
       }
 
@@ -181,7 +175,9 @@ export namespace consume {
    }
 
    /**
-    * Reads an unquoted attribute value until whitespace, `>`, `<`, `{`, `/`, or EOF.
+    * Reads an unquoted attribute value until whitespace, `>`, `{`, or EOF.
+    * Browser: unquoted values are terminated by whitespace or `>`.
+    * `<` and `/` inside unquoted values are literal characters.
     */
    export function unquotedAttributeValue(ctx: TokenizerContext) {
       const start = ctx.cursor.clone();
@@ -192,9 +188,7 @@ export namespace consume {
          if (
             is.whitespace(code) ||
             is.tagEnd(ctx) ||
-            code === char.lessThan ||
-            code === char.openBrace ||
-            code === char.slash
+            code === char.openBrace
          ) {
             break;
          }
@@ -220,6 +214,7 @@ export namespace consume {
 
    /**
     * Reads a closing tag like `</div>` or `</br>`.
+    * Browser: `</` must be immediately followed by tag name (alpha), no space.
     */
    export function closingTag(ctx: TokenizerContext) {
       const start = ctx.cursor.clone();
@@ -239,8 +234,6 @@ export namespace consume {
          end: start.position + 2,
          value: "/",
       });
-
-      consume.whiteSpace(ctx);
 
       const tagStart = ctx.cursor.clone();
 
@@ -304,7 +297,7 @@ export namespace consume {
          const code = ctx.cursor.peek();
 
          if (is.quote(code)) {
-            skip.string(ctx);
+            skip.string(ctx.cursor);
             continue;
          }
 
@@ -398,6 +391,7 @@ export namespace consume {
 
    /**
     * Reads an opening tag like `<div>` or `<br/>`, returning its name for further dispatch.
+    * Browser: `<` must be immediately followed by tag name (alpha), no space.
     */
    export function openingTag(ctx: TokenizerContext) {
       const start = ctx.cursor.clone();
@@ -409,8 +403,6 @@ export namespace consume {
          end: start.position + 1,
          value: "<",
       });
-
-      consume.whiteSpace(ctx);
 
       const tagStart = ctx.cursor.clone();
 
@@ -469,12 +461,12 @@ export namespace consume {
          const code = ctx.cursor.peek();
 
          if (is.quote(code)) {
-            skip.string(ctx);
+            skip.string(ctx.cursor);
             continue;
          }
 
          if (code === char.backtick) {
-            skip.template(ctx);
+            skip.template(ctx.cursor);
             continue;
          }
 
@@ -528,7 +520,7 @@ export namespace consume {
          const code = ctx.cursor.peek();
 
          if (is.quote(code)) {
-            skip.string(ctx);
+            skip.string(ctx.cursor);
             continue;
          }
 
@@ -653,14 +645,14 @@ export namespace consume {
 
 
 
-   // Reads plain text content until it hits a < or { character.
+   // Reads plain text content until it hits a valid tag start or { character.
    export function text(ctx: TokenizerContext) {
       const start = ctx.cursor.clone();
 
       while (!ctx.cursor.eof) {
          const code = ctx.cursor.peek();
 
-         if (code === char.lessThan || code === char.openBrace) {
+         if (is.tagStart(ctx) || code === char.openBrace) {
             break;
          }
 
@@ -684,10 +676,10 @@ export namespace consume {
    // Reads a JavaScript expression enclosed in curly braces like `{ name }` or `{ count + 1 }`.
    export function expression(ctx: TokenizerContext) {
       const start = ctx.cursor.clone();
-      ctx.cursor.advance();
+      ctx.cursor.advance(); // get past the {
 
       const expressionStart = ctx.cursor.clone();
-      skip.braceExpression(ctx);
+      skip.braceExpression(ctx.cursor);
 
       const closeBrace = ctx.cursor.position - 1;
       const terminated = ctx.cursor.source.charCodeAt(closeBrace) === char.closeBrace;

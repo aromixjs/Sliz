@@ -1,20 +1,22 @@
 import char from "../scanner/char";
+import { is } from "../scanner/is";
 import { consume } from "./consumer";
 import { SyntaxKind, Token, TokenizerContext } from "./token";
 
 function dispatch(ctx: TokenizerContext) {
   const code = ctx.cursor.peek();
-  switch (code) {
-    case char.lessThan:
-      consume.markup(ctx);
-      return;
-    case char.openBrace:
-      consume.expression(ctx);
-      return;
-    default:
-      consume.text(ctx);
-      return;
+
+  if (is.tagStart(ctx)) {
+    consume.markup(ctx);
+    return;
   }
+
+  if (code === char.openBrace) {
+    consume.expression(ctx);
+    return;
+  }
+
+  consume.text(ctx);
 }
 
 export function tokenize(source: string): Token[] {
