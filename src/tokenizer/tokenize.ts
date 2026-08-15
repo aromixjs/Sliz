@@ -24,7 +24,7 @@ function dispatch(ctx: TokenizerContext) {
 
 export function tokenize(source: string): Token[] {
   const cursor = new CharacterCursor(source, 0)
-  const ctx = new TokenizerContext([], cursor);
+  const ctx = new TokenizerContext(cursor);
 
   while (!ctx.cursor.eof) {
     dispatch(ctx);

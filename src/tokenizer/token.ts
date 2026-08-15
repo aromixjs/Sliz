@@ -7,8 +7,12 @@ export enum TokenType {
   OpenBrace = "OpenBrace",
   String = "String",
   EndOfFile = "EndOfFile",
+  HtmlCommentStart = "HtmlCommentStart",
+  HtmlCommentEnd = "HtmlCommentEnd",
+  HtmlCommentContent = "HtmlCommentContent",
+  UnterminatedHtmlComment = "UnterminatedHtmlComment"
 
-  
+
   // // Structural tokens
   // Doctype = "Doctype",
   // Whitespace = "Whitespace",
@@ -47,10 +51,9 @@ export interface Token {
 
 export class TokenizerContext {
   readonly cursor: CharacterCursor;
-  readonly tokens: Array<Token>;
+  readonly tokens: Array<Token> = [];
 
-  constructor(tokens: Array<Token>, cursor: CharacterCursor) {
-    this.tokens = tokens;
+  constructor(cursor: CharacterCursor) {
     this.cursor = cursor
   }
 

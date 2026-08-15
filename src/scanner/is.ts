@@ -171,39 +171,43 @@ export function styleClosingTag(ctx: TokenizerContext) {
    );
 }
 
-/**
- * Checks whether the cursor is at an opening `<!--` sequence.
- *
- * @param ctx The tokenizer context containing the cursor.
- */
-export function commentOpen(ctx: TokenizerContext) {
-   const { cursor } = ctx;
 
-   return (
-      cursor.peek() === char.lessThan &&
-      cursor.peek(1) === char.exclamationMark &&
-      cursor.peek(2) === char.minus &&
-      cursor.peek(3) === char.minus
-   );
-}
 
-/**
- * Checks whether the cursor is at a closing `-->` sequence.
- *
- * @param ctx The tokenizer context containing the cursor.
- */
-export function commentClose(ctx: TokenizerContext) {
-   const { cursor } = ctx;
-
-   return (
-      cursor.peek() === char.minus &&
-      cursor.peek(1) === char.minus &&
-      cursor.peek(2) === char.greaterThan
-   );
-}
 
 
 // ====>> done
+
+
+
+/**
+ * Checks whether the cursor is at a closing `-->` sequence.
+ */
+export function isCommentClose(cursor: CharacterCursor) {
+
+   return (
+      cursor.peek() === char.minus &&
+      cursor.peekAtOffset(1) === char.minus &&
+      cursor.peekAtOffset(2) === char.greaterThan
+   );
+}
+
+
+
+/**
+ * Checks whether the cursor is at an opening `<!--` sequence.
+ */
+export function isCommentOpen(cursor: CharacterCursor) {
+   return (
+      cursor.peek() === char.lessThan &&
+      cursor.peekAtOffset(1) === char.exclamationMark &&
+      cursor.peekAtOffset(2) === char.minus &&
+      cursor.peekAtOffset(3) === char.minus
+   );
+}
+
+
+
+
 
 
 /**

@@ -1,4 +1,5 @@
-import { TokenizerContext } from "../token";
+import { isCommentClose, isCommentOpen } from "../../scanner/is";
+import { TokenizerContext, TokenType } from "../token";
 
 export function whiteSpace(ctx: TokenizerContext) {
    const start = ctx.cursor.clone();
@@ -331,58 +332,7 @@ export function doctype(ctx: TokenizerContext) {
 }
 
 
-/**
- * Reads an HTML comment starting from `<!--` until `-->` is found.
- */
-export function htmlComment(ctx: TokenizerContext) {
-   const start = ctx.cursor.clone();
 
-   ctx.cursor.advance();
-   ctx.cursor.advance();
-   ctx.cursor.advance();
-   ctx.cursor.advance();
-
-   while (!ctx.cursor.eof) {
-
-      if (is.commentOpen(ctx)) {
-         ctx.cursor.advance();
-         ctx.cursor.advance();
-         ctx.cursor.advance();
-         ctx.cursor.advance();
-         continue;
-      }
-
-      if (is.commentClose(ctx)) {
-         ctx.cursor.advance();
-         ctx.cursor.advance();
-         ctx.cursor.advance();
-
-         ctx.emit({
-            kind: TokenType.HtmlComment,
-            start: start.position,
-            end: ctx.cursor.position,
-            value: ctx.cursor.getChars(start),
-         });
-
-         return;
-      }
-
-      ctx.cursor.advance();
-   }
-
-   ctx.emit({
-      kind: TokenType.HtmlComment,
-      start: start.position,
-      end: ctx.cursor.source.length,
-      value: ctx.cursor.getChars(start),
-   });
-
-   ctx.emit({
-      kind: TokenType.UnterminatedComment,
-      start: start.position,
-      end: ctx.cursor.source.length,
-   });
-}
 
 /**
  * Reads an opening tag like `<div>` or `<br/>`, returning its name for further dispatch.
@@ -558,7 +508,7 @@ export function style(ctx: TokenizerContext) {
  * Reads the closing `>` or `/>` of a tag.
  * Emits UnexpectedCharacter for any unexpected chars before the closing delimiter.
  */
-export function tagEnd(ctx: TokenizerContext) {
+function tagEnd(ctx: TokenizerContext) {
    while (!ctx.cursor.eof) {
       const start = ctx.cursor.clone();
 
@@ -605,14 +555,93 @@ export function tagEnd(ctx: TokenizerContext) {
 
 
 
-/*======  These Are Trigger Consumers  =====*/
+/**
+ * Reads an HTML comment starting from `<!--` until `-->` is found.
+ */
+function consumeHtmlComment(ctx: TokenizerContext) {
+   const commentStart = ctx.cursor.position;
+
+   // Consume <!--
+   ctx.cursor.advanceBy(4);
+   ctx.emit({
+      type: TokenType.HtmlCommentStart,
+      start: commentStart,
+      end: ctx.cursor.position,
+      value: ctx.cursor.getChars(commentStart),
+   });
+
+   const contentStart = ctx.cursor.position;
+
+   while (!ctx.cursor.eof) {
+      
+      // As Per Html Spec Nested Comments Are Not Allowed Parser Will Give necessary error
+      if (isCommentOpen(ctx.cursor)) {
+         const nestedStart = ctx.cursor.position;
+         ctx.cursor.advanceBy(4)
+
+         ctx.emit({
+            type: TokenType.HtmlCommentStart,
+            start: nestedStart,
+            end: ctx.cursor.position,
+            value: ctx.cursor.getChars(nestedStart),
+         });
+         continue;
+      }
+
+      if (isCommentClose(ctx.cursor)) {
+         const commentEnd = ctx.cursor.position;
+
+         if (commentEnd > contentStart) {
+            ctx.emit({
+               type: TokenType.HtmlCommentContent,
+               start: contentStart,
+               end: commentEnd,
+               value: ctx.cursor.getChars(contentStart),
+            });
+         }
+
+         ctx.cursor.advanceBy(3);
+         ctx.emit({
+            type: TokenType.HtmlCommentEnd,
+            start: commentEnd,
+            end: ctx.cursor.position,
+            value: ctx.cursor.getChars(commentEnd),
+         });
+
+         return;
+      }
+
+      ctx.cursor.advance();
+   }
+   if (ctx.cursor.position > contentStart) {
+      ctx.emit({
+         type: TokenType.HtmlCommentContent,
+         start: contentStart,
+         end: ctx.cursor.position,
+         value: ctx.cursor.getChars(contentStart),
+      });
+   }
+
+   ctx.emit({
+      type: TokenType.UnterminatedHtmlComment,
+      start: commentStart,
+      end: ctx.cursor.position,
+      value: undefined
+   });
+}
+
+
+
+
+
+
 
 // Determines what kind of HTML tag or element starts at the current position.
 export function consumeMarkup(ctx: TokenizerContext) {
-   // if (is.commentOpen(ctx)) {
-   //    consume.htmlComment(ctx);
-   //    return;
-   // }
+   if (isCommentOpen(ctx.cursor)) {
+      consumeHtmlComment(ctx);
+      return;
+   }
 
    // if (is.doctype(ctx)) {
    //    consume.doctype(ctx);

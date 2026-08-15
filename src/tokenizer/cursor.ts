@@ -20,10 +20,10 @@ export class CharacterCursor {
     this.index++;
   }
 
-
-  advanceTo(position: number): void {
-    this.index = Math.max(0, Math.min(position, this.source.length));
+  advanceBy(offset: number): void {
+    this.index = Math.max(0, Math.min(this.index + offset, this.source.length));
   }
+
 
   get position(): number {
     return this.index;
