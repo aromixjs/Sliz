@@ -1,11 +1,12 @@
 import char from "../../scanner/char";
-import { isQuote, isTagLike } from "../../scanner/is";
+import { blockCommentStart, isQuote, isTagLike, lineCommentStart } from "../../scanner/is";
 import { TokenizerContext, TokenType } from "../token";
+
 
 function consumeTemplateLiteral(ctx: TokenizerContext) {
   const start = ctx.cursor.position;
+  // Consume opening backtick.
   ctx.cursor.advance();
-
   ctx.emit({
     type: TokenType.BackTick,
     start,
@@ -13,6 +14,7 @@ function consumeTemplateLiteral(ctx: TokenizerContext) {
     value: ctx.cursor.getChars(start),
   });
 
+  // Start of the current static template text chunk.
   let chunkStart = ctx.cursor.position;
   while (!ctx.cursor.eof) {
     const code = ctx.cursor.peek();
@@ -30,6 +32,7 @@ function consumeTemplateLiteral(ctx: TokenizerContext) {
 
     // Template interpolation: ${ ... }
     if (code === char.dollar && ctx.cursor.peekAtOffset(1) === char.openBrace) {
+      // Emit the static text preceding the interpolation.
       ctx.emitIf(chunkStart < ctx.cursor.position, {
         type: TokenType.JsString,
         start: chunkStart,
@@ -189,6 +192,93 @@ function consumeString(ctx: TokenizerContext) {
   });
 }
 
+function consumeLineComment(ctx: TokenizerContext) {
+  const start = ctx.cursor.position;
+  ctx.cursor.advanceBy(2);
+
+  ctx.emit({
+    type: TokenType.DoubleSlash,
+    start,
+    end: ctx.cursor.position,
+    value: ctx.cursor.getChars(start),
+  });
+
+  const contentStart = ctx.cursor.position;
+
+  while (!ctx.cursor.eof) {
+    const code = ctx.cursor.peek();
+
+    if (code === char.carriageReturn || code === char.lineFeed) {
+
+      ctx.emitIf(contentStart < ctx.cursor.position, {
+        type: TokenType.CommentText,
+        start: contentStart,
+        end: ctx.cursor.position,
+        value: ctx.cursor.getChars(contentStart),
+      });
+
+      return;
+    }
+    ctx.cursor.advance()
+  }
+}
+
+function consumeBlockComment(ctx: TokenizerContext) {
+  const start = ctx.cursor.position;
+  ctx.cursor.advanceBy(2);
+
+  ctx.emit({
+    type: TokenType.SlashAsterisk,
+    start,
+    end: ctx.cursor.position,
+    value: ctx.cursor.getChars(start),
+  });
+
+  const contentStart = ctx.cursor.position;
+  while (!ctx.cursor.eof) {
+
+    if (ctx.cursor.peek() === char.asterisk && ctx.cursor.peekAtOffset(1) === char.slash) {
+      ctx.emitIf(contentStart < ctx.cursor.position, {
+        type: TokenType.CommentText,
+        start: contentStart,
+        end: ctx.cursor.position,
+        value: ctx.cursor.getChars(contentStart),
+      });
+
+      const endStart = ctx.cursor.position;
+      ctx.cursor.advanceBy(2);
+
+      ctx.emit({
+        type: TokenType.AsteriskSlash,
+        start: endStart,
+        end: ctx.cursor.position,
+        value: ctx.cursor.getChars(endStart),
+      });
+
+      return
+    }
+    ctx.cursor.advance()
+  }
+
+  ctx.emitIf(contentStart < ctx.cursor.position, {
+    type: TokenType.CommentText,
+    start: contentStart,
+    end: ctx.cursor.position,
+    value: ctx.cursor.getChars(contentStart),
+  });
+  ctx.emit({
+    type: TokenType.UnterminatedBlockComment,
+    start,
+    end: ctx.cursor.position,
+    value: ctx.cursor.getChars(start),
+  });
+
+
+
+
+}
+
+
 function consumeJs(ctx: TokenizerContext) {
   let depth = 1;
   let chunkStart = ctx.cursor.position;
@@ -224,6 +314,36 @@ function consumeJs(ctx: TokenizerContext) {
       continue;
     }
 
+    if (lineCommentStart(ctx.cursor)) {
+      ctx.emitIf(chunkStart < ctx.cursor.position, {
+        type: TokenType.JsExpression,
+        start: chunkStart,
+        end: ctx.cursor.position,
+        value: ctx.cursor.getChars(chunkStart),
+      });
+
+      consumeLineComment(ctx)
+      chunkStart = ctx.cursor.position;
+            continue;
+
+    }
+    if (blockCommentStart(ctx.cursor)) {
+            ctx.emitIf(chunkStart < ctx.cursor.position, {
+        type: TokenType.JsExpression,
+        start: chunkStart,
+        end: ctx.cursor.position,
+        value: ctx.cursor.getChars(chunkStart),
+      });
+
+      consumeBlockComment(ctx)
+       chunkStart = ctx.cursor.position;
+      continue;
+    }
+
+
+
+
+
     // Sliz template interpolation will not support jsx-like nested html inside js
     if (isTagLike(ctx.cursor)) {
       ctx.emitIf(chunkStart < ctx.cursor.position, {
@@ -242,6 +362,7 @@ function consumeJs(ctx: TokenizerContext) {
 
       return;
     }
+
 
     if (code === char.openBrace) {
       depth++;

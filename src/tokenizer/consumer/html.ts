@@ -337,64 +337,6 @@ export function openingTag(ctx: TokenizerContext) {
 
 
 
-/**
- * Reads the raw content of a `<script>` tag until `</script>` is found.
- */
-export function script(ctx: TokenizerContext) {
-   const start = ctx.cursor.clone();
-
-   while (!ctx.cursor.eof) {
-      const code = ctx.cursor.peek();
-
-      if (is.quote(code)) {
-         skip.string(ctx.cursor);
-         continue;
-      }
-
-      if (code === char.backtick) {
-         skip.template(ctx.cursor);
-         continue;
-      }
-
-      if (is.lineCommentStart(ctx)) {
-         skip.lineComment(ctx);
-         continue;
-      }
-
-      if (is.blockCommentStart(ctx)) {
-         skip.blockComment(ctx);
-         continue;
-      }
-
-      if (
-         code === char.lessThan &&
-         ctx.cursor.peek(1) === char.slash &&
-         is.scriptClosingTag(ctx)
-      ) {
-         break;
-      }
-
-      ctx.cursor.advance();
-   }
-
-   if (ctx.cursor.eof) {
-      ctx.emit({
-         kind: TokenType.UnterminatedScript,
-         start: start.position,
-         end: ctx.cursor.position,
-      });
-   }
-
-   if (ctx.cursor.position > start.position) {
-      ctx.emit({
-         kind: TokenType.Script,
-         start: start.position,
-         end: ctx.cursor.position,
-         value: ctx.cursor.getChars(start),
-      });
-   }
-}
-
 
 /**
  * Reads the raw content of a `<style>` tag until `</style>` is found.

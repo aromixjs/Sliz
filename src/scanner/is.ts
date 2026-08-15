@@ -64,94 +64,6 @@ export function closingTagStart(ctx: TokenizerContext) {
    );
 }
 
-/**
- * Checks whether the cursor is at the start of a line comment: `//`.
- */
-export function lineCommentStart(ctx: TokenizerContext) {
-   const { cursor } = ctx;
-   return cursor.peek() === char.slash && cursor.peek(1) === char.slash;
-}
-
-/**
- * Checks whether the cursor is at the start of a block comment: `/*`.
- */
-export function blockCommentStart(ctx: TokenizerContext) {
-   const { cursor } = ctx;
-   return cursor.peek() === char.slash && cursor.peek(1) === char.asterisk;
-}
-
-
-
-/**
- * Checks whether the cursor is at a `</script>` closing tag (case-insensitive).
- *
- * @param ctx The tokenizer context containing the cursor.
- */
-export function scriptClosingTag(ctx: TokenizerContext) {
-   const { cursor } = ctx;
-
-   if (
-      cursor.peek() !== char.lessThan ||
-      cursor.peek(1) !== char.slash
-   ) {
-      return false;
-   }
-
-   const s = cursor.peek(2);
-   const c = cursor.peek(3);
-   const r = cursor.peek(4);
-   const i = cursor.peek(5);
-   const p = cursor.peek(6);
-   const t = cursor.peek(7);
-
-   return (
-      (s === char.lowerS || s === char.upperS) &&
-      (c === char.lowerC || c === char.upperC) &&
-      (r === char.lowerR || r === char.upperR) &&
-      (i === char.lowerI || i === char.upperI) &&
-      (p === char.lowerP || p === char.upperP) &&
-      (t === char.lowerT || t === char.upperT) &&
-      (
-         is.whitespace(cursor.peek(8)) ||
-         cursor.peek(8) === char.greaterThan
-      )
-   );
-}
-
-/**
- * Checks whether the cursor is at a `</style>` closing tag (case-insensitive).
- *
- * @param ctx The tokenizer context containing the cursor.
- */
-export function styleClosingTag(ctx: TokenizerContext) {
-   const { cursor } = ctx;
-
-   if (
-      cursor.peek() !== char.lessThan ||
-      cursor.peek(1) !== char.slash
-   ) {
-      return false;
-   }
-
-   const s = cursor.peek(2);
-   const t = cursor.peek(3);
-   const y = cursor.peek(4);
-   const l = cursor.peek(5);
-   const e = cursor.peek(6);
-
-   return (
-      (s === char.lowerS || s === char.upperS) &&
-      (t === char.lowerT || t === char.upperT) &&
-      (y === char.lowerY || y === char.upperY) &&
-      (l === char.lowerL || l === char.upperL) &&
-      (e === char.lowerE || e === char.upperE) &&
-      (
-         is.whitespace(cursor.peek(7)) ||
-         cursor.peek(7) === char.greaterThan
-      )
-   );
-}
-
 
 
 
@@ -228,3 +140,12 @@ export function isTagLike(cursor: CharacterCursor) {
 export function isQuote(code: number) {
    return code === char.singleQuote || code === char.doubleQuote;
 }
+
+export function lineCommentStart(cursor: CharacterCursor) {
+   return cursor.peek() === char.slash && cursor.peekAtOffset(1) === char.slash;
+}
+
+export function blockCommentStart(cursor: CharacterCursor) {
+   return cursor.peek() === char.slash && cursor.peekAtOffset(1) === char.asterisk;
+}
+
