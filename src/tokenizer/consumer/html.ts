@@ -1,4 +1,5 @@
-import { isCommentClose, isCommentOpen } from "../../scanner/is";
+import char from "../../scanner/char";
+import { isCommentClose, isCommentOpen, isDoctype, isQuote } from "../../scanner/is";
 import { TokenizerContext, TokenType } from "../token";
 
 export function whiteSpace(ctx: TokenizerContext) {
@@ -273,66 +274,6 @@ export function closingTag(ctx: TokenizerContext) {
 }
 
 
-/**
- * Reads a `<!DOCTYPE ...>` declaration until the closing `>` is found.
- */
-export function doctype(ctx: TokenizerContext) {
-   const start = ctx.cursor.clone();
-
-   ctx.cursor.advance();
-   ctx.cursor.advance();
-   ctx.cursor.advance();
-   ctx.cursor.advance();
-   ctx.cursor.advance();
-   ctx.cursor.advance();
-   ctx.cursor.advance();
-   ctx.cursor.advance();
-   ctx.cursor.advance();
-
-   while (!ctx.cursor.eof) {
-      const code = ctx.cursor.peek();
-
-      if (is.quote(code)) {
-         skip.string(ctx.cursor);
-         continue;
-      }
-
-      if (code === char.greaterThan) {
-         ctx.cursor.advance();
-
-         ctx.emit({
-            kind: TokenType.Doctype,
-            start: start.position,
-            end: ctx.cursor.position,
-            value: ctx.cursor.getChars(start),
-         });
-
-         return;
-      }
-
-      if (code === char.lessThan) {
-         break;
-      }
-
-      ctx.cursor.advance();
-   }
-
-   ctx.emit({
-      kind: TokenType.Doctype,
-      start: start.position,
-      end: ctx.cursor.position,
-      value: ctx.cursor.getChars(start),
-   });
-
-   ctx.emit({
-      kind: TokenType.UnterminatedDoctype,
-      start: start.position,
-      end: ctx.cursor.position,
-   });
-}
-
-
-
 
 /**
  * Reads an opening tag like `<div>` or `<br/>`, returning its name for further dispatch.
@@ -554,6 +495,57 @@ function tagEnd(ctx: TokenizerContext) {
 }
 
 
+/**
+ * Reads a `<!DOCTYPE ...>` declaration until the closing `>` is found.
+ */
+function doctype(ctx: TokenizerContext) {
+   const start = ctx.cursor.position;
+   ctx.cursor.advanceBy(9);
+
+
+   while (!ctx.cursor.eof) {
+      const code = ctx.cursor.peek();
+
+      if (isQuote(code)) {
+         skip.string(ctx.cursor);
+         continue;
+      }
+
+      if (code === char.greaterThan) {
+         ctx.cursor.advance();
+
+         ctx.emit({
+            kind: TokenType.Doctype,
+            start: start.position,
+            end: ctx.cursor.position,
+            value: ctx.cursor.getChars(start),
+         });
+
+         return;
+      }
+
+      if (code === char.lessThan) {
+         break;
+      }
+
+      ctx.cursor.advance();
+   }
+
+   ctx.emit({
+      kind: TokenType.Doctype,
+      start: start.position,
+      end: ctx.cursor.position,
+      value: ctx.cursor.getChars(start),
+   });
+
+   ctx.emit({
+      kind: TokenType.UnterminatedDoctype,
+      start: start.position,
+      end: ctx.cursor.position,
+   });
+}
+
+
 
 /**
  * Reads an HTML comment starting from `<!--` until `-->` is found.
@@ -573,7 +565,7 @@ function consumeHtmlComment(ctx: TokenizerContext) {
    const contentStart = ctx.cursor.position;
 
    while (!ctx.cursor.eof) {
-      
+
       // As Per Html Spec Nested Comments Are Not Allowed Parser Will Give necessary error
       if (isCommentOpen(ctx.cursor)) {
          const nestedStart = ctx.cursor.position;
@@ -643,10 +635,10 @@ export function consumeMarkup(ctx: TokenizerContext) {
       return;
    }
 
-   // if (is.doctype(ctx)) {
-   //    consume.doctype(ctx);
-   //    return;
-   // }
+   if (isDoctype(ctx.cursor)) {
+      consumeDoctype(ctx);
+      return;
+   }
 
    // if (is.closingTagStart(ctx)) {
    //    consume.closingTag(ctx);

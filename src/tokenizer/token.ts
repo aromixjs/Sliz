@@ -5,8 +5,16 @@ import { CharacterCursor } from "./cursor";
 export enum TokenType {
   Text = "Text",
   OpenBrace = "OpenBrace",
-  String = "String",
+  CloseBrace = "CloseBrace",
+
+  JsString = "JsString",
+  JsExpression = "JsExpression",
+  UnterminatedJsString = "UnterminatedJsString",
+  UnterminatedJsExpression = "UnterminatedJsExpression",
+
   EndOfFile = "EndOfFile",
+
+  //  Html Comment Tokens
   HtmlCommentStart = "HtmlCommentStart",
   HtmlCommentEnd = "HtmlCommentEnd",
   HtmlCommentContent = "HtmlCommentContent",

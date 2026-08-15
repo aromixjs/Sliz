@@ -80,26 +80,7 @@ export function blockCommentStart(ctx: TokenizerContext) {
    return cursor.peek() === char.slash && cursor.peek(1) === char.asterisk;
 }
 
-/**
- * Checks whether the cursor is currently standing at the start of a `<!DOCTYPE` or `<!doctype` tag.
- *
- * @param ctx The tokenizer context containing the cursor.
- */
-export function doctype(ctx: TokenizerContext) {
-   const { cursor } = ctx;
 
-   return (
-      cursor.peek() === char.lessThan &&
-      cursor.peek(1) === char.exclamationMark &&
-      (cursor.peek(2) === char.upperD || cursor.peek(2) === char.lowerD) &&
-      (cursor.peek(3) === char.upperO || cursor.peek(3) === char.lowerO) &&
-      (cursor.peek(4) === char.upperC || cursor.peek(4) === char.lowerC) &&
-      (cursor.peek(5) === char.upperT || cursor.peek(5) === char.lowerT) &&
-      (cursor.peek(6) === char.upperY || cursor.peek(6) === char.lowerY) &&
-      (cursor.peek(7) === char.upperP || cursor.peek(7) === char.lowerP) &&
-      (cursor.peek(8) === char.upperE || cursor.peek(8) === char.lowerE)
-   );
-}
 
 /**
  * Checks whether the cursor is at a `</script>` closing tag (case-insensitive).
@@ -177,6 +158,24 @@ export function styleClosingTag(ctx: TokenizerContext) {
 
 // ====>> done
 
+/**
+ * Checks whether the cursor is currently standing at the start of a `<!DOCTYPE` or `<!doctype` tag.
+ */
+export function isDoctype(cursor: CharacterCursor) {
+
+   return (
+      cursor.peek() === char.lessThan &&
+      cursor.peekAtOffset(1) === char.exclamationMark &&
+      (cursor.peekAtOffset(2) === char.upperD || cursor.peekAtOffset(2) === char.lowerD) &&
+      (cursor.peekAtOffset(3) === char.upperO || cursor.peekAtOffset(3) === char.lowerO) &&
+      (cursor.peekAtOffset(4) === char.upperC || cursor.peekAtOffset(4) === char.lowerC) &&
+      (cursor.peekAtOffset(5) === char.upperT || cursor.peekAtOffset(5) === char.lowerT) &&
+      (cursor.peekAtOffset(6) === char.upperY || cursor.peekAtOffset(6) === char.lowerY) &&
+      (cursor.peekAtOffset(7) === char.upperP || cursor.peekAtOffset(7) === char.lowerP) &&
+      (cursor.peekAtOffset(8) === char.upperE || cursor.peekAtOffset(8) === char.lowerE)
+   );
+}
+
 
 
 /**
@@ -207,9 +206,6 @@ export function isCommentOpen(cursor: CharacterCursor) {
 
 
 
-
-
-
 /**
   * Checks whether the cursor is at the start of a valid HTML tag-like sequence.
   *
@@ -228,11 +224,7 @@ export function isTagLike(cursor: CharacterCursor) {
 
 
 
-/**
- * In Sliz, all quote types are treated identically.
- * Single quotes, double quotes, and backticks all support multiline strings.
- * Template-literal interpolation (${...}) is not supported.
- */
+
 export function isQuote(code: number) {
-   return code === char.singleQuote || code === char.doubleQuote || code === char.backtick;
+   return code === char.singleQuote || code === char.doubleQuote;
 }

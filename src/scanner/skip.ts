@@ -173,8 +173,10 @@ export function string(cursor: CharacterCursor) {
  */
 
 
-export function skipBraceExpression(cursor: CharacterCursor) {
+export function skipBraceExpression(ctx: TokenizerContext) {
+   const cursor = ctx.cursor;
    let depth = 1;
+   const expressionStart = cursor.position
 
    while (!cursor.eof) {
       const code = cursor.peek();
