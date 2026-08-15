@@ -336,57 +336,6 @@ export function openingTag(ctx: TokenizerContext) {
 }
 
 
-
-
-/**
- * Reads the raw content of a `<style>` tag until `</style>` is found.
- */
-export function style(ctx: TokenizerContext) {
-   const start = ctx.cursor.clone();
-
-   while (!ctx.cursor.eof) {
-      const code = ctx.cursor.peek();
-
-      if (is.quote(code)) {
-         skip.string(ctx.cursor);
-         continue;
-      }
-
-      if (is.blockCommentStart(ctx)) {
-         skip.blockComment(ctx);
-         continue;
-      }
-
-      if (
-         code === char.lessThan &&
-         ctx.cursor.peek(1) === char.slash &&
-         is.styleClosingTag(ctx)
-      ) {
-         break;
-      }
-
-      ctx.cursor.advance();
-   }
-
-   if (ctx.cursor.eof) {
-      ctx.emit({
-         kind: TokenType.UnterminatedStyle,
-         start: start.position,
-         end: ctx.cursor.position,
-      });
-   }
-
-   if (ctx.cursor.position > start.position) {
-      ctx.emit({
-         kind: TokenType.Style,
-         start: start.position,
-         end: ctx.cursor.position,
-         value: ctx.cursor.getChars(start),
-      });
-   }
-}
-
-
 /**
  * Reads the closing `>` or `/>` of a tag.
  * Emits UnexpectedCharacter for any unexpected chars before the closing delimiter.
@@ -440,7 +389,7 @@ function tagEnd(ctx: TokenizerContext) {
 /**
  * Reads a `<!DOCTYPE ...>` declaration until the closing `>` is found.
  */
-function doctype(ctx: TokenizerContext) {
+const consumeDoctype=(ctx: TokenizerContext)=> {
    const start = ctx.cursor.position;
    ctx.cursor.advanceBy(9);
 
@@ -492,7 +441,7 @@ function doctype(ctx: TokenizerContext) {
 /**
  * Reads an HTML comment starting from `<!--` until `-->` is found.
  */
-function consumeHtmlComment(ctx: TokenizerContext) {
+const consumeHtmlComment=(ctx: TokenizerContext)=> {
    const commentStart = ctx.cursor.position;
 
    // Consume <!--
@@ -547,14 +496,14 @@ function consumeHtmlComment(ctx: TokenizerContext) {
 
       ctx.cursor.advance();
    }
-   if (ctx.cursor.position > contentStart) {
-      ctx.emit({
-         type: TokenType.HtmlCommentContent,
-         start: contentStart,
-         end: ctx.cursor.position,
-         value: ctx.cursor.getChars(contentStart),
-      });
-   }
+
+   ctx.emitIf(ctx.cursor.position > contentStart, {
+      type: TokenType.HtmlCommentContent,
+      start: contentStart,
+      end: ctx.cursor.position,
+      value: ctx.cursor.getChars(contentStart),
+   })
+
 
    ctx.emit({
       type: TokenType.UnterminatedHtmlComment,
@@ -566,12 +515,8 @@ function consumeHtmlComment(ctx: TokenizerContext) {
 
 
 
-
-
-
-
 // Determines what kind of HTML tag or element starts at the current position.
-export function consumeMarkup(ctx: TokenizerContext) {
+export const consumeMarkup = (ctx: TokenizerContext) => {
    if (isCommentOpen(ctx.cursor)) {
       consumeHtmlComment(ctx);
       return;
@@ -582,10 +527,10 @@ export function consumeMarkup(ctx: TokenizerContext) {
       return;
    }
 
-   // if (is.closingTagStart(ctx)) {
-   //    consume.closingTag(ctx);
-   //    return;
-   // }
+   if (isClosingTagStart(ctx)) {
+      consume.closingTag(ctx);
+      return;
+   }
 
    // const tagName = consume.openingTag(ctx);
 

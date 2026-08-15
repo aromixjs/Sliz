@@ -46,6 +46,20 @@ describe('consume.expression', () => {
       ]);
    });
 
+   it("handles expression with double-quoted string containing }", () => {
+
+      const cursor = new CharacterCursor('{"}"}', 0)
+      const ctx = new TokenizerContext(cursor)
+      consumeExpression(ctx);
+      expect(ctx.tokens).toEqual([
+         { type: TokenType.OpenBrace, start: 0, end: 1, value: "{" },
+         { type: TokenType.Quote, start: 1, end: 2, value: '"' },
+         { type: TokenType.JsString, start: 2, end: 3, value: '}' },
+         { type: TokenType.Quote, start: 3, end: 4, value: '"' },
+         { type: TokenType.CloseBrace, start: 4, end: 5, value: "}" },
+      ]);
+   })
+
 
 
 

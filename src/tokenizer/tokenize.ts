@@ -1,6 +1,6 @@
 import char from "../scanner/char";
 import { isTagLike } from "../scanner/is";
-import { consumeMarkup } from "./consumer/html";
+import { consumeMarkup } from "./consumer/markup";
 import { consumeExpression } from "./consumer/interpolation";
 import { consumeText } from "./consumer/text";
 import { CharacterCursor } from "./cursor";

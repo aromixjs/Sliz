@@ -84,4 +84,6 @@ export default {
   lowerZ: 122,
   underscore: 95,
   dot: 46,
+  zero: 48,
+  nine: 57,
 };

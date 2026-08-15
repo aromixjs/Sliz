@@ -38,19 +38,20 @@
     "build": "tsup",
     "dev": "tsup --watch",
     "typecheck": "tsc --noEmit",
-    "format": "biome format --write .",
     "test": "vitest run",
     "change": "beachball change",
     "bump": "beachball bump",
-    "release": "beachball publish --yes --access public"
+    "release": "beachball publish --yes --access public",
+    "fmt": "oxfmt",
+    "fmt:check": "oxfmt --check"
   },
   "devDependencies": {
     "@types/node": "^22.10.2",
     "@vue/compiler-core": "^3.5.41",
     "beachball": "^2.65.5",
-    "biome": "^0.3.3",
     "fast-check": "^4.9.0",
     "htmlparser2": "^12.0.0",
+    "oxfmt": "^0.63.0",
     "tsup": "^8.3.5",
     "tsx": "^4.23.11",
     "vitest": "^4.1.6"
