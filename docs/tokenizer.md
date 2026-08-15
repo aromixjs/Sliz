@@ -41,14 +41,21 @@ Diagnostics are pushed into `context.diagnostics` (shared reference).
 ```ts
 function dispatch(ctx) {
   switch (cursor.peek()) {
-    case '<':  consume.markup(ctx);  break;
-    case '{':  consume.expression(ctx); break;
-    default:   consume.text(ctx); break;
+    case "<":
+      consume.markup(ctx);
+      break;
+    case "{":
+      consume.expression(ctx);
+      break;
+    default:
+      consume.text(ctx);
+      break;
   }
 }
 ```
 
 Three entry points based on the current character:
+
 - `<` → markup (tags, comments, doctypes)
 - `{` → expressions
 - anything else → plain text
@@ -59,14 +66,14 @@ Three entry points based on the current character:
 
 Every consumer stops scanning when it hits one of these characters:
 
-| Character | Meaning |
-|-----------|---------|
-| `<` | Start of a tag or comment |
-| `{` | Start of an expression |
-| `>` | End of a tag |
-| `/` | Potential self-closing tag or closing tag |
-| whitespace | Delimiter between tokens |
-| EOF | End of source |
+| Character  | Meaning                                   |
+| ---------- | ----------------------------------------- |
+| `<`        | Start of a tag or comment                 |
+| `{`        | Start of an expression                    |
+| `>`        | End of a tag                              |
+| `/`        | Potential self-closing tag or closing tag |
+| whitespace | Delimiter between tokens                  |
+| EOF        | End of source                             |
 
 When a consumer encounters a sync point it can't handle, it returns immediately. The outer `dispatch` loop picks up from there. This keeps error scope minimal — a malformed expression doesn't eat a closing tag, and a malformed tag doesn't eat the next element.
 
@@ -76,31 +83,31 @@ When a consumer encounters a sync point it can't handle, it returns immediately.
 
 ### Top-level
 
-| Function | Input | Produces |
-|----------|-------|----------|
-| `text` | plain text until `<` or `{` | `Text` token |
-| `expression` | `{ ... }` | `OpenBrace` + `JsExpression` + `CloseBrace` tokens |
-| `markup` | `<...` | dispatches to comment / doctype / closingTag / openingTag |
+| Function     | Input                       | Produces                                                  |
+| ------------ | --------------------------- | --------------------------------------------------------- |
+| `text`       | plain text until `<` or `{` | `Text` token                                              |
+| `expression` | `{ ... }`                   | `OpenBrace` + `JsExpression` + `CloseBrace` tokens        |
+| `markup`     | `<...`                      | dispatches to comment / doctype / closingTag / openingTag |
 
 ### Tag consumers
 
-| Function | Input | Produces |
-|----------|-------|----------|
-| `openingTag` | `<div class="x">` | `LessThan` + `TagName` + attributes + tag end |
-| `closingTag` | `</div>` | `LessThan` + `Slash` + `TagName` + tag end |
-| `tagEnd` | `>` or `/>` | `GreaterThan` or `SlashGreaterThan` |
-| `attributes` | loops calling `attribute` | multiple `AttributeName` + `AttributeValue` tokens |
-| `attribute` | `name="value"` | `AttributeName` + optionally `Equals` + value |
-| `attributeValue` | dispatches to expression / quoted / unquoted | value tokens |
+| Function         | Input                                        | Produces                                           |
+| ---------------- | -------------------------------------------- | -------------------------------------------------- |
+| `openingTag`     | `<div class="x">`                            | `LessThan` + `TagName` + attributes + tag end      |
+| `closingTag`     | `</div>`                                     | `LessThan` + `Slash` + `TagName` + tag end         |
+| `tagEnd`         | `>` or `/>`                                  | `GreaterThan` or `SlashGreaterThan`                |
+| `attributes`     | loops calling `attribute`                    | multiple `AttributeName` + `AttributeValue` tokens |
+| `attribute`      | `name="value"`                               | `AttributeName` + optionally `Equals` + value      |
+| `attributeValue` | dispatches to expression / quoted / unquoted | value tokens                                       |
 
 ### Special content
 
-| Function | Input | Produces |
-|----------|-------|----------|
-| `doctype` | `<!DOCTYPE ...>` | `Doctype` token |
-| `htmlComment` | `<!-- ... -->` | `HtmlComment` token |
-| `script` | raw content until `</script>` | `Script` token |
-| `style` | raw content until `</style>` | `Style` token |
+| Function      | Input                         | Produces            |
+| ------------- | ----------------------------- | ------------------- |
+| `doctype`     | `<!DOCTYPE ...>`              | `Doctype` token     |
+| `htmlComment` | `<!-- ... -->`                | `HtmlComment` token |
+| `script`      | raw content until `</script>` | `Script` token      |
+| `style`       | raw content until `</style>`  | `Style` token       |
 
 ---
 
@@ -166,9 +173,11 @@ The tokenizer never throws. When it encounters malformed input:
 4. **Return** — the outer `dispatch` loop takes over.
 
 Example:
+
 ```
 <div>{unclosed expression</div>
 ```
+
 - `expression` scans `{unclosed expression`
 - Hits `</` → emits `UnterminatedExpression` error + partial tokens
 - Cursor stays at `<`
@@ -178,17 +187,17 @@ Example:
 
 ## Diagnostic Codes
 
-| Code | Meaning |
-|------|---------|
-| SLIZ001 | Unterminated expression |
-| SLIZ002 | Unterminated doctype |
-| SLIZ003 | Expected tag name |
-| SLIZ004 | Unterminated attribute value |
+| Code    | Meaning                        |
+| ------- | ------------------------------ |
+| SLIZ001 | Unterminated expression        |
+| SLIZ002 | Unterminated doctype           |
+| SLIZ003 | Expected tag name              |
+| SLIZ004 | Unterminated attribute value   |
 | SLIZ005 | Expected tag end (`>` or `/>`) |
-| SLIZ006 | Unterminated comment |
-| SLIZ007 | Nested comment |
-| SLIZ008 | Unterminated script |
-| SLIZ009 | Unterminated style |
+| SLIZ006 | Unterminated comment           |
+| SLIZ007 | Nested comment                 |
+| SLIZ008 | Unterminated script            |
+| SLIZ009 | Unterminated style             |
 
 ---
 

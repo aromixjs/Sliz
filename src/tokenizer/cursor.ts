@@ -7,7 +7,6 @@ export class CharacterCursor {
     this.index = Math.max(0, Math.min(position, source.length));
   }
 
-
   peek(): number {
     return this.source.charCodeAt(this.index);
   }
@@ -24,7 +23,6 @@ export class CharacterCursor {
     this.index = Math.max(0, Math.min(this.index + offset, this.source.length));
   }
 
-
   get position(): number {
     return this.index;
   }
@@ -32,7 +30,6 @@ export class CharacterCursor {
   getChars(start: number): string {
     return this.source.slice(start, this.index);
   }
-
 
   get eof(): boolean {
     return this.index >= this.source.length;

@@ -1,7 +1,6 @@
 import { type Maybe } from "../types/maybe";
 import { CharacterCursor } from "./cursor";
 
-
 export enum TokenType {
   Text = "Text",
   OpenBrace = "OpenBrace",
@@ -26,10 +25,7 @@ export enum TokenType {
   HtmlCommentStart = "HtmlCommentStart",
   HtmlCommentEnd = "HtmlCommentEnd",
   HtmlCommentContent = "HtmlCommentContent",
-  UnterminatedHtmlComment = "UnterminatedHtmlComment"
-
-
-
+  UnterminatedHtmlComment = "UnterminatedHtmlComment",
 }
 
 export interface Token {
@@ -44,7 +40,7 @@ export class TokenizerContext {
   readonly tokens: Array<Token> = [];
 
   constructor(cursor: CharacterCursor) {
-    this.cursor = cursor
+    this.cursor = cursor;
   }
 
   emit(token: Token): void {
@@ -52,10 +48,8 @@ export class TokenizerContext {
   }
 
   emitIf(condition: boolean, token: Token) {
-
     if (condition) {
       this.tokens.push(token);
     }
-
   }
 }

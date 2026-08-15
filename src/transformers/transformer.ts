@@ -1,9 +1,5 @@
 import { Node } from "../parser/types";
-import {
-  ExtractedExpression,
-  PreProcessError,
-  PreProcessResult,
-} from "./types";
+import { ExtractedExpression, PreProcessError, PreProcessResult } from "./types";
 
 export type TransformedNode = TextNode | ElementNode | ConditionalNode;
 
@@ -59,9 +55,7 @@ function transformNode(
   }
 
   const { ".when": whenId, ...rest } = node.attributes;
-  const children = node.children.map((c: Node) =>
-    transformNode(c, expressions, errors)
-  );
+  const children = node.children.map((c: Node) => transformNode(c, expressions, errors));
 
   let current: TransformedNode = {
     type: "element",

@@ -2,7 +2,6 @@ import char from "../../scanner/char";
 import { blockCommentStart, isQuote, isTagLike, lineCommentStart } from "../../scanner/is";
 import { TokenizerContext, TokenType } from "../token";
 
-
 const consumeTemplateLiteral = (ctx: TokenizerContext) => {
   const start = ctx.cursor.position;
   // Consume opening backtick.
@@ -83,7 +82,7 @@ const consumeTemplateLiteral = (ctx: TokenizerContext) => {
     end: ctx.cursor.position,
     value: ctx.cursor.getChars(start),
   });
-}
+};
 
 const consumeTemplateExpression = (ctx: TokenizerContext) => {
   const beforeDollar = ctx.cursor.position;
@@ -105,7 +104,7 @@ const consumeTemplateExpression = (ctx: TokenizerContext) => {
   });
 
   consumeJs(ctx);
-}
+};
 
 const consumeString = (ctx: TokenizerContext) => {
   const start = ctx.cursor.position;
@@ -190,7 +189,7 @@ const consumeString = (ctx: TokenizerContext) => {
     end: ctx.cursor.position,
     value: ctx.cursor.getChars(start),
   });
-}
+};
 
 const consumeLineComment = (ctx: TokenizerContext) => {
   const start = ctx.cursor.position;
@@ -209,7 +208,6 @@ const consumeLineComment = (ctx: TokenizerContext) => {
     const code = ctx.cursor.peek();
 
     if (code === char.carriageReturn || code === char.lineFeed) {
-
       ctx.emitIf(contentStart < ctx.cursor.position, {
         type: TokenType.CommentText,
         start: contentStart,
@@ -219,9 +217,9 @@ const consumeLineComment = (ctx: TokenizerContext) => {
 
       return;
     }
-    ctx.cursor.advance()
+    ctx.cursor.advance();
   }
-}
+};
 
 const consumeBlockComment = (ctx: TokenizerContext) => {
   const start = ctx.cursor.position;
@@ -236,7 +234,6 @@ const consumeBlockComment = (ctx: TokenizerContext) => {
 
   const contentStart = ctx.cursor.position;
   while (!ctx.cursor.eof) {
-
     if (ctx.cursor.peek() === char.asterisk && ctx.cursor.peekAtOffset(1) === char.slash) {
       ctx.emitIf(contentStart < ctx.cursor.position, {
         type: TokenType.CommentText,
@@ -255,9 +252,9 @@ const consumeBlockComment = (ctx: TokenizerContext) => {
         value: ctx.cursor.getChars(endStart),
       });
 
-      return
+      return;
     }
-    ctx.cursor.advance()
+    ctx.cursor.advance();
   }
 
   ctx.emitIf(contentStart < ctx.cursor.position, {
@@ -272,8 +269,7 @@ const consumeBlockComment = (ctx: TokenizerContext) => {
     end: ctx.cursor.position,
     value: ctx.cursor.getChars(start),
   });
-}
-
+};
 
 const consumeJs = (ctx: TokenizerContext) => {
   let depth = 1;
@@ -318,7 +314,7 @@ const consumeJs = (ctx: TokenizerContext) => {
         value: ctx.cursor.getChars(chunkStart),
       });
 
-      consumeLineComment(ctx)
+      consumeLineComment(ctx);
       chunkStart = ctx.cursor.position;
       continue;
     }
@@ -331,7 +327,7 @@ const consumeJs = (ctx: TokenizerContext) => {
         value: ctx.cursor.getChars(chunkStart),
       });
 
-      consumeBlockComment(ctx)
+      consumeBlockComment(ctx);
       chunkStart = ctx.cursor.position;
       continue;
     }
@@ -354,7 +350,6 @@ const consumeJs = (ctx: TokenizerContext) => {
 
       return;
     }
-
 
     if (code === char.openBrace) {
       depth++;
@@ -408,7 +403,7 @@ const consumeJs = (ctx: TokenizerContext) => {
     end: ctx.cursor.position,
     value: undefined,
   });
-}
+};
 
 /**
  * Consumes a JavaScript interpolation expression enclosed in curly braces.
@@ -424,4 +419,4 @@ export const consumeExpression = (ctx: TokenizerContext) => {
     value: ctx.cursor.getChars(start),
   });
   consumeJs(ctx);
-}
+};

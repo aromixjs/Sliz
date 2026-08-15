@@ -10,11 +10,11 @@ Read this file in full before making any change in this repository. If a request
 
 ## Commands
 
-* `pnpm build` — tsup → dist/
-* `pnpm dev` — tsup --watch
-* `pnpm test` — vitest run
-* `pnpm typecheck` — tsc --noEmit
-* `pnpm format` — biome format --write .
+- `pnpm build` — tsup → dist/
+- `pnpm dev` — tsup --watch
+- `pnpm test` — vitest run
+- `pnpm typecheck` — tsc --noEmit
+- `pnpm format` — biome format --write .
 
 ---
 
@@ -28,8 +28,8 @@ Sliz is an HTML-like template compiler. Pipeline stages:
 4. **Transformer** (`src/transformers/`) — HTML AST → `TransformedNode[]` (handles `.when` conditionals, extracts `{expressions}`)
 5. **Codegen** (`src/codegen.ts`) — `TransformedNode[]` → JS output string
 
-* **Entry point:** `src/pipeline/compile.ts` → `compile(context)`. Currently only tokenizes; parser/transform/codegen are not yet wired into the pipeline.
-* **Exports:** `compile`, `CompilerContext`, `Diagnostic`, `tokenize` from `src/index.ts`.
+- **Entry point:** `src/pipeline/compile.ts` → `compile(context)`. Currently only tokenizes; parser/transform/codegen are not yet wired into the pipeline.
+- **Exports:** `compile`, `CompilerContext`, `Diagnostic`, `tokenize` from `src/index.ts`.
 
 ---
 
@@ -40,27 +40,24 @@ Sliz is an HTML-like template compiler. Pipeline stages:
   // server-side setup/state/logic — plain TS
 </script>
 
-<div class={jscode}>{jscode}</div>
-<button .when={data}></button>
-
+<div class="{jscode}">{jscode}</div>
+<button .when="{data}"></button>
 ```
 
-* `{expr}` is interpolation of a JS/TS expression — not JSX. Control flow (loops, conditionals) is handled by dedicated directives, never by embedding `.map()`/ternaries in markup.
-* Dot-prefixed attributes (`.when=`, and future ones) are compiler-owned directives — distinct from plain HTML attributes. Don't blur the two.
-* Treat every syntax detail here as provisional unless it's written in a confirmed spec file.
+- `{expr}` is interpolation of a JS/TS expression — not JSX. Control flow (loops, conditionals) is handled by dedicated directives, never by embedding `.map()`/ternaries in markup.
+- Dot-prefixed attributes (`.when=`, and future ones) are compiler-owned directives — distinct from plain HTML attributes. Don't blur the two.
+- Treat every syntax detail here as provisional unless it's written in a confirmed spec file.
 
 ---
 
 ## Parser Behavior & Spec Rules
 
-* **No Throwing:** Parsers must be single-pass where feasible and must **never throw on malformed input** — degrade gracefully. A throw in a parser is a bug unless it's a genuinely unrecoverable internal invariant violation, and that must be commented as such.
-* **Structured Parsing:** Prefer a real structured (recursive-descent or equivalent) parser over regex for anything with nesting. Regex is fine only for flat, fixed-shape tokens.
-* **Spec is Source of Truth:**
-* Never reintroduce a previously-dropped mechanism without an explicit, current instruction.
-* Before implementing new syntax or compiler behavior, check whether a spec file already describes it. If it does, implement to the spec exactly. If it doesn't, surface the gap and wait for confirmation instead of inventing one.
-* Any new directive or grammar construct is a breaking, versioned decision — don't add one speculatively while doing something else.
-
-
+- **No Throwing:** Parsers must be single-pass where feasible and must **never throw on malformed input** — degrade gracefully. A throw in a parser is a bug unless it's a genuinely unrecoverable internal invariant violation, and that must be commented as such.
+- **Structured Parsing:** Prefer a real structured (recursive-descent or equivalent) parser over regex for anything with nesting. Regex is fine only for flat, fixed-shape tokens.
+- **Spec is Source of Truth:**
+- Never reintroduce a previously-dropped mechanism without an explicit, current instruction.
+- Before implementing new syntax or compiler behavior, check whether a spec file already describes it. If it does, implement to the spec exactly. If it doesn't, surface the gap and wait for confirmation instead of inventing one.
+- Any new directive or grammar construct is a breaking, versioned decision — don't add one speculatively while doing something else.
 
 ---
 
@@ -68,14 +65,14 @@ Sliz is an HTML-like template compiler. Pipeline stages:
 
 ### 1. Tooling & Formatting
 
-* **Biome:** Biome is used for formatting and linting (no Prettier/ESLint config). Never hand-format against it, never argue with it in a diff — if formatting looks wrong, fix the `biome.json` config, don't fight it inline.
+- **Biome:** Biome is used for formatting and linting (no Prettier/ESLint config). Never hand-format against it, never argue with it in a diff — if formatting looks wrong, fix the `biome.json` config, don't fight it inline.
 
 ### 2. Comments
 
-* A comment explaining *what* code does is low value — the code should mostly say that itself.
-* A comment explaining *why* the code exists or does something a non-obvious way is the bar.
-* If you find yourself needing a long comment to explain how a piece of code works, that's a signal the code itself is too clever — rewrite it plainly instead of documenting the cleverness.
-* Every `try/catch` must carry a comment stating exactly what error is being caught and why it can't be prevented structurally instead.
+- A comment explaining _what_ code does is low value — the code should mostly say that itself.
+- A comment explaining _why_ the code exists or does something a non-obvious way is the bar.
+- If you find yourself needing a long comment to explain how a piece of code works, that's a signal the code itself is too clever — rewrite it plainly instead of documenting the cleverness.
+- Every `try/catch` must carry a comment stating exactly what error is being caught and why it can't be prevented structurally instead.
 
 ### 3. No Ternaries, Ever
 
@@ -83,16 +80,15 @@ Always a full `if/else` block. No shortcuts, no nesting exceptions.
 
 ```ts
 // BAD
-const label = isActive ? 'active' : 'inactive';
+const label = isActive ? "active" : "inactive";
 
 // GOOD
 let label: string;
 if (isActive) {
-  label = 'active';
+  label = "active";
 } else {
-  label = 'inactive';
+  label = "inactive";
 }
-
 ```
 
 ### 4. Classes: Allowed for One Specific Case
@@ -127,7 +123,6 @@ class TokenStream {
     return this.position >= this.source.length;
   }
 }
-
 ```
 
 ### 5. Generics
@@ -144,21 +139,18 @@ function firstOf<T>(items: readonly T[]): T | undefined {
 type DeepPartial<T> = T extends object
   ? { [K in keyof T]?: T[K] extends object ? DeepPartial<T[K]> : T[K] }
   : T;
-
 ```
 
 ### 6. Naming & Identifiers
 
-* **No shorthand/abbreviated identifiers:** No `i`, `j`, `idx`, `tmp`, `el`, etc. Every name should read as a real word or phrase.
-* **Casing:** `camelCase` for values, variables, and functions. `PascalCase` for types and classes. **Never `UPPER_SNAKE_CASE**`, anywhere, for anything — including constants.
-* **Characters:** Identifiers are alphanumeric only — **no `$`, no `_**`, in any variable, function, or property name.
-* **Namespaces:** Namespace-style groupings are encouraged when they make code read naturally, e.g., `is.whitespace(char)`, `skip.string(cursor)` — group related predicates/actions under a short, meaningful namespace object instead of a wall of similarly-prefixed standalone functions.
-* **Tokenizer/Scanner implementation specifics:**
-* Diagnostic codes use `SLIZ001`–`SLIZ005` prefix.
-* Tokenizer uses char-code comparisons (not string comparisons). See `src/scanner/char.ts`.
-* The `consume` namespace in `src/tokenizer/consumer.ts` contains all token consumption logic.
-
-
+- **No shorthand/abbreviated identifiers:** No `i`, `j`, `idx`, `tmp`, `el`, etc. Every name should read as a real word or phrase.
+- **Casing:** `camelCase` for values, variables, and functions. `PascalCase` for types and classes. **Never `UPPER_SNAKE_CASE**`, anywhere, for anything — including constants.
+- **Characters:** Identifiers are alphanumeric only — **no `$`, no `_**`, in any variable, function, or property name.
+- **Namespaces:** Namespace-style groupings are encouraged when they make code read naturally, e.g., `is.whitespace(char)`, `skip.string(cursor)` — group related predicates/actions under a short, meaningful namespace object instead of a wall of similarly-prefixed standalone functions.
+- **Tokenizer/Scanner implementation specifics:**
+- Diagnostic codes use `SLIZ001`–`SLIZ005` prefix.
+- Tokenizer uses char-code comparisons (not string comparisons). See `src/scanner/char.ts`.
+- The `consume` namespace in `src/tokenizer/consumer.ts` contains all token consumption logic.
 
 ```ts
 // BAD
@@ -174,13 +166,12 @@ for (let tokenIndex = 0; tokenIndex < tokens.length; tokenIndex++) {
 // GOOD — namespace-style grouping
 const is = {
   whitespace(char: string): boolean {
-    return char === ' ' || char === '\t' || char === '\n';
+    return char === " " || char === "\t" || char === "\n";
   },
   digit(char: string): boolean {
-    return char >= '0' && char <= '9';
+    return char >= "0" && char <= "9";
   },
 };
-
 ```
 
 ### 7. Type Inference
@@ -202,7 +193,6 @@ function data() {
 function double(value: number) {
   return value * 2;
 }
-
 ```
 
 ### 8. Extraction
@@ -235,7 +225,6 @@ function testWithDefault() {
 function testWith(data: number) {
   // ...
 }
-
 ```
 
 ### 12. Module Format
@@ -246,17 +235,17 @@ ESM-only (`"type": "module"`). Target: `ESNext` / `ES2022`. DTS via tsup (`dts: 
 
 ## Testing Guidelines
 
-* Tests live in `tests/**/*.test.ts`.
-* New grammar additions need a test covering at least one well-formed input and one malformed input.
+- Tests live in `tests/**/*.test.ts`.
+- New grammar additions need a test covering at least one well-formed input and one malformed input.
 
 ---
 
 ## Agent Workflow Rules
 
-* **Scope:** Stay exactly in scope. Do only what was explicitly asked. "Update that fn" means update only that function — never its callers throughout the codebase, even if that leaves things broken — unless the instruction explicitly says so ("update that fn and all its callers"). Don't take initiative beyond the literal request, no matter how obviously related it seems.
-* **File Access:** Don't read unnecessary files. Only read what's explicitly provided or explicitly pointed to in the task. Don't explore or grep the wider codebase to "understand the full structure" for a small, scoped change.
-* **Execution:** Implement first, don't over-deliberate. For small/simple tasks, write the solution immediately and let the developer give feedback and iterate, rather than spending a long time reasoning upfront about the "ideal" approach.
-* **Speed:** Speed matters. The bar is: finish a small task faster than doing it manually would have taken. Slow deliberation on small tasks is a hindrance to development velocity, not a virtue.
+- **Scope:** Stay exactly in scope. Do only what was explicitly asked. "Update that fn" means update only that function — never its callers throughout the codebase, even if that leaves things broken — unless the instruction explicitly says so ("update that fn and all its callers"). Don't take initiative beyond the literal request, no matter how obviously related it seems.
+- **File Access:** Don't read unnecessary files. Only read what's explicitly provided or explicitly pointed to in the task. Don't explore or grep the wider codebase to "understand the full structure" for a small, scoped change.
+- **Execution:** Implement first, don't over-deliberate. For small/simple tasks, write the solution immediately and let the developer give feedback and iterate, rather than spending a long time reasoning upfront about the "ideal" approach.
+- **Speed:** Speed matters. The bar is: finish a small task faster than doing it manually would have taken. Slow deliberation on small tasks is a hindrance to development velocity, not a virtue.
 
 ---
 
