@@ -5,7 +5,7 @@ import { TokenType, TokenizerContext } from "../token";
 /**
  * Consumes plain text content until it encounters a tag-like syntax or an open brace.
  */
-export function consumeText(ctx: TokenizerContext) {
+export const consumeText = (ctx: TokenizerContext) => {
    const start = ctx.cursor.position;
 
    while (!ctx.cursor.eof) {

@@ -3,7 +3,7 @@ import { blockCommentStart, isQuote, isTagLike, lineCommentStart } from "../../s
 import { TokenizerContext, TokenType } from "../token";
 
 
-function consumeTemplateLiteral(ctx: TokenizerContext) {
+const consumeTemplateLiteral = (ctx: TokenizerContext) => {
   const start = ctx.cursor.position;
   // Consume opening backtick.
   ctx.cursor.advance();
@@ -85,7 +85,7 @@ function consumeTemplateLiteral(ctx: TokenizerContext) {
   });
 }
 
-function consumeTemplateExpression(ctx: TokenizerContext) {
+const consumeTemplateExpression = (ctx: TokenizerContext) => {
   const beforeDollar = ctx.cursor.position;
   ctx.cursor.advance();
   ctx.emit({
@@ -107,7 +107,7 @@ function consumeTemplateExpression(ctx: TokenizerContext) {
   consumeJs(ctx);
 }
 
-function consumeString(ctx: TokenizerContext) {
+const consumeString = (ctx: TokenizerContext) => {
   const start = ctx.cursor.position;
   const quote = ctx.cursor.peek();
   ctx.cursor.advance();
@@ -192,7 +192,7 @@ function consumeString(ctx: TokenizerContext) {
   });
 }
 
-function consumeLineComment(ctx: TokenizerContext) {
+const consumeLineComment = (ctx: TokenizerContext) => {
   const start = ctx.cursor.position;
   ctx.cursor.advanceBy(2);
 
@@ -223,7 +223,7 @@ function consumeLineComment(ctx: TokenizerContext) {
   }
 }
 
-function consumeBlockComment(ctx: TokenizerContext) {
+const consumeBlockComment = (ctx: TokenizerContext) => {
   const start = ctx.cursor.position;
   ctx.cursor.advanceBy(2);
 
@@ -272,14 +272,10 @@ function consumeBlockComment(ctx: TokenizerContext) {
     end: ctx.cursor.position,
     value: ctx.cursor.getChars(start),
   });
-
-
-
-
 }
 
 
-function consumeJs(ctx: TokenizerContext) {
+const consumeJs = (ctx: TokenizerContext) => {
   let depth = 1;
   let chunkStart = ctx.cursor.position;
 
@@ -324,11 +320,11 @@ function consumeJs(ctx: TokenizerContext) {
 
       consumeLineComment(ctx)
       chunkStart = ctx.cursor.position;
-            continue;
-
+      continue;
     }
+
     if (blockCommentStart(ctx.cursor)) {
-            ctx.emitIf(chunkStart < ctx.cursor.position, {
+      ctx.emitIf(chunkStart < ctx.cursor.position, {
         type: TokenType.JsExpression,
         start: chunkStart,
         end: ctx.cursor.position,
@@ -336,13 +332,9 @@ function consumeJs(ctx: TokenizerContext) {
       });
 
       consumeBlockComment(ctx)
-       chunkStart = ctx.cursor.position;
+      chunkStart = ctx.cursor.position;
       continue;
     }
-
-
-
-
 
     // Sliz template interpolation will not support jsx-like nested html inside js
     if (isTagLike(ctx.cursor)) {
@@ -420,11 +412,8 @@ function consumeJs(ctx: TokenizerContext) {
 
 /**
  * Consumes a JavaScript interpolation expression enclosed in curly braces.
- *
- * Emits an `OpenBrace` token for the initial `{` character, advances the cursor,
- * and delegates the remaining expression parsing to the `consumeJs` consumer.
  */
-export function consumeExpression(ctx: TokenizerContext) {
+export const consumeExpression = (ctx: TokenizerContext) => {
   const start = ctx.cursor.position;
   ctx.cursor.advance();
 
