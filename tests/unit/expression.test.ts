@@ -1,6 +1,6 @@
-import { TokenizerContext, SyntaxKind, consume, tokenize } from "@/src"
+import { SyntaxKind, TokenizerContext, consume, tokenize } from "@/src";
 
-import { describe, it, expect } from "vitest";
+import { describe, expect, it } from "vitest";
 
 
 describe('consume.expression', () => {
@@ -10,7 +10,7 @@ describe('consume.expression', () => {
       consume.expression(ctx)
 
       const errorTokens = ctx.tokens.filter(t =>
-         t.kind === SyntaxKind.UnterminatedExpression
+         t.type === SyntaxKind.UnterminatedExpression
       );
       expect(errorTokens).toHaveLength(0);
       expect(ctx.tokens).toEqual([
@@ -25,7 +25,7 @@ describe('consume.expression', () => {
       consume.expression(ctx);
 
       const errorTokens = ctx.tokens.filter(t =>
-         t.kind === SyntaxKind.UnterminatedExpression
+         t.type === SyntaxKind.UnterminatedExpression
       );
       expect(errorTokens).toHaveLength(0);
       expect(ctx.tokens).toEqual([
@@ -40,7 +40,7 @@ describe('consume.expression', () => {
       consume.expression(ctx);
 
       const errorTokens = ctx.tokens.filter(t =>
-         t.kind === SyntaxKind.UnterminatedExpression
+         t.type === SyntaxKind.UnterminatedExpression
       );
       expect(errorTokens).toHaveLength(0);
       expect(ctx.tokens).toEqual([
@@ -55,7 +55,7 @@ describe('consume.expression', () => {
       consume.expression(ctx);
 
       const errorTokens = ctx.tokens.filter(t =>
-         t.kind === SyntaxKind.UnterminatedExpression
+         t.type === SyntaxKind.UnterminatedExpression
       );
       expect(errorTokens).toHaveLength(0);
       expect(ctx.tokens).toEqual([
@@ -70,7 +70,7 @@ describe('consume.expression', () => {
       consume.expression(ctx);
 
       const errorTokens = ctx.tokens.filter(t =>
-         t.kind === SyntaxKind.UnterminatedExpression
+         t.type === SyntaxKind.UnterminatedExpression
       );
       expect(errorTokens).toHaveLength(0);
       expect(ctx.tokens).toEqual([
@@ -85,7 +85,7 @@ describe('consume.expression', () => {
       consume.expression(ctx);
 
       const errorTokens = ctx.tokens.filter(t =>
-         t.kind === SyntaxKind.UnterminatedExpression
+         t.type === SyntaxKind.UnterminatedExpression
       );
       expect(errorTokens).toHaveLength(0);
       expect(ctx.tokens).toEqual([
@@ -100,7 +100,7 @@ describe('consume.expression', () => {
       consume.expression(ctx);
 
       const errorTokens = ctx.tokens.filter(t =>
-         t.kind === SyntaxKind.UnterminatedExpression
+         t.type === SyntaxKind.UnterminatedExpression
       );
       expect(errorTokens).toHaveLength(0);
       expect(ctx.tokens).toEqual([
@@ -115,7 +115,7 @@ describe('consume.expression', () => {
       consume.expression(ctx);
 
       const errorTokens = ctx.tokens.filter(t =>
-         t.kind === SyntaxKind.UnterminatedExpression
+         t.type === SyntaxKind.UnterminatedExpression
       );
       expect(errorTokens).toHaveLength(0);
       expect(ctx.tokens).toEqual([
@@ -130,7 +130,7 @@ describe('consume.expression', () => {
       consume.expression(ctx);
 
       const errorTokens = ctx.tokens.filter(t =>
-         t.kind === SyntaxKind.UnterminatedExpression
+         t.type === SyntaxKind.UnterminatedExpression
       );
       expect(errorTokens).toHaveLength(0);
       expect(ctx.tokens).toEqual([
@@ -145,7 +145,7 @@ describe('consume.expression', () => {
       consume.expression(ctx);
 
       const errorTokens = ctx.tokens.filter(t =>
-         t.kind === SyntaxKind.UnterminatedExpression
+         t.type === SyntaxKind.UnterminatedExpression
       );
       expect(errorTokens).toHaveLength(0);
       expect(ctx.tokens).toEqual([
@@ -160,7 +160,7 @@ describe('consume.expression', () => {
       consume.expression(ctx);
 
       const errorTokens = ctx.tokens.filter(t =>
-         t.kind === SyntaxKind.UnterminatedExpression
+         t.type === SyntaxKind.UnterminatedExpression
       );
       expect(errorTokens).toHaveLength(1);
       expect(errorTokens[0].start).toBe(8);
@@ -176,7 +176,7 @@ describe('consume.expression', () => {
       consume.expression(ctx);
 
       const errorTokens = ctx.tokens.filter(t =>
-         t.kind === SyntaxKind.UnterminatedExpression
+         t.type === SyntaxKind.UnterminatedExpression
       );
       expect(errorTokens).toHaveLength(1);
       expect(errorTokens[0].start).toBe(8);
@@ -192,7 +192,7 @@ describe('consume.expression', () => {
       consume.expression(ctx);
 
       const errorTokens = ctx.tokens.filter(t =>
-         t.kind === SyntaxKind.UnterminatedExpression
+         t.type === SyntaxKind.UnterminatedExpression
       );
       expect(errorTokens).toHaveLength(0);
       expect(ctx.tokens).toEqual([
@@ -206,7 +206,7 @@ describe('consume.expression', () => {
       consume.expression(ctx);
 
       const errorTokens = ctx.tokens.filter(t =>
-         t.kind === SyntaxKind.UnterminatedExpression
+         t.type === SyntaxKind.UnterminatedExpression
       );
       expect(errorTokens).toHaveLength(0);
       expect(ctx.tokens).toEqual([
@@ -221,7 +221,7 @@ describe('consume.expression', () => {
       consume.expression(ctx);
 
       const errorTokens = ctx.tokens.filter(t =>
-         t.kind === SyntaxKind.UnterminatedExpression
+         t.type === SyntaxKind.UnterminatedExpression
       );
       expect(errorTokens).toHaveLength(0);
       expect(ctx.tokens).toEqual([
@@ -236,7 +236,7 @@ describe('consume.expression', () => {
       consume.expression(ctx);
 
       const errorTokens = ctx.tokens.filter(t =>
-         t.kind === SyntaxKind.UnterminatedExpression
+         t.type === SyntaxKind.UnterminatedExpression
       );
       expect(errorTokens).toHaveLength(0);
       expect(ctx.tokens).toEqual([
@@ -251,7 +251,7 @@ describe('consume.expression', () => {
       consume.expression(ctx);
 
       const errorTokens = ctx.tokens.filter(t =>
-         t.kind === SyntaxKind.UnterminatedExpression
+         t.type === SyntaxKind.UnterminatedExpression
       );
       expect(errorTokens).toHaveLength(0);
       expect(ctx.tokens).toEqual([
@@ -269,12 +269,12 @@ describe('full tokenizer expression handling', () => {
       const tokens = tokenize("<div>{data.id}</div>");
 
       const errorTokens = tokens.filter(t =>
-         t.kind === SyntaxKind.UnterminatedExpression
+         t.type === SyntaxKind.UnterminatedExpression
       );
       expect(errorTokens).toHaveLength(0);
 
       const exprTokens = tokens.filter(t =>
-         t.kind === SyntaxKind.JsExpression
+         t.type === SyntaxKind.JsExpression
       );
       expect(exprTokens).toHaveLength(1);
       expect(exprTokens[0].value).toBe("data.id");
@@ -284,7 +284,7 @@ describe('full tokenizer expression handling', () => {
       const tokens = tokenize("{a}{b}{c}");
 
       const exprTokens = tokens.filter(t =>
-         t.kind === SyntaxKind.JsExpression
+         t.type === SyntaxKind.JsExpression
       );
       expect(exprTokens).toHaveLength(3);
       expect(exprTokens[0].value).toBe("a");
@@ -296,14 +296,14 @@ describe('full tokenizer expression handling', () => {
       const tokens = tokenize("hello {name} world");
 
       const textTokens = tokens.filter(t =>
-         t.kind === SyntaxKind.Text
+         t.type === SyntaxKind.Text
       );
       expect(textTokens).toHaveLength(2);
       expect(textTokens[0].value).toBe("hello ");
       expect(textTokens[1].value).toBe(" world");
 
       const exprTokens = tokens.filter(t =>
-         t.kind === SyntaxKind.JsExpression
+         t.type === SyntaxKind.JsExpression
       );
       expect(exprTokens).toHaveLength(1);
       expect(exprTokens[0].value).toBe("name");
@@ -313,7 +313,7 @@ describe('full tokenizer expression handling', () => {
       const tokens = tokenize('<div class={className}');
 
       const exprTokens = tokens.filter(t =>
-         t.kind === SyntaxKind.JsExpression
+         t.type === SyntaxKind.JsExpression
       );
       expect(exprTokens).toHaveLength(1);
       expect(exprTokens[0].value).toBe("className");
@@ -323,7 +323,7 @@ describe('full tokenizer expression handling', () => {
       const tokens = tokenize("{unclosed");
 
       const errorTokens = tokens.filter(t =>
-         t.kind === SyntaxKind.UnterminatedExpression
+         t.type === SyntaxKind.UnterminatedExpression
       );
       expect(errorTokens).toHaveLength(1);
    });
@@ -332,12 +332,12 @@ describe('full tokenizer expression handling', () => {
       const tokens = tokenize('<div>{items.map(i => i.name)}</div>');
 
       const errorTokens = tokens.filter(t =>
-         t.kind === SyntaxKind.UnterminatedExpression
+         t.type === SyntaxKind.UnterminatedExpression
       );
       expect(errorTokens).toHaveLength(0);
 
       const exprTokens = tokens.filter(t =>
-         t.kind === SyntaxKind.JsExpression
+         t.type === SyntaxKind.JsExpression
       );
       expect(exprTokens).toHaveLength(1);
       expect(exprTokens[0].value).toBe("items.map(i => i.name)");

@@ -1,6 +1,6 @@
-import { describe, it, expect } from "vitest";
+import { SyntaxKind, tokenize } from "@/src";
 import * as fc from "fast-check";
-import { tokenize, SyntaxKind } from "@/src";
+import { describe, expect, it } from "vitest";
 
 // ===========================================================================
 // Arbitraries — input generators designed to stress every code path
@@ -229,7 +229,7 @@ const ZERO_WIDTH_ALLOWED = new Set([
 /** Return only data tokens (excludes EndOfFile and error diagnostics). */
 function dataTokensOf(input: string) {
    return tokenize(input).filter(
-      t => t.kind !== SyntaxKind.EndOfFile && !ERROR_KINDS.has(t.kind),
+      t => t.type !== SyntaxKind.EndOfFile && !ERROR_KINDS.has(t.type),
    );
 }
 
@@ -311,11 +311,11 @@ function assertValidPositions(input: string) {
 // ---------------------------------------------------------------------------
 function assertValuesMatch(input: string) {
    for (const t of tokenize(input)) {
-      if (t.value !== undefined && !ERROR_KINDS.has(t.kind)) {
+      if (t.value !== undefined && !ERROR_KINDS.has(t.type)) {
          const expected = input.slice(t.start, t.end);
          if (t.value !== expected) {
             throw new Error(
-               `${t.kind}(${t.start},${t.end}) value=${JSON.stringify(t.value)} ` +
+               `${t.type}(${t.start},${t.end}) value=${JSON.stringify(t.value)} ` +
                `!= slice ${JSON.stringify(expected)}`
             );
          }
@@ -328,8 +328,8 @@ function assertValuesMatch(input: string) {
 // ---------------------------------------------------------------------------
 function assertNoZeroWidth(input: string) {
    for (const t of tokenize(input)) {
-      if (!ZERO_WIDTH_ALLOWED.has(t.kind) && t.start === t.end) {
-         throw new Error(`${t.kind} at ${t.start} has zero width in ${JSON.stringify(input)}`);
+      if (!ZERO_WIDTH_ALLOWED.has(t.type) && t.start === t.end) {
+         throw new Error(`${t.type} at ${t.start} has zero width in ${JSON.stringify(input)}`);
       }
    }
 }
@@ -356,7 +356,7 @@ function assertDeterministic(input: string) {
       throw new Error(`Different token count: ${a.length} vs ${b.length}`);
    }
    for (let i = 0; i < a.length; i++) {
-      if (a[i].kind !== b[i].kind || a[i].start !== b[i].start || a[i].end !== b[i].end) {
+      if (a[i].type !== b[i].type || a[i].start !== b[i].start || a[i].end !== b[i].end) {
          throw new Error(`Token ${i} differs: ${JSON.stringify(a[i])} vs ${JSON.stringify(b[i])}`);
       }
    }
@@ -368,8 +368,8 @@ function assertDeterministic(input: string) {
 function assertEndOfFileLast(input: string) {
    const tokens = tokenize(input);
    if (tokens.length === 0) throw new Error("No tokens");
-   if (tokens[tokens.length - 1].kind !== SyntaxKind.EndOfFile) {
-      throw new Error(`Last token is ${tokens[tokens.length - 1].kind}, expected EndOfFile`);
+   if (tokens[tokens.length - 1].type !== SyntaxKind.EndOfFile) {
+      throw new Error(`Last token is ${tokens[tokens.length - 1].type}, expected EndOfFile`);
    }
 }
 
@@ -379,10 +379,10 @@ function assertEndOfFileLast(input: string) {
 //   - Equals only after AttributeName or Whitespace
 // ---------------------------------------------------------------------------
 function assertTokenContexts(input: string) {
-   const tokens = tokenize(input).filter(t => t.kind !== SyntaxKind.EndOfFile);
+   const tokens = tokenize(input).filter(t => t.type !== SyntaxKind.EndOfFile);
    for (let i = 0; i < tokens.length; i++) {
-      const kind = tokens[i].kind;
-      const prev = i > 0 ? tokens[i - 1].kind : null;
+      const kind = tokens[i].type;
+      const prev = i > 0 ? tokens[i - 1].type : null;
 
       if (kind === SyntaxKind.CloseBrace && prev !== SyntaxKind.JsExpression && prev !== SyntaxKind.OpenBrace) {
          throw new Error(`CloseBrace at ${i} after ${prev} in ${JSON.stringify(input)}`);
@@ -511,7 +511,7 @@ describe("tokenizer properties", () => {
       it("empty input produces only EndOfFile", () => {
          const tokens = tokenize("");
          expect(tokens).toHaveLength(1);
-         expect(tokens[0].kind).toBe(SyntaxKind.EndOfFile);
+         expect(tokens[0].type).toBe(SyntaxKind.EndOfFile);
       });
    });
 

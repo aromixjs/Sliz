@@ -1,11 +1,11 @@
-import { tokenize, SyntaxKind } from "@/src";
-import { describe, it, expect } from "vitest";
+import { SyntaxKind, tokenize } from "@/src";
+import { describe, expect, it } from "vitest";
 
 describe("tag attribute anomalies", () => {
 
    it("expression with > comparison in attribute", () => {
       const tokens = tokenize("<div class={a > b}>");
-      const kinds = tokens.map(t => t.kind);
+      const kinds = tokens.map(t => t.type);
 
       expect(kinds).toEqual([
          SyntaxKind.LessThan,
@@ -23,7 +23,7 @@ describe("tag attribute anomalies", () => {
 
    it("expression with < comparison in attribute", () => {
       const tokens = tokenize("<div class={a < b}>");
-      const kinds = tokens.map(t => t.kind);
+      const kinds = tokens.map(t => t.type);
 
       expect(kinds).toEqual([
          SyntaxKind.LessThan,
@@ -41,7 +41,7 @@ describe("tag attribute anomalies", () => {
 
    it("expression with || in attribute", () => {
       const tokens = tokenize("<div class={a || b}>");
-      const kinds = tokens.map(t => t.kind);
+      const kinds = tokens.map(t => t.type);
 
       expect(kinds).toEqual([
          SyntaxKind.LessThan,
@@ -59,7 +59,7 @@ describe("tag attribute anomalies", () => {
 
    it("expression with && in attribute", () => {
       const tokens = tokenize("<div class={a && b}>");
-      const kinds = tokens.map(t => t.kind);
+      const kinds = tokens.map(t => t.type);
 
       expect(kinds).toEqual([
          SyntaxKind.LessThan,
@@ -77,7 +77,7 @@ describe("tag attribute anomalies", () => {
 
    it("multiple expressions in attributes", () => {
       const tokens = tokenize("<div class={a} id={b}>");
-      const kinds = tokens.map(t => t.kind);
+      const kinds = tokens.map(t => t.type);
 
       expect(kinds).toEqual([
          SyntaxKind.LessThan,
@@ -101,7 +101,7 @@ describe("tag attribute anomalies", () => {
 
    it("unterminated expression in attribute", () => {
       const tokens = tokenize("<div class={unclosed>");
-      const kinds = tokens.map(t => t.kind);
+      const kinds = tokens.map(t => t.type);
 
       expect(kinds).toEqual([
          SyntaxKind.LessThan,
@@ -118,7 +118,7 @@ describe("tag attribute anomalies", () => {
 
    it("unterminated expression EOF", () => {
       const tokens = tokenize("<div class={unclosed");
-      const kinds = tokens.map(t => t.kind);
+      const kinds = tokens.map(t => t.type);
 
       expect(kinds).toEqual([
          SyntaxKind.LessThan,
@@ -143,12 +143,12 @@ describe("tag attribute anomalies", () => {
       expect(tokens[4]).toEqual({ kind: SyntaxKind.Equals, start: 10, end: 11, value: "=" });
       expect(tokens[5]).toEqual({ kind: SyntaxKind.AttributeValue, start: 11, end: 16, value: "test}" });
       expect(tokens[6]).toEqual({ kind: SyntaxKind.GreaterThan, start: 16, end: 17, value: ">" });
-      expect(tokens[7].kind).toBe(SyntaxKind.EndOfFile);
+      expect(tokens[7].type).toBe(SyntaxKind.EndOfFile);
    });
 
    it("} in attribute value then expression", () => {
       const tokens = tokenize("<div class=test}>{{data</div>");
-      const kinds = tokens.map(t => t.kind);
+      const kinds = tokens.map(t => t.type);
 
       expect(kinds).toEqual([
          SyntaxKind.LessThan,
@@ -171,7 +171,7 @@ describe("tag attribute anomalies", () => {
 
    it("self-closing with expression", () => {
       const tokens = tokenize("<div class={expr} />");
-      const kinds = tokens.map(t => t.kind);
+      const kinds = tokens.map(t => t.type);
 
       expect(kinds).toEqual([
          SyntaxKind.LessThan,
@@ -190,7 +190,7 @@ describe("tag attribute anomalies", () => {
 
    it("expression with ternary", () => {
       const tokens = tokenize("<div class={a ? b : c}>");
-      const kinds = tokens.map(t => t.kind);
+      const kinds = tokens.map(t => t.type);
 
       expect(kinds).toEqual([
          SyntaxKind.LessThan,
@@ -208,7 +208,7 @@ describe("tag attribute anomalies", () => {
 
    it("expression with string containing special chars", () => {
       const tokens = tokenize("<div class={'hello'}>");
-      const exprTokens = tokens.filter(t => t.kind === SyntaxKind.JsExpression);
+      const exprTokens = tokens.filter(t => t.type === SyntaxKind.JsExpression);
 
       expect(exprTokens).toHaveLength(1);
       expect(exprTokens[0].value).toBe("'hello'");
@@ -216,7 +216,7 @@ describe("tag attribute anomalies", () => {
 
    it("boolean attribute", () => {
       const tokens = tokenize("<div disabled>");
-      const kinds = tokens.map(t => t.kind);
+      const kinds = tokens.map(t => t.type);
 
       expect(kinds).toEqual([
          SyntaxKind.LessThan,
@@ -230,7 +230,7 @@ describe("tag attribute anomalies", () => {
 
    it("attribute with missing value after =", () => {
       const tokens = tokenize("<div class= >");
-      const kinds = tokens.map(t => t.kind);
+      const kinds = tokens.map(t => t.type);
 
       expect(kinds).toEqual([
          SyntaxKind.LessThan,
@@ -246,7 +246,7 @@ describe("tag attribute anomalies", () => {
 
    it("unterminated quoted attribute value", () => {
       const tokens = tokenize('<div class="unclosed');
-      const kinds = tokens.map(t => t.kind);
+      const kinds = tokens.map(t => t.type);
 
       expect(kinds).toEqual([
          SyntaxKind.LessThan,
@@ -262,7 +262,7 @@ describe("tag attribute anomalies", () => {
 
    it("unquoted value with || after } does not loop", () => {
       const tokens = tokenize("<div class=test} || }}>{{data 123</div>");
-      const kinds = tokens.map(t => t.kind);
+      const kinds = tokens.map(t => t.type);
 
       expect(kinds).toEqual([
          SyntaxKind.LessThan,
@@ -294,7 +294,7 @@ describe("malformed tags", () => {
 
    it("bare <", () => {
       const tokens = tokenize("<");
-      const kinds = tokens.map(t => t.kind);
+      const kinds = tokens.map(t => t.type);
 
       expect(kinds).toEqual([
          SyntaxKind.Text,
@@ -304,7 +304,7 @@ describe("malformed tags", () => {
 
    it("bare </", () => {
       const tokens = tokenize("</");
-      const kinds = tokens.map(t => t.kind);
+      const kinds = tokens.map(t => t.type);
 
       expect(kinds).toEqual([
          SyntaxKind.LessThan,
@@ -316,7 +316,7 @@ describe("malformed tags", () => {
 
    it("</>", () => {
       const tokens = tokenize("</>");
-      const kinds = tokens.map(t => t.kind);
+      const kinds = tokens.map(t => t.type);
 
       expect(kinds).toEqual([
          SyntaxKind.LessThan,
@@ -328,7 +328,7 @@ describe("malformed tags", () => {
 
    it("extra } before >", () => {
       const tokens = tokenize("<div }>>");
-      const kinds = tokens.map(t => t.kind);
+      const kinds = tokens.map(t => t.type);
 
       expect(kinds).toEqual([
          SyntaxKind.LessThan,
@@ -343,7 +343,7 @@ describe("malformed tags", () => {
 
    it("empty braces inside tag", () => {
       const tokens = tokenize("<div {}>");
-      const kinds = tokens.map(t => t.kind);
+      const kinds = tokens.map(t => t.type);
 
       expect(kinds).toEqual([
          SyntaxKind.LessThan,
@@ -361,7 +361,7 @@ describe("raw text tags", () => {
 
    it("script with < operator", () => {
       const tokens = tokenize("<script>if(a<b){}</script>");
-      const kinds = tokens.map(t => t.kind);
+      const kinds = tokens.map(t => t.type);
 
       expect(kinds).toEqual([
          SyntaxKind.LessThan,
@@ -378,7 +378,7 @@ describe("raw text tags", () => {
 
    it("unterminated script", () => {
       const tokens = tokenize("<script>code");
-      const kinds = tokens.map(t => t.kind);
+      const kinds = tokens.map(t => t.type);
 
       expect(kinds).toEqual([
          SyntaxKind.LessThan,
@@ -392,7 +392,7 @@ describe("raw text tags", () => {
 
    it("style tag", () => {
       const tokens = tokenize("<style>.a{color:red}</style>");
-      const kinds = tokens.map(t => t.kind);
+      const kinds = tokens.map(t => t.type);
 
       expect(kinds).toEqual([
          SyntaxKind.LessThan,
@@ -409,7 +409,7 @@ describe("raw text tags", () => {
 
    it("unterminated style", () => {
       const tokens = tokenize("<style>css");
-      const kinds = tokens.map(t => t.kind);
+      const kinds = tokens.map(t => t.type);
 
       expect(kinds).toEqual([
          SyntaxKind.LessThan,
@@ -426,7 +426,7 @@ describe("comments and declarations", () => {
 
    it("unterminated comment", () => {
       const tokens = tokenize("<!-- comment");
-      const kinds = tokens.map(t => t.kind);
+      const kinds = tokens.map(t => t.type);
 
       expect(kinds).toEqual([
          SyntaxKind.HtmlComment,
@@ -437,7 +437,7 @@ describe("comments and declarations", () => {
 
    it("unterminated doctype", () => {
       const tokens = tokenize("<!DOCTYPE html");
-      const kinds = tokens.map(t => t.kind);
+      const kinds = tokens.map(t => t.type);
 
       expect(kinds).toEqual([
          SyntaxKind.Doctype,
@@ -451,7 +451,7 @@ describe("full tag lifecycle", () => {
 
    it("div with expression then content then closing", () => {
       const tokens = tokenize("<div class={expr}>text</div>");
-      const kinds = tokens.map(t => t.kind);
+      const kinds = tokens.map(t => t.type);
 
       expect(kinds).toEqual([
          SyntaxKind.LessThan,
@@ -474,7 +474,7 @@ describe("full tag lifecycle", () => {
 
    it("nested divs with expressions", () => {
       const tokens = tokenize("<div>{a}<span>{b}</span></div>");
-      const kinds = tokens.map(t => t.kind);
+      const kinds = tokens.map(t => t.type);
 
       expect(kinds).toEqual([
          SyntaxKind.LessThan,

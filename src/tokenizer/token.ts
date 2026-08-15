@@ -1,41 +1,45 @@
 import { type Maybe } from "../types/maybe";
 import { CharacterCursor } from "./cursor";
 
-export enum SyntaxKind {
-  // Structural tokens
-  Doctype = "Doctype",
+
+export enum TokenType {
   Text = "Text",
-  Whitespace = "Whitespace",
-  LessThan = "LessThan",
-  Slash = "Slash",
   OpenBrace = "OpenBrace",
-  JsExpression = "JsExpression",
-  CloseBrace = "CloseBrace",
-  TagName = "TagName",
-  AttributeName = "AttributeName",
-  AttributeValue = "AttributeValue",
-  GreaterThan = "GreaterThan",
-  SlashGreaterThan = "SlashGreaterThan",
-  Equals = "Equals",
-  Script = "Script",
-  Style = "Style",
-  HtmlComment = "HtmlComment",
+  String = "String",
   EndOfFile = "EndOfFile",
 
-  // Error tokens — malformed content that was still lexed
-  UnterminatedString = "UnterminatedString",
-  UnterminatedComment = "UnterminatedComment",
-  UnterminatedExpression = "UnterminatedExpression",
-  UnterminatedScript = "UnterminatedScript",
-  UnterminatedStyle = "UnterminatedStyle",
-  UnterminatedDoctype = "UnterminatedDoctype",
-  ExpectedTagName = "ExpectedTagName",
-  ExpectedTagEnd = "ExpectedTagEnd",
-  UnexpectedCharacter = "UnexpectedCharacter",
+  
+  // // Structural tokens
+  // Doctype = "Doctype",
+  // Whitespace = "Whitespace",
+  // LessThan = "LessThan",
+  // Slash = "Slash",
+  // JsExpression = "JsExpression",
+  // CloseBrace = "CloseBrace",
+  // TagName = "TagName",
+  // AttributeName = "AttributeName",
+  // AttributeValue = "AttributeValue",
+  // GreaterThan = "GreaterThan",
+  // SlashGreaterThan = "SlashGreaterThan",
+  // Equals = "Equals",
+  // Script = "Script",
+  // Style = "Style",
+  // HtmlComment = "HtmlComment",
+
+  // // Error tokens — malformed content that was still lexed
+  // UnterminatedString = "UnterminatedString",
+  // UnterminatedComment = "UnterminatedComment",
+  // UnterminatedExpression = "UnterminatedExpression",
+  // UnterminatedScript = "UnterminatedScript",
+  // UnterminatedStyle = "UnterminatedStyle",
+  // UnterminatedDoctype = "UnterminatedDoctype",
+  // ExpectedTagName = "ExpectedTagName",
+  // ExpectedTagEnd = "ExpectedTagEnd",
+  // UnexpectedCharacter = "UnexpectedCharacter",
 }
 
 export interface Token {
-  kind: SyntaxKind;
+  type: TokenType;
   start: number;
   end: number;
   value: Maybe<string>;

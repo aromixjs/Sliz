@@ -29,13 +29,8 @@ export class CharacterCursor {
     return this.index;
   }
 
-  clone(): CharacterCursor {
-    return new CharacterCursor(this.source, this.index);
-  }
-
-
-  getChars(start: CharacterCursor): string {
-    return this.source.slice(start.index, this.index);
+  getChars(start: number): string {
+    return this.source.slice(start, this.index);
   }
 
 

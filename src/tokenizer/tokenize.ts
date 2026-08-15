@@ -1,23 +1,25 @@
 import char from "../scanner/char";
-import { is } from "../scanner/is";
-import { consume } from "./consumer";
+import { isTagLike } from "../scanner/is";
+import { consumeMarkup } from "./consumer/html";
+import { consumeExpression } from "./consumer/interpolation";
+import { consumeText } from "./consumer/text";
 import { CharacterCursor } from "./cursor";
-import { SyntaxKind, Token, TokenizerContext } from "./token";
+import { Token, TokenizerContext, TokenType } from "./token";
 
 function dispatch(ctx: TokenizerContext) {
   const code = ctx.cursor.peek();
-
-  if (is.tagLike(ctx.cursor)) {
-    consume.markup(ctx);
+  
+  if (isTagLike(ctx.cursor)) {
+    consumeMarkup(ctx);
     return;
   }
 
   if (code === char.openBrace) {
-    consume.expression(ctx);
+    consumeExpression(ctx);
     return;
   }
 
-  consume.text(ctx);
+  consumeText(ctx);
 }
 
 export function tokenize(source: string): Token[] {
@@ -29,7 +31,7 @@ export function tokenize(source: string): Token[] {
   }
 
   ctx.emit({
-    kind: SyntaxKind.EndOfFile,
+    type: TokenType.EndOfFile,
     start: ctx.cursor.source.length,
     end: ctx.cursor.source.length,
     value: undefined
