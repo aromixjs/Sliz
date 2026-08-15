@@ -27,6 +27,19 @@ export enum TokenType {
   HtmlCommentEnd = "HtmlCommentEnd",
   HtmlCommentContent = "HtmlCommentContent",
   UnterminatedHtmlComment = "UnterminatedHtmlComment",
+
+  //  Markup Tokens
+  Whitespace = "Whitespace",
+  TagName = "TagName",
+  ExpectedTagName = "ExpectedTagName",
+  Slash = "Slash",
+  SlashGreaterThan = "SlashGreaterThan",
+  GreaterThan = "GreaterThan",
+  AttributeName = "AttributeName",
+  Equals = "Equals",
+  AttributeValue = "AttributeValue",
+  UnterminatedString = "UnterminatedString",
+  UnexpectedCharacter = "UnexpectedCharacter",
 }
 
 export interface Token {
