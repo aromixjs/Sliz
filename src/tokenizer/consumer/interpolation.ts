@@ -3,206 +3,298 @@ import { isQuote, isTagLike } from "../../scanner/is";
 import { TokenizerContext, TokenType } from "../token";
 
 function consumeTemplateLiteral(ctx: TokenizerContext) {
-   const start = ctx.cursor.position;
-   ctx.cursor.advance();
+  const start = ctx.cursor.position;
+  ctx.cursor.advance();
 
-   while (!ctx.cursor.eof) {
-      const code = ctx.cursor.peek();
-      // Skip escaped characters
-      if (code === char.backslash) {
-         ctx.cursor.advance();
+  ctx.emit({
+    type: TokenType.BackTick,
+    start,
+    end: ctx.cursor.position,
+    value: ctx.cursor.getChars(start),
+  });
 
-         if (!ctx.cursor.eof) {
-            ctx.cursor.advance();
-         }
+  let chunkStart = ctx.cursor.position;
+  while (!ctx.cursor.eof) {
+    const code = ctx.cursor.peek();
 
-         continue;
-      }
-
-      // Template closed successfully.
-      if (code === char.backtick) {
-         ctx.cursor.advance();
-         ctx.emit({
-            type: TokenType.JsString,
-            start,
-            end: ctx.cursor.position,
-            value: ctx.cursor.getChars(start),
-         });
-
-         return;
-      }
-
-      // string interpolation
-      if (code === char.dollar && ctx.cursor.peekAtOffset(1) === char.openBrace) {
-         ctx.cursor.advanceBy(2)
-         consumeJs(ctx)
-      }
-
+    // Skip escaped characters
+    if (code === char.backslash) {
       ctx.cursor.advance();
-   }
 
-   // ran Out Of Input Before The string closed
-   ctx.emit({
-      type: TokenType.UnterminatedJsString,
-      start,
-      end: ctx.cursor.position,
-      value: ctx.cursor.getChars(start),
-   });
+      if (!ctx.cursor.eof) {
+        ctx.cursor.advance();
+      }
+
+      continue;
+    }
+
+    // Template interpolation: ${ ... }
+    if (code === char.dollar && ctx.cursor.peekAtOffset(1) === char.openBrace) {
+      ctx.emitIf(chunkStart < ctx.cursor.position, {
+        type: TokenType.JsString,
+        start: chunkStart,
+        end: ctx.cursor.position,
+        value: ctx.cursor.getChars(chunkStart),
+      });
+
+      consumeTemplateExpression(ctx);
+      chunkStart = ctx.cursor.position;
+      continue;
+    }
+
+    // Template closed successfully.
+    if (code === char.backtick) {
+      ctx.emitIf(chunkStart < ctx.cursor.position, {
+        type: TokenType.JsString,
+        start: chunkStart,
+        end: ctx.cursor.position,
+        value: ctx.cursor.getChars(chunkStart),
+      });
+
+      const endStart = ctx.cursor.position;
+      ctx.cursor.advance();
+      ctx.emit({
+        type: TokenType.BackTick,
+        start: endStart,
+        end: ctx.cursor.position,
+        value: ctx.cursor.getChars(endStart),
+      });
+
+      return;
+    }
+
+    ctx.cursor.advance();
+  }
+
+  // ran Out Of Input Before The string closed
+  ctx.emitIf(chunkStart < ctx.cursor.position, {
+    type: TokenType.JsString,
+    start: chunkStart,
+    end: ctx.cursor.position,
+    value: ctx.cursor.getChars(chunkStart),
+  });
+
+  ctx.emit({
+    type: TokenType.UnterminatedJsString,
+    start,
+    end: ctx.cursor.position,
+    value: ctx.cursor.getChars(start),
+  });
+}
+
+function consumeTemplateExpression(ctx: TokenizerContext) {
+  const beforeDollar = ctx.cursor.position;
+  ctx.cursor.advance();
+  ctx.emit({
+    type: TokenType.Dollar,
+    start: beforeDollar,
+    end: ctx.cursor.position,
+    value: ctx.cursor.getChars(beforeDollar),
+  });
+
+  const beforeBrace = ctx.cursor.position;
+  ctx.cursor.advance();
+  ctx.emit({
+    type: TokenType.OpenBrace,
+    start: beforeBrace,
+    end: ctx.cursor.position,
+    value: ctx.cursor.getChars(beforeBrace),
+  });
+
+  consumeJs(ctx);
 }
 
 function consumeString(ctx: TokenizerContext) {
-   const start = ctx.cursor.position;
-   const quote = ctx.cursor.peek();
-   ctx.cursor.advance();
+  const start = ctx.cursor.position;
+  const quote = ctx.cursor.peek();
+  ctx.cursor.advance();
 
-   while (!ctx.cursor.eof) {
-      const code = ctx.cursor.peek();
+  ctx.emit({
+    type: TokenType.Quote,
+    start,
+    end: ctx.cursor.position,
+    value: ctx.cursor.getChars(start),
+  });
 
-      // Skip escaped characters
-      if (code === char.backslash) {
-         ctx.cursor.advance();
+  let chunkStart = ctx.cursor.position;
+  while (!ctx.cursor.eof) {
+    const code = ctx.cursor.peek();
 
-         if (!ctx.cursor.eof) {
-            ctx.cursor.advance();
-         }
-
-         continue;
-      }
-
-      // String closed successfully.
-      if (code === quote) {
-         ctx.cursor.advance();
-
-         ctx.emit({
-            type: TokenType.JsString,
-            start,
-            end: ctx.cursor.position,
-            value: ctx.cursor.getChars(start),
-         });
-
-         return;
-      }
-
-      // in js singleQuoted or doubleQuoted string is not multi line.
-      if (code === char.carriageReturn || code === char.lineFeed) {
-         ctx.emit({
-            type: TokenType.UnterminatedJsString,
-            start,
-            end: ctx.cursor.position,
-            value: ctx.cursor.getChars(start),
-         });
-
-         return;
-      }
-
+    // Skip escaped characters
+    if (code === char.backslash) {
       ctx.cursor.advance();
-   }
 
-   // ran Out Of Input Before The string closed
-   ctx.emit({
-      type: TokenType.UnterminatedJsString,
-      start,
-      end: ctx.cursor.position,
-      value: ctx.cursor.getChars(start),
-   });
+      if (!ctx.cursor.eof) {
+        ctx.cursor.advance();
+      }
+
+      continue;
+    }
+
+    // String closed successfully.
+    if (code === quote) {
+      ctx.emitIf(chunkStart < ctx.cursor.position, {
+        type: TokenType.JsString,
+        start: chunkStart,
+        end: ctx.cursor.position,
+        value: ctx.cursor.getChars(chunkStart),
+      });
+
+      const endStart = ctx.cursor.position;
+      ctx.cursor.advance();
+
+      ctx.emit({
+        type: TokenType.Quote,
+        start: endStart,
+        end: ctx.cursor.position,
+        value: ctx.cursor.getChars(endStart),
+      });
+
+      return;
+    }
+
+    // Single and double quoted JS strings cannot contain newlines
+    if (code === char.carriageReturn || code === char.lineFeed) {
+      ctx.emitIf(chunkStart < ctx.cursor.position, {
+        type: TokenType.JsString,
+        start: chunkStart,
+        end: ctx.cursor.position,
+        value: ctx.cursor.getChars(chunkStart),
+      });
+      ctx.emit({
+        type: TokenType.UnterminatedJsString,
+        start,
+        end: ctx.cursor.position,
+        value: ctx.cursor.getChars(start),
+      });
+
+      return;
+    }
+
+    ctx.cursor.advance();
+  }
+
+  ctx.emitIf(chunkStart < ctx.cursor.position, {
+    type: TokenType.JsString,
+    start: chunkStart,
+    end: ctx.cursor.position,
+    value: ctx.cursor.getChars(chunkStart),
+  });
+  // ran Out Of Input Before The string closed
+  ctx.emit({
+    type: TokenType.UnterminatedJsString,
+    start,
+    end: ctx.cursor.position,
+    value: ctx.cursor.getChars(start),
+  });
 }
 
 function consumeJs(ctx: TokenizerContext) {
-   let depth = 1;
-   let chunkStart = ctx.cursor.position;
+  let depth = 1;
+  let chunkStart = ctx.cursor.position;
 
-   while (!ctx.cursor.eof) {
-      const code = ctx.cursor.peek();
+  while (!ctx.cursor.eof) {
+    const code = ctx.cursor.peek();
 
-      // Handle Js Strings
-      if (isQuote(code)) {
-         ctx.emitIf(chunkStart < ctx.cursor.position, {
-            type: TokenType.JsExpression,
-            start: chunkStart,
-            end: ctx.cursor.position,
-            value: ctx.cursor.getChars(chunkStart),
-         });
+    // Handle Js Strings
+    if (isQuote(code)) {
+      ctx.emitIf(chunkStart < ctx.cursor.position, {
+        type: TokenType.JsExpression,
+        start: chunkStart,
+        end: ctx.cursor.position,
+        value: ctx.cursor.getChars(chunkStart),
+      });
 
-         consumeString(ctx);
-         chunkStart = ctx.cursor.position
-         continue;
-      }
+      consumeString(ctx);
+      chunkStart = ctx.cursor.position;
+      continue;
+    }
 
-      // Handle Template Literals
-      if (code === char.backtick) {
-         ctx.emitIf(chunkStart < ctx.cursor.position, {
-            type: TokenType.JsExpression,
-            start: chunkStart,
-            end: ctx.cursor.position,
-            value: ctx.cursor.getChars(chunkStart),
-         });
+    // Handle Template Literals
+    if (code === char.backtick) {
+      ctx.emitIf(chunkStart < ctx.cursor.position, {
+        type: TokenType.JsExpression,
+        start: chunkStart,
+        end: ctx.cursor.position,
+        value: ctx.cursor.getChars(chunkStart),
+      });
 
-         consumeTemplateLiteral(ctx);
-         chunkStart = ctx.cursor.position
-         continue;
-      }
+      consumeTemplateLiteral(ctx);
+      chunkStart = ctx.cursor.position;
+      continue;
+    }
 
-      // Sliz template interpolation will not support jsx-like nested html inside js
-      if (isTagLike(ctx.cursor)) {
-         ctx.emitIf(chunkStart < ctx.cursor.position, {
-            type: TokenType.JsExpression,
-            start: chunkStart,
-            end: ctx.cursor.position,
-            value: ctx.cursor.getChars(chunkStart),
-         });
+    // Sliz template interpolation will not support jsx-like nested html inside js
+    if (isTagLike(ctx.cursor)) {
+      ctx.emitIf(chunkStart < ctx.cursor.position, {
+        type: TokenType.JsExpression,
+        start: chunkStart,
+        end: ctx.cursor.position,
+        value: ctx.cursor.getChars(chunkStart),
+      });
 
-         ctx.emit({
-            type: TokenType.UnterminatedJsExpression,
-            start: ctx.cursor.position,
-            end: ctx.cursor.position,
-            value: undefined,
-         });
+      ctx.emit({
+        type: TokenType.UnterminatedJsExpression,
+        start: ctx.cursor.position,
+        end: ctx.cursor.position,
+        value: undefined,
+      });
 
-         return;
-      }
+      return;
+    }
 
-      if (code === char.openBrace) {
-         depth++;
-         ctx.cursor.advance();
-         continue;
-      }
+    if (code === char.openBrace) {
+      depth++;
+      ctx.cursor.advance();
+      continue;
+    }
 
-      if (code === char.closeBrace) {
-         depth--;
+    if (code === char.closeBrace) {
+      depth--;
 
-         if (depth === 0) {
-            ctx.emitIf(chunkStart < ctx.cursor.position, {
-               type: TokenType.JsExpression,
-               start: chunkStart,
-               end: ctx.cursor.position,
-               value: ctx.cursor.getChars(chunkStart),
-            });
+      if (depth === 0) {
+        ctx.emitIf(chunkStart < ctx.cursor.position, {
+          type: TokenType.JsExpression,
+          start: chunkStart,
+          end: ctx.cursor.position,
+          value: ctx.cursor.getChars(chunkStart),
+        });
 
-            ctx.cursor.advance();
-            return;
-         }
+        const closeStart = ctx.cursor.position;
 
-         ctx.cursor.advance();
-         continue;
+        ctx.cursor.advance();
+
+        ctx.emit({
+          type: TokenType.CloseBrace,
+          start: closeStart,
+          end: ctx.cursor.position,
+          value: ctx.cursor.getChars(closeStart),
+        });
+
+        return;
       }
 
       ctx.cursor.advance();
-   }
+      continue;
+    }
 
-   // ran out of input before depth returned to 0
-   ctx.emitIf(chunkStart < ctx.cursor.position, {
-      type: TokenType.JsExpression,
-      start: chunkStart,
-      end: ctx.cursor.position,
-      value: ctx.cursor.getChars(chunkStart),
-   });
+    ctx.cursor.advance();
+  }
 
-   ctx.emit({
-      type: TokenType.UnterminatedJsExpression,
-      start: ctx.cursor.position,
-      end: ctx.cursor.position,
-      value: undefined,
-   });
+  // ran out of input before depth returned to 0
+  ctx.emitIf(chunkStart < ctx.cursor.position, {
+    type: TokenType.JsExpression,
+    start: chunkStart,
+    end: ctx.cursor.position,
+    value: ctx.cursor.getChars(chunkStart),
+  });
+
+  ctx.emit({
+    type: TokenType.UnterminatedJsExpression,
+    start: ctx.cursor.position,
+    end: ctx.cursor.position,
+    value: undefined,
+  });
 }
 
 /**
@@ -211,19 +303,15 @@ function consumeJs(ctx: TokenizerContext) {
  * Emits an `OpenBrace` token for the initial `{` character, advances the cursor,
  * and delegates the remaining expression parsing to the `consumeJs` consumer.
  */
-export function consumeExpression(ctx: TokenizerContext): void {
-   ctx.emit({
-      type: TokenType.OpenBrace,
-      start: ctx.cursor.position,
-      end: ctx.cursor.position + 1,
-      value: "{",
-   });
-   ctx.cursor.advance();
-   consumeJs(ctx);
-   ctx.emit({
-      type: TokenType.CloseBrace,
-      start: ctx.cursor.position - 1,
-      end: ctx.cursor.position,
-      value: "}",
-   });
+export function consumeExpression(ctx: TokenizerContext) {
+  const start = ctx.cursor.position;
+  ctx.cursor.advance();
+
+  ctx.emit({
+    type: TokenType.OpenBrace,
+    start,
+    end: start + 1,
+    value: ctx.cursor.getChars(start),
+  });
+  consumeJs(ctx);
 }

@@ -7,9 +7,19 @@ export enum TokenType {
   OpenBrace = "OpenBrace",
   CloseBrace = "CloseBrace",
 
+Dollar = "Dollar",
+BackTick="BackTick",
+Quote= "Quote",
+
+
+
+
+
+  UnterminatedJsString = "UnterminatedJsString",
+
+
   JsString = "JsString",
   JsExpression = "JsExpression",
-  UnterminatedJsString = "UnterminatedJsString",
   UnterminatedJsExpression = "UnterminatedJsExpression",
 
   EndOfFile = "EndOfFile",
@@ -21,33 +31,7 @@ export enum TokenType {
   UnterminatedHtmlComment = "UnterminatedHtmlComment"
 
 
-  // // Structural tokens
-  // Doctype = "Doctype",
-  // Whitespace = "Whitespace",
-  // LessThan = "LessThan",
-  // Slash = "Slash",
-  // JsExpression = "JsExpression",
-  // CloseBrace = "CloseBrace",
-  // TagName = "TagName",
-  // AttributeName = "AttributeName",
-  // AttributeValue = "AttributeValue",
-  // GreaterThan = "GreaterThan",
-  // SlashGreaterThan = "SlashGreaterThan",
-  // Equals = "Equals",
-  // Script = "Script",
-  // Style = "Style",
-  // HtmlComment = "HtmlComment",
 
-  // // Error tokens — malformed content that was still lexed
-  // UnterminatedString = "UnterminatedString",
-  // UnterminatedComment = "UnterminatedComment",
-  // UnterminatedExpression = "UnterminatedExpression",
-  // UnterminatedScript = "UnterminatedScript",
-  // UnterminatedStyle = "UnterminatedStyle",
-  // UnterminatedDoctype = "UnterminatedDoctype",
-  // ExpectedTagName = "ExpectedTagName",
-  // ExpectedTagEnd = "ExpectedTagEnd",
-  // UnexpectedCharacter = "UnexpectedCharacter",
 }
 
 export interface Token {
