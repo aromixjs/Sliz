@@ -68,4 +68,12 @@ export class TokenizerContext {
   emit(token: Token): void {
     this.tokens.push(token);
   }
+
+  emitIf(condition: boolean, token: Token) {
+
+    if (condition) {
+      this.tokens.push(token);
+    }
+
+  }
 }

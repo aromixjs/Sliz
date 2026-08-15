@@ -18,18 +18,14 @@ export function consumeText(ctx: TokenizerContext) {
       ctx.cursor.advance();
    }
 
-
-   if (ctx.cursor.position !== start) {
-
-      ctx.emit({
-         type: TokenType.Text,
-         start: start,
-         end: ctx.cursor.position,
-         value: ctx.cursor.getChars(start),
-      });
-
-   }
-
+   ctx.emitIf(ctx.cursor.position !== start, {
+      type: TokenType.Text,
+      start: start,
+      end: ctx.cursor.position,
+      value: ctx.cursor.getChars(start),
+   });
 
 }
+
+
 
