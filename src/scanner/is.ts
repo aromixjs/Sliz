@@ -30,20 +30,6 @@ export namespace is {
     );
   }
 
-  export function doctypeStart(cursor: CharacterCursor) {
-    return (
-      cursor.peek() === char.lessThan &&
-      cursor.peekAtOffset(1) === char.exclamationMark &&
-      (cursor.peekAtOffset(2) === char.upperD || cursor.peekAtOffset(2) === char.lowerD) &&
-      (cursor.peekAtOffset(3) === char.upperO || cursor.peekAtOffset(3) === char.lowerO) &&
-      (cursor.peekAtOffset(4) === char.upperC || cursor.peekAtOffset(4) === char.lowerC) &&
-      (cursor.peekAtOffset(5) === char.upperT || cursor.peekAtOffset(5) === char.lowerT) &&
-      (cursor.peekAtOffset(6) === char.upperY || cursor.peekAtOffset(6) === char.lowerY) &&
-      (cursor.peekAtOffset(7) === char.upperP || cursor.peekAtOffset(7) === char.lowerP) &&
-      (cursor.peekAtOffset(8) === char.upperE || cursor.peekAtOffset(8) === char.lowerE)
-    );
-  }
-
   export function htmlCommentClose(cursor: CharacterCursor) {
     return (
       cursor.peek() === char.minus &&

@@ -6,6 +6,7 @@ export enum TokenType {
   OpenBrace = "OpenBrace",
   CloseBrace = "CloseBrace",
   CommentText = "CommentText",
+  LessThan = "LessThan",
 
   Dollar = "Dollar",
   BackTick = "BackTick",

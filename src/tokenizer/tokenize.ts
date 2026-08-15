@@ -1,25 +1,23 @@
 import char from "../scanner/char";
-import { isTagLike } from "../scanner/is";
-import { consumeMarkup } from "./consumer/markup";
-import { consumeExpression } from "./consumer/interpolation";
-import { consumeText } from "./consumer/text";
 import { CharacterCursor } from "./cursor";
 import { Token, TokenizerContext, TokenType } from "./token";
+import { is } from "../scanner/is";
+import { consume } from "./consumer";
 
 function dispatch(ctx: TokenizerContext) {
   const code = ctx.cursor.peek();
 
-  if (isTagLike(ctx.cursor)) {
-    consumeMarkup(ctx);
+  if (is.tagLike(ctx.cursor)) {
+    consume.markup(ctx);
     return;
   }
 
   if (code === char.openBrace) {
-    consumeExpression(ctx);
+    consume.expression(ctx);
     return;
   }
 
-  consumeText(ctx);
+  consume.text(ctx);
 }
 
 export function tokenize(source: string): Token[] {
