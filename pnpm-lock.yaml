@@ -8,12 +8,6 @@ importers:
 
   .:
     dependencies:
-      acorn:
-        specifier: ^8.18.0
-        version: 8.18.0
-      acorn-loose:
-        specifier: ^8.5.2
-        version: 8.5.2
       typescript:
         specifier: ^5.9.3
         version: 5.9.3
@@ -829,10 +823,6 @@ packages:
 
   '@yarnpkg/lockfile@1.1.0':
     resolution: {integrity: sha512-GpSwvyXOcOOlV70vbnzjj4fW5xW/FdUF6nQEt1ENy7m4ZCczi1+/buVUPAqmGfqznsORNFzUMjctTIp8a9tuCQ==}
-
-  acorn-loose@8.5.2:
-    resolution: {integrity: sha512-PPvV6g8UGMGgjrMu+n/f9E/tCSkNQ2Y97eFvuVdJfG11+xdIeDcLyNdC8SHcrHbRqkfwLASdplyR6B6sKM1U4A==}
-    engines: {node: '>=0.4.0'}
 
   acorn@8.18.0:
     resolution: {integrity: sha512-lGq+9yr1/GuAWaVYIHRjvvySG5/4VfKIvC8EWxStPdcDh/Ka7FG3twP6v4d5BkravUilhIAsG4Qj83t02LWUPQ==}
@@ -2033,10 +2023,6 @@ snapshots:
   '@vue/shared@3.5.41': {}
 
   '@yarnpkg/lockfile@1.1.0': {}
-
-  acorn-loose@8.5.2:
-    dependencies:
-      acorn: 8.18.0
 
   acorn@8.18.0: {}
 

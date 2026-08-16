@@ -1,17 +1,25 @@
 import chars from "../scanner/chars";
 import is from "../scanner/is";
 import { CharacterCursor } from "./cursor";
-import { Skip } from "./skip";
+import { resolveJsExpression } from "./jsConsumer";
 import { Token, TokenType } from "./token";
-import * as acorn from "acorn";
 
-export class Tokenizer extends Skip {
+export class Tokenizer {
   protected cursor: CharacterCursor;
   protected tokens: Token[] = [];
 
   constructor(source: string) {
-    super();
     this.cursor = new CharacterCursor(source);
+  }
+
+  protected skipWhiteSpace() {
+    while (!this.cursor.eof) {
+      const code = this.cursor.peek();
+      if (!is.whitespace(code)) {
+        break;
+      }
+      this.cursor.advance();
+    }
   }
 
   tokenize() {
@@ -149,7 +157,7 @@ export class Tokenizer extends Skip {
   private consumeAttributeValue() {
     const code = this.cursor.peek();
     if (code === chars.openBrace) {
-      this.consumeJsExpression()
+      this.consumeJsExpressionAttributeValue()
     } else if (is.quote(code)) {
       this.consumeQuotedAttributeValue();
     } else {
@@ -207,44 +215,56 @@ export class Tokenizer extends Skip {
     }
   }
   /*===== JavaScript Expression Consumer =====*/
-  consumeJsExpression() {
+
+  private consumeJsExpressionAttributeValue() {
     const start = this.cursor.position;
-    this.cursor.advance();
-    const exprStart = this.cursor.position;
-    const source = this.cursor.source;
+    const result = resolveJsExpression(this.cursor);
+    this.tokens.push({
+      type: TokenType.JsExpression,
+      start,
+      end: result.end,
+      content: this.cursor.getChars(start),
+    });
 
-    try {
-      const expr = acorn.parseExpressionAt(source, exprStart, {
-        ecmaVersion: 2022,
-      });
+    let index = 0;
+    while (index < result.issues.length) {
+      const issue = result.issues[index];
 
-      const exprEnd = expr.end;
-this.skipWhiteSpace();
-
-      if (this.cursor.peek() === chars.closeBrace) {
-        this.cursor.advance();
+      if (issue.kind === "unterminatedString") {
         this.tokens.push({
-          type: TokenType.JsExpression,
-          start,
-          end: this.cursor.position,
-          content: this.cursor.getChars(start),
+          type: TokenType.UnterminatedJsString,
+          start: issue.start,
+          end: issue.end,
         });
-      } else {
-        this.tokens.push({
-          type: TokenType.ExpectedClosingBrace,
-          start,
-          end: exprEnd,
-        });
-        this.cursor.advanceTo(exprEnd);
       }
-    } catch (error) {
-      this.tokens.push({
-        type: TokenType.InvalidExpression,
-        start: exprStart,
-        end: this.cursor.position,
-      });
 
-      this.cursor.advance();
+      if (issue.kind === "unterminatedTemplate") {
+        // TokenType.UnterminatedTemplateLiteral needs adding to ./token —
+        // it did not exist before, since the old tokenizer folded this
+        // case into UnterminatedJsString.
+        this.tokens.push({
+          type: TokenType.UnterminatedTemplateLiteral,
+          start: issue.start,
+          end: issue.end,
+        });
+      }
+      if (issue.kind === "unterminatedBlockComment") {
+        this.tokens.push({
+          type: TokenType.UnterminatedBlockComment,
+          start: issue.start,
+          end: issue.end,
+        });
+      }
+
+      if (issue.kind === "unterminatedExpression" || issue.kind === "tagLike") {
+        this.tokens.push({
+          type: TokenType.UnterminatedJsExpression,
+          start: issue.start,
+          end: issue.end,
+        });
+      }
+
+      index++;
     }
   }
 }

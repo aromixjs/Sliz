@@ -1,12 +1,24 @@
-import { Tokenizer } from "@/src";
+import { CharacterCursor, resolveJsExpression, Tokenizer } from "@/src";
 import { describe, expect, it } from "vitest";
-import * as acorn from 'acorn'
-describe("Tokenize Html Tag", () => {
-   it("Should Tokenize Basic Html Tag", () => {
-      const expr = acorn.parseExpressionAt('{1+4}', 1, {
-         ecmaVersion: 2022,
-      });
 
-      console.log(expr);
-   });
+describe("Resolve JS Expression", () => {
+  it("Should Resolve Basic JS", () => {
+    const cursor = new CharacterCursor('{userId+ "name"}');
+    const output = resolveJsExpression(cursor);
+
+    expect(output).toStrictEqual({
+      status: "closed",
+      end: cursor.source.length,
+      issues: [],
+    });
+  });
+
+  it("Should Resolve Unterminated Expression", () => {
+    const cursor = new CharacterCursor(`{userId+ "name}
+    
+    }
+    `);
+    const output = resolveJsExpression(cursor);
+    console.log(output);
+  });
 });

@@ -9,9 +9,12 @@ export enum TokenType {
   QuotedAttributeValue = "QuotedAttributeValue",
   UnterminatedQuotedAttributeValue = "UnterminatedQuotedAttributeValue",
   UnQuotedAttributeValue = "UnQuotedAttributeValue",
+
   JsExpression = "JsExpression",
-  ExpectedClosingBrace = "ExpectedClosingBrace",
-  InvalidExpression = "InvalidExpression",
+  UnterminatedJsString = "UnterminatedJsString",
+  UnterminatedTemplateLiteral = "UnterminatedTemplateLiteral",
+  UnterminatedBlockComment = "UnterminatedBlockComment",
+  UnterminatedJsExpression = "UnterminatedJsExpression",
 }
 
 export interface BaseToken {
@@ -66,11 +69,20 @@ export interface JsExpressionToken extends BaseToken {
   content: string;
 }
 
-export interface ExpectedClosingBraceToken extends BaseToken {
-  type: TokenType.ExpectedClosingBrace;
+export interface UnterminatedJsStringToken extends BaseToken {
+  type: TokenType.UnterminatedJsString;
 }
-export interface InvalidExpressionToken extends BaseToken {
-  type: TokenType.InvalidExpression;
+
+export interface UnterminatedTemplateLiteralToken extends BaseToken {
+  type: TokenType.UnterminatedTemplateLiteral;
+}
+
+export interface UnterminatedBlockCommentToken extends BaseToken {
+  type: TokenType.UnterminatedBlockComment;
+}
+
+export interface UnterminatedJsExpressionToken extends BaseToken {
+  type: TokenType.UnterminatedJsExpression;
 }
 
 export type Token =
@@ -85,5 +97,7 @@ export type Token =
   | UnterminatedQuotedAttributeValueToken
   | UnQuotedAttributeValueToken
   | JsExpressionToken
-  | ExpectedClosingBraceToken
-  | InvalidExpressionToken;
+  | UnterminatedJsStringToken
+  | UnterminatedTemplateLiteralToken
+  | UnterminatedBlockCommentToken
+  | UnterminatedJsExpressionToken;
