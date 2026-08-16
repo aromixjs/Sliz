@@ -1,7 +1,7 @@
 import chars from "../scanner/chars";
 import is from "../scanner/is";
 import { CharacterCursor } from "./cursor";
-import { resolveJsExpression } from "./jsConsumer";
+import { resolveJsExpression } from "./jsResolver/jsResolver";
 import { Token, TokenType } from "./token";
 
 export class Tokenizer {
@@ -157,7 +157,7 @@ export class Tokenizer {
   private consumeAttributeValue() {
     const code = this.cursor.peek();
     if (code === chars.openBrace) {
-      this.consumeJsExpressionAttributeValue()
+      this.consumeJsExpressionAttributeValue();
     } else if (is.quote(code)) {
       this.consumeQuotedAttributeValue();
     } else {
