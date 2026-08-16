@@ -2,9 +2,8 @@ export class CharacterCursor {
   private index = 0;
   readonly source: string;
 
-  constructor(source: string, position: number) {
+  constructor(source: string) {
     this.source = source;
-    this.index = Math.max(0, Math.min(position, source.length));
   }
 
   peek(): number {

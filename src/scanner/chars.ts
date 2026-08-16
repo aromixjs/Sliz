@@ -1,4 +1,6 @@
 export default {
+  lessThan: 60,
+
   space: 32,
   tab: 9,
   lineFeed: 10,
@@ -7,7 +9,6 @@ export default {
   doubleQuote: 34,
   backtick: 96,
   backslash: 92,
-  lessThan: 60,
   greaterThan: 62,
   slash: 47,
   asterisk: 42,

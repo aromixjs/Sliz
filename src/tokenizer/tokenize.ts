@@ -1,39 +1,82 @@
-import char from "../scanner/char";
+import is from "../scanner/is";
 import { CharacterCursor } from "./cursor";
-import { Token, TokenizerContext, TokenType } from "./token";
-import { is } from "../scanner/is";
-import { consume } from "./consumer";
+import { Token, TokenType } from "./token";
 
-function dispatch(ctx: TokenizerContext) {
-  const code = ctx.cursor.peek();
+export class Tokenizer {
+  private cursor: CharacterCursor;
+  tokens: Token[] = [];
 
-  if (is.tagLike(ctx.cursor)) {
-    consume.markup(ctx);
-    return;
+  constructor(source: string) {
+    this.cursor = new CharacterCursor(source);
   }
 
-  if (code === char.openBrace) {
-    consume.expression(ctx);
-    return;
+  tokenize() {
+    while (!this.cursor.eof) {
+      if (is.htmlCommentStart(this.cursor)) {
+        this.consumeHtmlCommentStart();
+        this.consumeHtmlCommentContent();
+        this.consumeHtmlCommentEnd();
+      }
+    }
   }
 
-  consume.text(ctx);
-}
-
-export function tokenize(source: string): Token[] {
-  const cursor = new CharacterCursor(source, 0);
-  const ctx = new TokenizerContext(cursor);
-
-  while (!ctx.cursor.eof) {
-    dispatch(ctx);
+  private consumeHtmlCommentStart() {
+    const start = this.cursor.position;
+    this.cursor.advanceBy(4);
+    this.tokens.push({
+      type: TokenType.HtmlCommentStart,
+      start,
+      end: this.cursor.position,
+    });
+  }
+  private consumeHtmlCommentEnd() {
+    const start = this.cursor.position;
+    this.cursor.advanceBy(3);
+    this.tokens.push({
+      type: TokenType.HtmlCommentEnd,
+      start,
+      end: this.cursor.position,
+    });
   }
 
-  ctx.emit({
-    type: TokenType.EndOfFile,
-    start: ctx.cursor.source.length,
-    end: ctx.cursor.source.length,
-    value: undefined,
-  });
+  private consumeHtmlCommentContent() {
+    const start = this.cursor.position;
+    while (!this.cursor.eof) {
+      if (is.htmlCommentEnd(this.cursor)) {
+        this.tokens.push({
+          type: TokenType.HtmlCommentContent,
+          start: start,
+          end: this.cursor.position,
+          content: this.cursor.getChars(start),
+        });
+        //  No Advancement Let the CommentEnd Consumer handle that
+        return;
+      }
 
-  return ctx.tokens;
+      // Error :: Parser Will Resolve That
+      if (is.htmlCommentStart(this.cursor)) {
+        this.tokens.push({
+          type: TokenType.HtmlCommentStart,
+          start: start,
+          end: this.cursor.position,
+        });
+        this.cursor.advanceBy(3);
+      }
+
+      this.cursor.advance();
+    }
+
+    this.tokens.push({
+      type: TokenType.HtmlCommentContent,
+      start: start,
+      end: this.cursor.position,
+      content: this.cursor.getChars(start),
+    });
+
+    this.tokens.push({
+      type: TokenType.UnterminatedHtmlComment,
+      start: start,
+      end: this.cursor.position,
+    });
+  }
 }
