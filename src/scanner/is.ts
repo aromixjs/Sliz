@@ -76,15 +76,13 @@ export default {
       this.alpha(cursor.peekAtOffset(2))
     );
   },
-
-  //=== unused
-
   quote(code: number) {
     return code === char.singleQuote || code === char.doubleQuote;
   },
   lineCommentStart(cursor: CharacterCursor) {
     return cursor.peek() === char.slash && cursor.peekAtOffset(1) === char.slash;
   },
+
   blockCommentStart(cursor: CharacterCursor) {
     return cursor.peek() === char.slash && cursor.peekAtOffset(1) === char.asterisk;
   },

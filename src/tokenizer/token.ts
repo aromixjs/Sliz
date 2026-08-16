@@ -4,8 +4,14 @@ export enum TokenType {
   HtmlCommentContent = "HtmlCommentContent",
   UnterminatedHtmlComment = "UnterminatedHtmlComment",
   DoctypeStart = "DoctypeStart",
-  WhiteSpace = "WhiteSpace",
   AttributeName = "AttributeName",
+  Equals = "Equals",
+  QuotedAttributeValue = "QuotedAttributeValue",
+  UnterminatedQuotedAttributeValue = "UnterminatedQuotedAttributeValue",
+  UnQuotedAttributeValue = "UnQuotedAttributeValue",
+  JsExpression = "JsExpression",
+  ExpectedClosingBrace = "ExpectedClosingBrace",
+  InvalidExpression = "InvalidExpression",
 }
 
 export interface BaseToken {
@@ -32,12 +38,39 @@ export interface UnterminatedHtmlComment extends BaseToken {
 export interface DoctypeStartToken extends BaseToken {
   type: TokenType.DoctypeStart;
 }
-export interface WhiteSpaceToken extends BaseToken {
-  type: TokenType.WhiteSpace;
-}
-export interface AttributeName extends BaseToken {
+export interface AttributeNameToken extends BaseToken {
   type: TokenType.AttributeName;
   content: string;
+}
+
+export interface EqualsToken extends BaseToken {
+  type: TokenType.Equals;
+}
+
+export interface QuotedAttributeValueToken extends BaseToken {
+  type: TokenType.QuotedAttributeValue;
+  content: string;
+}
+
+export interface UnterminatedQuotedAttributeValueToken extends BaseToken {
+  type: TokenType.UnterminatedQuotedAttributeValue;
+}
+
+export interface UnQuotedAttributeValueToken extends BaseToken {
+  type: TokenType.UnQuotedAttributeValue;
+  content: string;
+}
+
+export interface JsExpressionToken extends BaseToken {
+  type: TokenType.JsExpression;
+  content: string;
+}
+
+export interface ExpectedClosingBraceToken extends BaseToken {
+  type: TokenType.ExpectedClosingBrace;
+}
+export interface InvalidExpressionToken extends BaseToken {
+  type: TokenType.InvalidExpression;
 }
 
 export type Token =
@@ -46,5 +79,11 @@ export type Token =
   | HtmlCommentContentToken
   | UnterminatedHtmlComment
   | DoctypeStartToken
-  | WhiteSpaceToken
-  | AttributeName;
+  | AttributeNameToken
+  | EqualsToken
+  | QuotedAttributeValueToken
+  | UnterminatedQuotedAttributeValueToken
+  | UnQuotedAttributeValueToken
+  | JsExpressionToken
+  | ExpectedClosingBraceToken
+  | InvalidExpressionToken;

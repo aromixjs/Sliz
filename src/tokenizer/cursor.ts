@@ -17,9 +17,17 @@ export class CharacterCursor {
   advance(): void {
     this.index++;
   }
+  advanceIf(condition: boolean) {
+    if (condition) {
+      this.index++;
+    }
+  }
 
   advanceBy(offset: number): void {
     this.index = Math.max(0, Math.min(this.index + offset, this.source.length));
+  }
+  advanceTo(position: number) {
+    this.index = position;
   }
 
   get position(): number {
