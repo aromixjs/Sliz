@@ -1,27 +1,34 @@
 export default {
   lessThan: 60,
+  greaterThan: 62,
 
   space: 32,
   tab: 9,
   lineFeed: 10,
   carriageReturn: 13,
+
   singleQuote: 39,
   doubleQuote: 34,
   backtick: 96,
+
   backslash: 92,
-  greaterThan: 62,
   slash: 47,
   asterisk: 42,
   equals: 61,
+
   openParen: 40,
   closeParen: 41,
+
   openBracket: 91,
   closeBracket: 93,
+
   openBrace: 123,
   closeBrace: 125,
+
   comma: 44,
   colon: 58,
   semicolon: 59,
+
   percent: 37,
   exclamationMark: 33,
   ampersand: 38,
@@ -31,6 +38,10 @@ export default {
   plus: 43,
   minus: 45,
   dollar: 36,
+
+  hash: 35,
+  tilde: 126,
+
   upperA: 65,
   upperB: 66,
   upperC: 67,
@@ -57,6 +68,7 @@ export default {
   upperX: 88,
   upperY: 89,
   upperZ: 90,
+
   lowerA: 97,
   lowerB: 98,
   lowerC: 99,
@@ -83,8 +95,10 @@ export default {
   lowerX: 120,
   lowerY: 121,
   lowerZ: 122,
+
   underscore: 95,
   dot: 46,
+
   zero: 48,
   nine: 57,
 };

@@ -444,19 +444,6 @@ export namespace consume {
 
   /*=========== Markup Consumer ===========*/
 
-  export const whiteSpace = (ctx: TokenizerContext) => {
-    const start = ctx.cursor.position;
-    while (is.whitespace(ctx.cursor.peek())) {
-      ctx.cursor.advance();
-    }
-    ctx.emitIf(ctx.cursor.position > start, {
-      type: TokenType.Whitespace,
-      start,
-      end: ctx.cursor.position,
-      value: ctx.cursor.getChars(start),
-    });
-  };
-
   export const quotedAttributeValue = (ctx: TokenizerContext) => {
     const start = ctx.cursor.position;
     const quote = ctx.cursor.peek();

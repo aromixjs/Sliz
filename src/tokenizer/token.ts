@@ -3,6 +3,9 @@ export enum TokenType {
   HtmlCommentEnd = "HtmlCommentEnd",
   HtmlCommentContent = "HtmlCommentContent",
   UnterminatedHtmlComment = "UnterminatedHtmlComment",
+  DoctypeStart = "DoctypeStart",
+  WhiteSpace = "WhiteSpace",
+  AttributeName = "AttributeName",
 }
 
 export interface BaseToken {
@@ -26,9 +29,22 @@ export interface HtmlCommentContentToken extends BaseToken {
 export interface UnterminatedHtmlComment extends BaseToken {
   type: TokenType.UnterminatedHtmlComment;
 }
+export interface DoctypeStartToken extends BaseToken {
+  type: TokenType.DoctypeStart;
+}
+export interface WhiteSpaceToken extends BaseToken {
+  type: TokenType.WhiteSpace;
+}
+export interface AttributeName extends BaseToken {
+  type: TokenType.AttributeName;
+  content: string;
+}
 
 export type Token =
   | HtmlCommentStartToken
   | HtmlCommentEndToken
   | HtmlCommentContentToken
-  | UnterminatedHtmlComment;
+  | UnterminatedHtmlComment
+  | DoctypeStartToken
+  | WhiteSpaceToken
+  | AttributeName;
