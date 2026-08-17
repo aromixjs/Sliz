@@ -1,6 +1,7 @@
 export enum JsTokenType {
   ExpressionStart = "ExpressionStart",
   ExpressionEnd = "ExpressionEnd",
+  RawJs = "RawJs",
   StringLiteral = "StringLiteral",
   TemplateLiteral = "TemplateLiteral",
   LineComment = "LineComment",
@@ -64,6 +65,12 @@ export interface UnterminatedExpressionToken extends BaseJsToken {
 export interface TagLikeToken extends BaseJsToken {
   type: JsTokenType.TagLike;
 }
+export interface RawJsToken extends BaseJsToken {
+  type: JsTokenType.RawJs;
+  content: string;
+}
+
+
 
 export type JsToken =
   | ExpressionStartToken
@@ -76,4 +83,4 @@ export type JsToken =
   | UnterminatedTemplateLiteralToken
   | UnterminatedBlockCommentToken
   | UnterminatedExpressionToken
-  | TagLikeToken;
+  | TagLikeToken | RawJsToken;

@@ -13,43 +13,55 @@ export class JsExprTokenizer extends CharacterScanner<JsToken> {
   private readOutcome() {
     const tokens = this.getTokens();
     const last = tokens[tokens.length - 1];
-    return { end: last.end, closed: last.type === JsTokenType.ExpressionEnd };
+    return { end: last.end, closed: last.type === JsTokenType.ExpressionEnd, tokens };
   }
 
   private consumeExpressionBody(exprStart: number) {
+      let rawStart = this.position;
     while (!this.eof) {
       const code = this.peek();
 
       if (this.isQuote(code)) {
+              this.flushRawJS(rawStart);
         this.consumeStringLiteral();
+         rawStart = this.position;
         continue;
       }
 
       if (code === this.backtick) {
+                      this.flushRawJS(rawStart);
         this.consumeTemplateLiteral();
+          rawStart = this.position;
         continue;
       }
 
       if (this.isJsLineCommentStart) {
+                      this.flushRawJS(rawStart);
         this.consumeLineComment();
+          rawStart = this.position;
         continue;
       }
 
-      if (this.isJsBlockCommentStart) {
-        this.consumeBlockComment();
-        continue;
-      }
+    if (this.isJsBlockCommentStart) {
+      this.flushRawJS(rawStart);
+      this.consumeBlockComment();
+      rawStart = this.position;
+      continue;
+    }
 
       if (this.isHtmlTagLike) {
+        this.flushRawJS(rawStart)
         const bailPosition = this.position;
         this.emit({ type: JsTokenType.TagLike, start: bailPosition, end: bailPosition });
         return;
       }
 
       if (code === this.openBrace) {
+             this.flushRawJS(rawStart);
         const nestedStart = this.position;
         this.advance();
         this.consumeExpressionBody(nestedStart);
+         rawStart = this.position;
         if (this.lastEmittedWasTerminal()) {
           return;
         }
@@ -57,6 +69,7 @@ export class JsExprTokenizer extends CharacterScanner<JsToken> {
       }
 
       if (code === this.closeBrace) {
+              this.flushRawJS(rawStart);
         this.advance();
         this.emit({
           type: JsTokenType.ExpressionEnd,
@@ -67,8 +80,25 @@ export class JsExprTokenizer extends CharacterScanner<JsToken> {
       }
       this.advance();
     }
-
+ this.flushRawJS(rawStart);
     this.emit({ type: JsTokenType.UnterminatedExpression, start: exprStart, end: this.position });
+  }
+
+
+  private flushRawJS(start: number) {
+
+
+    this.emitIf(this.position > start, {
+      type: JsTokenType.RawJs,
+      start,
+      end: this.position,
+      content: this.getChars(start),
+    });
+
+
+
+
+
   }
 
   private lastEmittedWasTerminal(): boolean {

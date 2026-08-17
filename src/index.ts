@@ -1,5 +1,5 @@
 export { CharacterCursor } from "./common/cursor";
-export { JsResolver } from "./JsExpr/tokenizer";
+export { JsExprTokenizer } from "./JsExpr/tokenizer";
 export {
   HtmlCommentContentToken,
   HtmlCommentEndToken,
