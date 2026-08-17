@@ -49,14 +49,17 @@ export interface BlockCommentToken extends BaseJsToken {
 
 export interface UnterminatedStringToken extends BaseJsToken {
   type: JsTokenType.UnterminatedString;
+   content: string;
 }
 
 export interface UnterminatedTemplateLiteralToken extends BaseJsToken {
   type: JsTokenType.UnterminatedTemplateLiteral;
+   content: string;
 }
 
 export interface UnterminatedBlockCommentToken extends BaseJsToken {
   type: JsTokenType.UnterminatedBlockComment;
+   content: string;
 }
 
 export interface UnterminatedExpressionToken extends BaseJsToken {

@@ -147,6 +147,10 @@ export class CharacterScanner<Token> {
   protected advanceIf(condition: boolean): void {
     this.cursor.advanceIf(condition);
   }
+  protected advanceTo(position:number) {
+    
+    this.cursor.advanceTo(position)
+  }
 
   protected getChars(start: number): string {
     return this.cursor.getChars(start);
