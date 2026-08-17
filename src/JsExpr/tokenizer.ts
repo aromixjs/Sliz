@@ -2,11 +2,12 @@ import { CharacterScanner } from "../common/scanner";
 import { JsToken, JsTokenType } from "./token";
 
 export class JsExprTokenizer extends CharacterScanner<JsToken> {
-  public tokenize() {
-    const start = this.position;
+
+  public tokenize(start: number) {
+    this.advanceTo(start)
     this.emit({ type: JsTokenType.ExpressionStart, start, end: start + 1 });
     this.advance();
-    this.consumeExpressionBody(start);
+    this.consumeExpressionBody();
     return this.readOutcome();
   }
 
@@ -16,7 +17,8 @@ export class JsExprTokenizer extends CharacterScanner<JsToken> {
     return { end: last.end, closed: last.type === JsTokenType.ExpressionEnd, tokens };
   }
 
-  private consumeExpressionBody(exprStart: number) {
+  private consumeExpressionBody() {
+    const exprStart = this.position
     while (!this.eof) {
       const code = this.peek();
 
@@ -49,7 +51,7 @@ export class JsExprTokenizer extends CharacterScanner<JsToken> {
       if (code === this.openBrace) {
         const nestedStart = this.position;
         this.advance();
-        this.consumeExpressionBody(nestedStart);
+        this.consumeExpressionBody();
         if (this.lastEmittedWasTerminal()) {
           return;
         }
@@ -161,9 +163,8 @@ export class JsExprTokenizer extends CharacterScanner<JsToken> {
       }
 
       if (code === this.dollar && this.peekAtOffset(1) === this.openBrace) {
-        const interpolationStart = this.position;
         this.advanceBy(2);
-        this.consumeExpressionBody(interpolationStart);
+        this.consumeExpressionBody();
 
         if (this.lastEmittedWasTerminal()) {
           return;
