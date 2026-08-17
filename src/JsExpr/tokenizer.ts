@@ -2,32 +2,50 @@ import { CharacterScanner } from "../common/scanner";
 import { JsToken, JsTokenType } from "./token";
 
 export class JsExprTokenizer extends CharacterScanner<JsToken> {
-
   public tokenize(start: number) {
-    this.advanceTo(start)
+    this.clearTokens();
+    this.advanceTo(start);
     this.emit({ type: JsTokenType.ExpressionStart, start, end: start + 1 });
     this.advance();
     this.consumeExpressionBody();
-    return this.readOutcome();
+    return this.outcome;
   }
 
-  private readOutcome() {
+  /*===== JsExpr local checks/getters =====*/
+  private get outcome() {
     const tokens = this.getTokens();
     const last = tokens[tokens.length - 1];
     return { end: last.end, closed: last.type === JsTokenType.ExpressionEnd, tokens };
   }
 
-  private consumeExpressionBody() {
-    const exprStart = this.position
-    while (!this.eof) {
-      const code = this.peek();
+  private get isRawJsBoundary(): boolean {
+    return (
+      this.isQuote ||
+      this.isBacktick ||
+      this.isOpenBrace ||
+      this.isCloseBrace ||
+      this.isJsLineCommentStart ||
+      this.isJsBlockCommentStart ||
+      this.isHtmlTagLike
+    );
+  }
 
-      if (this.isQuote(code)) {
+  private get shouldStopScanning() {
+    const tokens = this.getTokens();
+    const last = tokens[tokens.length - 1];
+    return last.type === JsTokenType.TagLike || last.type === JsTokenType.UnterminatedExpression;
+  }
+
+  /*===== Consumers =====*/
+  private consumeExpressionBody() {
+    const exprStart = this.position;
+    while (!this.eof) {
+      if (this.isQuote) {
         this.consumeStringLiteral();
         continue;
       }
 
-      if (code === this.backtick) {
+      if (this.isBacktick) {
         this.consumeTemplateLiteral();
         continue;
       }
@@ -41,24 +59,22 @@ export class JsExprTokenizer extends CharacterScanner<JsToken> {
         this.consumeBlockComment();
         continue;
       }
-
+      //  IT Will Not Support Jsx like Syntax
       if (this.isHtmlTagLike) {
-        const bailPosition = this.position;
-        this.emit({ type: JsTokenType.TagLike, start: bailPosition, end: bailPosition });
+        this.emit({ type: JsTokenType.TagLike, start: this.position, end: this.position });
         return;
       }
 
-      if (code === this.openBrace) {
-        const nestedStart = this.position;
+      if (this.isOpenBrace) {
         this.advance();
         this.consumeExpressionBody();
-        if (this.lastEmittedWasTerminal()) {
+        if (this.shouldStopScanning) {
           return;
         }
         continue;
       }
 
-      if (code === this.closeBrace) {
+      if (this.isCloseBrace) {
         this.advance();
         this.emit({
           type: JsTokenType.ExpressionEnd,
@@ -73,14 +89,12 @@ export class JsExprTokenizer extends CharacterScanner<JsToken> {
     this.emit({ type: JsTokenType.UnterminatedExpression, start: exprStart, end: this.position });
   }
 
-
   private consumeRawJs() {
     const start = this.position;
 
-    while (!this.eof && !this.isRawJsBoundary()) {
+    while (!this.eof && !this.isRawJsBoundary) {
       this.advance();
     }
-
 
     this.emitIf(this.position > start, {
       type: JsTokenType.RawJs,
@@ -90,44 +104,19 @@ export class JsExprTokenizer extends CharacterScanner<JsToken> {
     });
   }
 
-  private isRawJsBoundary(): boolean {
-    const code = this.peek();
-
-    return (
-      this.isQuote(code) ||
-      code === this.backtick ||
-      code === this.openBrace ||
-      code === this.closeBrace ||
-      this.isJsLineCommentStart ||
-      this.isJsBlockCommentStart ||
-      this.isHtmlTagLike
-    );
-  }
-
-
-
-
-  private lastEmittedWasTerminal(): boolean {
-    const tokens = this.getTokens();
-    const last = tokens[tokens.length - 1];
-    return last.type === JsTokenType.TagLike || last.type === JsTokenType.UnterminatedExpression;
-  }
-
   private consumeStringLiteral() {
     const start = this.position;
     const quote = this.peek();
     this.advance();
 
     while (!this.eof) {
-      const code = this.peek();
-
-      if (code === this.backslash) {
+      if (this.isEscape) {
         this.advance();
         this.advanceIf(!this.eof);
         continue;
       }
 
-      if (code === quote) {
+      if (this.peek() === quote) {
         this.advance();
         this.emit({
           type: JsTokenType.StringLiteral,
@@ -137,16 +126,20 @@ export class JsExprTokenizer extends CharacterScanner<JsToken> {
         });
         return;
       }
-
-      if (code === this.carriageReturn || code === this.lineFeed) {
-        this.emit({ type: JsTokenType.UnterminatedString, start, end: this.position, content: this.getChars(start) });
-        return;
+      // Single and double quoted strings cannot contain newlines.
+      if (this.isLineBreak) {
+        break;
       }
 
       this.advance();
     }
 
-    this.emit({ type: JsTokenType.UnterminatedString, start, end: this.position, content: this.getChars(start) });
+    this.emit({
+      type: JsTokenType.UnterminatedString,
+      start,
+      end: this.position,
+      content: this.getChars(start),
+    });
   }
 
   private consumeTemplateLiteral() {
@@ -154,25 +147,23 @@ export class JsExprTokenizer extends CharacterScanner<JsToken> {
     this.advance();
 
     while (!this.eof) {
-      const code = this.peek();
-
-      if (code === this.backslash) {
+      if (this.isEscape) {
         this.advance();
         this.advanceIf(!this.eof);
         continue;
       }
 
-      if (code === this.dollar && this.peekAtOffset(1) === this.openBrace) {
+      if (this.isTemplateInterpolationStart) {
         this.advanceBy(2);
         this.consumeExpressionBody();
 
-        if (this.lastEmittedWasTerminal()) {
+        if (this.shouldStopScanning) {
           return;
         }
         continue;
       }
 
-      if (code === this.backtick) {
+      if (this.isBacktick) {
         this.advance();
         this.emit({
           type: JsTokenType.TemplateLiteral,
@@ -185,14 +176,19 @@ export class JsExprTokenizer extends CharacterScanner<JsToken> {
 
       this.advance();
     }
-    this.emit({ type: JsTokenType.UnterminatedTemplateLiteral, start, end: this.position, content: this.getChars(start), });
+
+    this.emit({
+      type: JsTokenType.UnterminatedTemplateLiteral,
+      start,
+      end: this.position,
+      content: this.getChars(start),
+    });
   }
 
   private consumeLineComment() {
     const start = this.position;
     this.advanceBy(2);
-
-    while (!this.eof && this.peek() !== this.carriageReturn && this.peek() !== this.lineFeed) {
+    while (!this.eof && !this.isLineBreak) {
       this.advance();
     }
     this.emit({
@@ -208,7 +204,7 @@ export class JsExprTokenizer extends CharacterScanner<JsToken> {
     this.advanceBy(2);
 
     while (!this.eof) {
-      if (this.peek() === this.asterisk && this.peekAtOffset(1) === this.slash) {
+      if (this.isBlockCommentEnd) {
         this.advanceBy(2);
         this.emit({
           type: JsTokenType.BlockComment,

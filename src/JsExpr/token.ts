@@ -49,17 +49,17 @@ export interface BlockCommentToken extends BaseJsToken {
 
 export interface UnterminatedStringToken extends BaseJsToken {
   type: JsTokenType.UnterminatedString;
-   content: string;
+  content: string;
 }
 
 export interface UnterminatedTemplateLiteralToken extends BaseJsToken {
   type: JsTokenType.UnterminatedTemplateLiteral;
-   content: string;
+  content: string;
 }
 
 export interface UnterminatedBlockCommentToken extends BaseJsToken {
   type: JsTokenType.UnterminatedBlockComment;
-   content: string;
+  content: string;
 }
 
 export interface UnterminatedExpressionToken extends BaseJsToken {
@@ -73,8 +73,6 @@ export interface RawJsToken extends BaseJsToken {
   content: string;
 }
 
-
-
 export type JsToken =
   | ExpressionStartToken
   | ExpressionEndToken
@@ -86,4 +84,5 @@ export type JsToken =
   | UnterminatedTemplateLiteralToken
   | UnterminatedBlockCommentToken
   | UnterminatedExpressionToken
-  | TagLikeToken | RawJsToken;
+  | TagLikeToken
+  | RawJsToken;

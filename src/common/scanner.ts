@@ -118,8 +118,12 @@ export class CharacterScanner<Token> {
       this.tokens.push(token);
     }
   }
-  getTokens() {
+  protected getTokens() {
     return this.tokens;
+  }
+
+  protected clearTokens(): void {
+    this.tokens.length = 0;
   }
 
   /*===== Cursor passthrough :: [implementers should never touch CharacterCursor directly] =====*/
@@ -145,11 +149,12 @@ export class CharacterScanner<Token> {
     this.cursor.advanceBy(offset);
   }
   protected advanceIf(condition: boolean): void {
-    this.cursor.advanceIf(condition);
+    if (condition) {
+      this.cursor.advance();
+    }
   }
-  protected advanceTo(position:number) {
-    
-    this.cursor.advanceTo(position)
+  protected advanceTo(position: number) {
+    this.cursor.advanceTo(position);
   }
 
   protected getChars(start: number): string {
@@ -174,8 +179,21 @@ export class CharacterScanner<Token> {
     );
   }
 
-  protected isQuote(code: number): boolean {
+  protected get isQuote(): boolean {
+    const code = this.cursor.peek();
     return code === this.singleQuote || code === this.doubleQuote;
+  }
+  protected get isBacktick() {
+    const code = this.cursor.peek();
+    return code === this.backtick;
+  }
+  protected get isOpenBrace() {
+    const code = this.cursor.peek();
+    return code === this.openBrace;
+  }
+  protected get isCloseBrace() {
+    const code = this.cursor.peek();
+    return code === this.openBrace;
   }
 
   protected skipWhiteSpace() {
@@ -269,5 +287,18 @@ export class CharacterScanner<Token> {
   }
   protected get isJsBlockCommentStart(): boolean {
     return this.cursor.peek() === this.slash && this.cursor.peekAtOffset(1) === this.asterisk;
+  }
+  protected get isEscape(): boolean {
+    return this.peek() === this.backslash;
+  }
+  protected get isLineBreak(): boolean {
+    const code = this.peek();
+    return code === this.carriageReturn || code === this.lineFeed;
+  }
+  protected get isTemplateInterpolationStart(): boolean {
+    return this.peek() === this.dollar && this.peekAtOffset(1) === this.openBrace;
+  }
+  protected get isBlockCommentEnd(): boolean {
+    return this.peek() === this.asterisk && this.peekAtOffset(1) === this.slash;
   }
 }
