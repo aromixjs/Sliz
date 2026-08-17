@@ -1,5 +1,3 @@
 export class JsResolver extends Character {
-   constructor(parameters) {
-      
-   }
+  constructor(parameters) {}
 }

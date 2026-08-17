@@ -1,12 +1,11 @@
 export { CharacterCursor } from "./common/cursor";
-export { JsResolver } from "./tokenizer/jsResolver/jsResolver";
+export { JsResolver } from "./JsExpr/tokenizer";
 export {
   HtmlCommentContentToken,
   HtmlCommentEndToken,
   HtmlCommentStartToken,
   Token,
   TokenType,
-  UnterminatedHtmlComment
+  UnterminatedHtmlComment,
 } from "./tokenizer/token";
 export { Tokenizer } from "./tokenizer/tokenize";
-

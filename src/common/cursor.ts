@@ -17,7 +17,7 @@ export class CharacterCursor {
   advance(): void {
     this.index++;
   }
-  
+
   advanceIf(condition: boolean) {
     if (condition) {
       this.index++;
