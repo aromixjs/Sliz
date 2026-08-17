@@ -1,5 +1,5 @@
 import { JsExprTokenizer } from "@/src";
-import { JsTokenType } from "@/src/JsExpr/token";
+import { JsTokenType,RawJsToken } from "@/src/JsExpr/token";
 import { describe, expect, it } from "vitest";
 
 describe("closing brace (core behavior)", () => {
@@ -415,5 +415,117 @@ describe("guards", () => {
     }
     expect(thrown).toBeInstanceOf(Error);
     expect((thrown as Error).message).toContain("'{'");
+  });
+});
+
+describe("realistic multi-slot source with a single tokenizer instance", () => {
+  const source =
+    '<script server>\n' +
+    '  const name = "world";\n' +
+    '  const items = [1, 2, 3];\n' +
+    '  const ready = true;\n' +
+    '  const kind = "primary";\n' +
+    '</script>\n\n' +
+    '<div class="card-{kind}">\n' +
+    '  <main class="{container}">\n' +
+    '    <h1>{greeting + name}</h1>\n' +
+    '    <ul>\n' +
+    '      {items.map((item) => `<li class="{row}">{item}</li>`)}\n' +
+    '    </ul>\n' +
+    '    <button .when="{ready}">{submitLabel}</button>\n' +
+    '  </main>\n' +
+    '</div>';
+
+  const tokenizer = new JsExprTokenizer(source);
+
+  it("tokenizes the {kind} attribute expression slot", () => {
+    const result = tokenizer.tokenize(source.indexOf("{kind}"));
+    expect(result.closed).toBe(true);
+    const raw = result.tokens.find((token) => token.type === JsTokenType.RawJs) as RawJsToken;
+    expect(raw.content).toBe("kind");
+  });
+
+  it("tokenizes the {container} class expression slot", () => {
+    const result = tokenizer.tokenize(source.indexOf("{container}"));
+    expect(result.closed).toBe(true);
+    const raw = result.tokens.find((token) => token.type === JsTokenType.RawJs) as RawJsToken
+    expect(raw.content).toBe("container");
+  });
+
+  it("tokenizes the {greeting + name} interpolation slot", () => {
+    const result = tokenizer.tokenize(source.indexOf("{greeting + name}"));
+    expect(result.closed).toBe(true);
+    const raw = result.tokens.find((token) => token.type === JsTokenType.RawJs) as RawJsToken;
+    expect(raw.content).toBe("greeting + name");
+  });
+
+  it("tokenizes the {ready} directive expression slot", () => {
+    const result = tokenizer.tokenize(source.indexOf("{ready}"));
+    expect(result.closed).toBe(true);
+    const raw = result.tokens.find((token) => token.type === JsTokenType.RawJs) as RawJsToken;
+    expect(raw.content).toBe("ready");
+  });
+
+  it("tokenizes the {submitLabel} slot", () => {
+    const result = tokenizer.tokenize(source.indexOf("{submitLabel}"));
+    expect(result.closed).toBe(true);
+    const raw = result.tokens.find((token) => token.type === JsTokenType.RawJs) as RawJsToken
+    expect(raw.content).toBe("submitLabel");
+  });
+
+  it("tokenizes the .map expression with an embedded template literal", () => {
+    const result = tokenizer.tokenize(source.indexOf("{items.map"));
+    expect(result.closed).toBe(true);
+    const raws = result.tokens.filter((token) => token.type === JsTokenType.RawJs) as RawJsToken[];
+    expect(raws[0].content).toBe("items.map((item) =>");
+    expect(raws[raws.length - 1].content).toBe(")");
+    const template = result.tokens.find(
+      (token) => token.type === JsTokenType.TemplateLiteral,
+    ) as { content: string };
+    expect(template.content).toBe('`<li class="{row}">{item}</li>`');
+  });
+
+  it("keeps inner {row}/{item} inside the template literal (single ExpressionStart)", () => {
+    const result = tokenizer.tokenize(source.indexOf("{items.map"));
+    const startCount = result.tokens.filter(
+      (token) => token.type === JsTokenType.ExpressionStart,
+    ).length;
+    expect(startCount).toBe(1);
+    const template = result.tokens.find(
+      (token) => token.type === JsTokenType.TemplateLiteral,
+    ) as { content: string };
+    expect(template.content).toContain("{row}");
+    expect(template.content).toContain("{item}");
+  });
+
+  it("stops at the first } for an expression embedded in an attribute (card-{kind})", () => {
+    const result = tokenizer.tokenize(source.indexOf("{kind}"));
+    expect(result.closed).toBe(true);
+    expect(result.end).toBe(source.indexOf("{kind}") + 6);
+  });
+
+  it("does not bleed state between slots on the shared instance", () => {
+    tokenizer.tokenize(source.indexOf("{kind}"));
+    const afterContainer = tokenizer.tokenize(source.indexOf("{container}"));
+    const hasKind = afterContainer.tokens.some(
+      (token) =>
+        "content" in token && (token as { content: string }).content.includes("kind"),
+    );
+    expect(hasKind).toBe(false);
+    expect(afterContainer.closed).toBe(true);
+  });
+
+  it("scans every { in the source without throwing and degrades gracefully", () => {
+    let searchFrom = 0;
+    let position = source.indexOf("{", searchFrom);
+    while (position !== -1) {
+      const result = tokenizer.tokenize(position);
+      const isGraceful =
+        result.closed ||
+        result.tokens.some((token) => token.type === JsTokenType.UnterminatedExpression);
+      expect(isGraceful).toBe(true);
+      searchFrom = position + 1;
+      position = source.indexOf("{", searchFrom);
+    }
   });
 });
