@@ -3,7 +3,8 @@ import { describe, expect, it } from "vitest";
 
 describe("Tokenize Html Comment", () => {
   it("tokenizes a simple single-line comment", () => {
-    const tokens = new Tokenizer("<!-- simple comment -->").tokenize();
+    const tokens = new Tokenizer("<!-- simple comment <!--  -->").tokenize();
+    console.log(tokens);
 
     expect(tokens).toStrictEqual([
       { type: TokenType.HtmlCommentStart, start: 0, end: 4 },

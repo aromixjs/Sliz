@@ -1,270 +1,182 @@
-import chars from "../scanner/chars";
-import is from "../scanner/is";
-import { CharacterCursor } from "./cursor";
-import { resolveJsExpression } from "./jsResolver/jsResolver";
-import { Token, TokenType } from "./token";
+import { CharacterScanner } from "../common/scanner";
+import { TagEndToken, Token, TokenType } from "./token";
 
-export class Tokenizer {
-  protected cursor: CharacterCursor;
-  protected tokens: Token[] = [];
-
-  constructor(source: string) {
-    this.cursor = new CharacterCursor(source);
-  }
-
-  protected skipWhiteSpace() {
-    while (!this.cursor.eof) {
-      const code = this.cursor.peek();
-      if (!is.whitespace(code)) {
-        break;
-      }
-      this.cursor.advance();
-    }
-  }
-
+export class Tokenizer extends CharacterScanner<Token> {
   tokenize() {
-    while (!this.cursor.eof) {
-      if (is.htmlCommentStart(this.cursor)) {
+    while (!this.eof) {
+      /*=== Consume Html Comment ===*/
+      if (this.isHtmlCommentStart) {
         this.consumeHtmlCommentStart();
         this.consumeHtmlCommentContent();
         this.consumeHtmlCommentEnd();
         continue;
-      } else if (is.tagLike(this.cursor)) {
-        if (is.doctypeStart(this.cursor)) {
-          this.consumeDoctypeStart();
-          this.skipWhiteSpace();
-          this.consumeAttributeName();
-          this.skipWhiteSpace();
-          this.consumeEqual();
-          this.skipWhiteSpace();
-          this.consumeAttributeValue();
-          continue;
-        } else if (is.closingTagStart(this.cursor)) {
-        } else {
-        }
       }
 
-      this.cursor.advance();
+      const isDoctype = this.isHtmlTagLike && this.isHtmlDoctypeStart;
+      if (isDoctype) {
+        this.consumeDoctypeStart();
+        this.consumeTagAttributes();
+        this.emitIf(!this.eof && this.peek() === this.greaterThan, this.makeTagEndToken());
+        continue;
+      }
+
+      this.advance();
     }
 
-    return this.tokens;
+    return this.getTokens();
   }
-  /*===== Common Consumers =====*/
 
   /*===== Html Comment Consumers =====*/
   private consumeHtmlCommentStart() {
-    const start = this.cursor.position;
-    this.cursor.advanceBy(4);
-    this.tokens.push({
-      type: TokenType.HtmlCommentStart,
-      start,
-      end: this.cursor.position,
-    });
+    const start = this.position;
+    this.advanceBy(4);
+    this.emit({ type: TokenType.HtmlCommentStart, start, end: this.position });
   }
   private consumeHtmlCommentEnd() {
-    const start = this.cursor.position;
-    this.cursor.advanceBy(3);
-    this.tokens.push({
-      type: TokenType.HtmlCommentEnd,
-      start,
-      end: this.cursor.position,
-    });
+    const start = this.position;
+    this.advanceBy(3);
+    this.emit({ type: TokenType.HtmlCommentEnd, start, end: this.position });
   }
   private consumeHtmlCommentContent() {
-    const start = this.cursor.position;
-    while (!this.cursor.eof) {
-      if (is.htmlCommentEnd(this.cursor)) {
-        if (this.cursor.position > start) {
-          this.tokens.push({
-            type: TokenType.HtmlCommentContent,
-            start: start,
-            end: this.cursor.position,
-            content: this.cursor.getChars(start),
-          });
-        }
-        //  No Advancement Let the CommentEnd Consumer handle that
-        return;
-      }
-      // Error :: Parser Will Resolve That
-      if (is.htmlCommentStart(this.cursor)) {
-        this.tokens.push({
-          type: TokenType.HtmlCommentStart,
-          start: start,
-          end: this.cursor.position,
-        });
-        this.cursor.advanceBy(3);
+    const start = this.position;
+
+    while (!this.eof && !this.isHtmlCommentEnd) {
+      // Error :: Parser will resolve that.
+      if (this.isHtmlCommentStart) {
+        this.emit({ type: TokenType.HtmlCommentStart, start: this.position, end: this.position });
+        this.advanceBy(4);
+        continue;
       }
 
-      this.cursor.advance();
+      this.advance();
     }
 
-    this.tokens.push({
+    this.emitIf(this.position > start, {
       type: TokenType.HtmlCommentContent,
-      start: start,
-      end: this.cursor.position,
-      content: this.cursor.getChars(start),
+      start,
+      end: this.position,
+      content: this.getChars(start),
     });
 
-    this.tokens.push({
+    this.emitIf(this.eof, {
       type: TokenType.UnterminatedHtmlComment,
-      start: start,
-      end: this.cursor.position,
+      start,
+      end: this.position,
     });
+  }
+  /*===== Html Tag Consumers =====*/
+  private makeTagEndToken(): TagEndToken {
+    const start = this.position;
+    this.advance();
+    return { type: TokenType.TagEnd, start, end: this.position };
   }
 
   /*===== Html Doctype Consumer =====*/
   private consumeDoctypeStart() {
-    const start = this.cursor.position;
-    this.cursor.advanceBy(9);
-    this.tokens.push({
-      type: TokenType.DoctypeStart,
-      start,
-      end: this.cursor.position,
-    });
+    const start = this.position;
+    this.advanceBy(9);
+    this.emit({ type: TokenType.DoctypeStart, start, end: this.position });
   }
-  /*===== Html Attribute Consumer =====*/
-  private consumeAttributeName() {
-    const start = this.cursor.position;
-    while (!this.cursor.eof) {
-      const code = this.cursor.peek();
-      if (!is.attributeNameChar(code)) {
+
+  /*===== Html Attribute Consumers =====*/
+  private consumeTagAttributes() {
+    while (!this.eof) {
+      this.skipWhiteSpace();
+      if (this.eof || this.isHtmlTagEnd) {
         break;
       }
-      this.cursor.advance();
+      const beforeAttribute = this.position;
+      this.consumeAttributeName();
+      this.skipWhiteSpace();
+      const hasValue = !this.eof && this.peek() === this.equals;
+      if (hasValue) {
+        this.consumeEqual();
+        this.skipWhiteSpace();
+        this.consumeAttributeValue();
+      }
+      this.advanceIf(this.position === beforeAttribute);
+    }
+  }
+
+  private consumeAttributeName() {
+    const start = this.position;
+
+    while (!this.eof) {
+      const code = this.peek();
+      if (!this.isHtmlAttributeNameChar(code)) {
+        break;
+      }
+      this.advance();
     }
 
-    if (this.cursor.position > start) {
-      this.tokens.push({
-        type: TokenType.AttributeName,
-        start,
-        end: this.cursor.position,
-        content: this.cursor.getChars(start),
-      });
-    }
+    this.emitIf(this.position > start, {
+      type: TokenType.AttributeName,
+      start,
+      end: this.position,
+      content: this.getChars(start),
+    });
   }
 
   private consumeEqual() {
-    if (this.cursor.peek() === chars.equals) {
-      this.tokens.push({
-        type: TokenType.Equals,
-        start: this.cursor.position,
-        end: this.cursor.position + 1,
-      });
-      this.cursor.advance();
-    }
+    const start = this.position;
+    this.advance();
+    this.emit({ type: TokenType.Equals, start, end: this.position });
   }
 
   private consumeAttributeValue() {
-    const code = this.cursor.peek();
-    if (code === chars.openBrace) {
-      this.consumeJsExpressionAttributeValue();
-    } else if (is.quote(code)) {
+    const code = this.peek();
+    const isExpression = code === this.openBrace;
+    const isQuoted = !isExpression && this.isQuote(code);
+    const isUnquoted = !isExpression && !isQuoted;
+    if (isExpression) {
+      this.consumeJsExpression();
+    }
+
+    if (isQuoted) {
       this.consumeQuotedAttributeValue();
-    } else {
+    }
+    if (isUnquoted) {
       this.consumeUnquotedAttributeValue();
     }
   }
 
   private consumeQuotedAttributeValue() {
-    const start = this.cursor.position;
-    const quote = this.cursor.peek();
-    this.cursor.advance();
-    while (!this.cursor.eof) {
-      const code = this.cursor.peek();
-      if (code === quote) {
-        this.cursor.advance();
-        this.tokens.push({
-          type: TokenType.QuotedAttributeValue,
-          start,
-          end: this.cursor.position,
-          content: this.cursor.getChars(start),
-        });
-        return;
-      }
-      this.cursor.advance();
+    const start = this.position;
+    const quote = this.peek();
+    this.advance();
+    while (!this.eof && this.peek() !== quote) {
+      this.advance();
     }
-    this.tokens.push({
+
+    const closed = !this.eof;
+    this.advanceIf(closed);
+    this.emit({
       type: TokenType.QuotedAttributeValue,
       start,
-      end: this.cursor.position,
-      content: this.cursor.getChars(start),
+      end: this.position,
+      content: this.getChars(start),
     });
-    this.tokens.push({
+    this.emitIf(!closed, {
       type: TokenType.UnterminatedQuotedAttributeValue,
       start,
-      end: this.cursor.position,
+      end: this.position,
     });
   }
 
   private consumeUnquotedAttributeValue() {
-    const start = this.cursor.position;
-    while (!this.cursor.eof) {
-      const code = this.cursor.peek();
-      if (is.whitespace(code) || is.tagEnd(this.cursor)) {
-        if (this.cursor.position > start) {
-          this.tokens.push({
-            type: TokenType.UnQuotedAttributeValue,
-            start,
-            end: this.cursor.position,
-            content: this.cursor.getChars(start),
-          });
-        }
-        return;
-      }
-      this.cursor.advance();
-    }
-  }
-  /*===== JavaScript Expression Consumer =====*/
+    const start = this.position;
 
-  private consumeJsExpressionAttributeValue() {
-    const start = this.cursor.position;
-    const result = resolveJsExpression(this.cursor);
-    this.tokens.push({
-      type: TokenType.JsExpression,
+    while (!this.eof && !this.isWhitespace && !this.isHtmlTagEnd) {
+      this.advance();
+    }
+    this.emitIf(this.position > start, {
+      type: TokenType.UnQuotedAttributeValue,
       start,
-      end: result.end,
-      content: this.cursor.getChars(start),
+      end: this.position,
+      content: this.getChars(start),
     });
-
-    let index = 0;
-    while (index < result.issues.length) {
-      const issue = result.issues[index];
-
-      if (issue.kind === "unterminatedString") {
-        this.tokens.push({
-          type: TokenType.UnterminatedJsString,
-          start: issue.start,
-          end: issue.end,
-        });
-      }
-
-      if (issue.kind === "unterminatedTemplate") {
-        // TokenType.UnterminatedTemplateLiteral needs adding to ./token —
-        // it did not exist before, since the old tokenizer folded this
-        // case into UnterminatedJsString.
-        this.tokens.push({
-          type: TokenType.UnterminatedTemplateLiteral,
-          start: issue.start,
-          end: issue.end,
-        });
-      }
-      if (issue.kind === "unterminatedBlockComment") {
-        this.tokens.push({
-          type: TokenType.UnterminatedBlockComment,
-          start: issue.start,
-          end: issue.end,
-        });
-      }
-
-      if (issue.kind === "unterminatedExpression" || issue.kind === "tagLike") {
-        this.tokens.push({
-          type: TokenType.UnterminatedJsExpression,
-          start: issue.start,
-          end: issue.end,
-        });
-      }
-
-      index++;
-    }
   }
+
+  /*===== JavaScript Expression Consumer =====*/
+  private consumeJsExpression() {}
 }

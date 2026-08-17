@@ -9,6 +9,8 @@ export enum TokenType {
   QuotedAttributeValue = "QuotedAttributeValue",
   UnterminatedQuotedAttributeValue = "UnterminatedQuotedAttributeValue",
   UnQuotedAttributeValue = "UnQuotedAttributeValue",
+  TagStart = "TagStart",
+  TagEnd = "TagEnd",
 
   JsExpression = "JsExpression",
   UnterminatedJsString = "UnterminatedJsString",
@@ -85,6 +87,15 @@ export interface UnterminatedJsExpressionToken extends BaseToken {
   type: TokenType.UnterminatedJsExpression;
 }
 
+export interface TagStartToken extends BaseToken {
+  type: TokenType.TagStart;
+  content: string;
+}
+
+export interface TagEndToken extends BaseToken {
+  type: TokenType.TagEnd;
+}
+
 export type Token =
   | HtmlCommentStartToken
   | HtmlCommentEndToken
@@ -100,4 +111,6 @@ export type Token =
   | UnterminatedJsStringToken
   | UnterminatedTemplateLiteralToken
   | UnterminatedBlockCommentToken
-  | UnterminatedJsExpressionToken;
+  | UnterminatedJsExpressionToken
+  | TagStartToken
+  | TagEndToken;

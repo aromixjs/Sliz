@@ -1,13 +1,11 @@
-import chars from "../../scanner/chars";
-import is from "../../scanner/is";
-import { CharacterCursor } from "../cursor";
+import { CharacterCursor } from "../../common/cursor";
 import {
-  FrameKind,
-  JsExpressionIssue,
-  JsExpressionIssueKind,
-  JsExpressionResolution,
-  ResolverFrame,
-} from "./types";
+   FrameKind,
+   JsExpressionIssue,
+   JsExpressionIssueKind,
+   JsExpressionResolution,
+   ResolverFrame,
+} from "./token";
 export class JsResolver {
   private cursor: CharacterCursor;
   private stack: Array<ResolverFrame> = [];
