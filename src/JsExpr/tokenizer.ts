@@ -5,6 +5,14 @@ export class JsExprTokenizer extends CharacterScanner<JsToken> {
   public tokenize(start: number) {
     this.clearTokens();
     this.advanceTo(start);
+
+    const code = this.peek();
+    if (code !== this.openBrace) {
+      throw new Error(
+        `Programming Error:: A Js Expr Tokenizer Only Works When Position is at '{', current position is at index ${this.position}`,
+      );
+    }
+
     this.emit({ type: JsTokenType.ExpressionStart, start, end: start + 1 });
     this.advance();
     this.consumeExpressionBody();
@@ -96,11 +104,12 @@ export class JsExprTokenizer extends CharacterScanner<JsToken> {
       this.advance();
     }
 
-    this.emitIf(this.position > start, {
+    const content = this.getChars(start).trim();
+    this.emitIf(content.length > 0, {
       type: JsTokenType.RawJs,
       start,
       end: this.position,
-      content: this.getChars(start),
+      content,
     });
   }
 

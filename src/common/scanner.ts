@@ -193,7 +193,7 @@ export class CharacterScanner<Token> {
   }
   protected get isCloseBrace() {
     const code = this.cursor.peek();
-    return code === this.openBrace;
+    return code === this.closeBrace;
   }
 
   protected skipWhiteSpace() {
