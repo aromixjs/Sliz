@@ -1,3 +1,4 @@
-export { CharacterCursor } from "./common/cursor";
+export { CharacterScanner } from "./common/CharacterScanner";
 export { JsInterpolationResolver, JsInterpolationStatus } from "./common/JsInterpolationResolver";
-export { Tokenizer } from "./tokenizer/tokenize";
+export { SlizTokenizer } from "./tokenizer/tokenize";
+

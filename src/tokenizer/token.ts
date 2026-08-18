@@ -1,8 +1,10 @@
 export enum TokenType {
+  /*=== Html Comment ===*/
   HtmlCommentStart = "HtmlCommentStart",
   HtmlCommentEnd = "HtmlCommentEnd",
   HtmlCommentContent = "HtmlCommentContent",
   UnterminatedHtmlComment = "UnterminatedHtmlComment",
+  /*=== Html Tags ===*/
   DoctypeStart = "DoctypeStart",
   AttributeName = "AttributeName",
   Equals = "Equals",
@@ -11,20 +13,21 @@ export enum TokenType {
   UnQuotedAttributeValue = "UnQuotedAttributeValue",
   TagStart = "TagStart",
   TagEnd = "TagEnd",
-
+  /*=== Js Expression ===*/
   JsExpression = "JsExpression",
-  UnterminatedJsString = "UnterminatedJsString",
-  UnterminatedTemplateLiteral = "UnterminatedTemplateLiteral",
-  UnterminatedBlockComment = "UnterminatedBlockComment",
+  UnterminatedJsLiteral = "UnterminatedJsLiteral",
   UnterminatedJsExpression = "UnterminatedJsExpression",
+  /*=== Text ===*/
+  Text = "Text",
 }
 
+/*===== Tokens =====*/
 export interface BaseToken {
   type: TokenType;
   start: number;
   end: number;
 }
-
+/*=== Html Comment Tokens  ===*/
 export interface HtmlCommentStartToken extends BaseToken {
   type: TokenType.HtmlCommentStart;
 }
@@ -40,6 +43,8 @@ export interface HtmlCommentContentToken extends BaseToken {
 export interface UnterminatedHtmlComment extends BaseToken {
   type: TokenType.UnterminatedHtmlComment;
 }
+
+/*=== Html Tag Tokens ===*/
 export interface DoctypeStartToken extends BaseToken {
   type: TokenType.DoctypeStart;
 }
@@ -66,27 +71,6 @@ export interface UnQuotedAttributeValueToken extends BaseToken {
   content: string;
 }
 
-export interface JsExpressionToken extends BaseToken {
-  type: TokenType.JsExpression;
-  content: string;
-}
-
-export interface UnterminatedJsStringToken extends BaseToken {
-  type: TokenType.UnterminatedJsString;
-}
-
-export interface UnterminatedTemplateLiteralToken extends BaseToken {
-  type: TokenType.UnterminatedTemplateLiteral;
-}
-
-export interface UnterminatedBlockCommentToken extends BaseToken {
-  type: TokenType.UnterminatedBlockComment;
-}
-
-export interface UnterminatedJsExpressionToken extends BaseToken {
-  type: TokenType.UnterminatedJsExpression;
-}
-
 export interface TagStartToken extends BaseToken {
   type: TokenType.TagStart;
   content: string;
@@ -94,6 +78,27 @@ export interface TagStartToken extends BaseToken {
 
 export interface TagEndToken extends BaseToken {
   type: TokenType.TagEnd;
+}
+
+/*=== Js Expression ===*/
+export interface JsExpressionToken extends BaseToken {
+  type: TokenType.JsExpression;
+  content: string;
+}
+
+export interface UnterminatedJsExpressionToken extends BaseToken {
+  type: TokenType.UnterminatedJsExpression;
+}
+
+export interface UnterminatedJsLiteralToken extends BaseToken {
+  type: TokenType.UnterminatedJsLiteral;
+}
+
+/*=== Text ===*/
+
+export interface TextToken extends BaseToken {
+  type: TokenType.Text;
+  content: string;
 }
 
 export type Token =
@@ -108,9 +113,8 @@ export type Token =
   | UnterminatedQuotedAttributeValueToken
   | UnQuotedAttributeValueToken
   | JsExpressionToken
-  | UnterminatedJsStringToken
-  | UnterminatedTemplateLiteralToken
-  | UnterminatedBlockCommentToken
   | UnterminatedJsExpressionToken
+  | UnterminatedJsLiteralToken
   | TagStartToken
-  | TagEndToken;
+  | TagEndToken
+  | TextToken;

@@ -1,7 +1,76 @@
-import { CharacterScanner } from "../common/scanner";
-import { TagEndToken, Token, TokenType } from "./token";
+import { CharacterScanner } from "../common/CharacterScanner";
+import { JsInterpolationResolver, JsInterpolationStatus } from "../common/JsInterpolationResolver";
+import { Token, TokenType } from "./token";
 
-export class Tokenizer extends CharacterScanner<Token> {
+export class SlizTokenizer extends CharacterScanner<Token> {
+  private readonly jsResolver: JsInterpolationResolver;
+
+  constructor(source: string) {
+    super(source);
+    this.jsResolver = new JsInterpolationResolver(source);
+  }
+
+  /*===== Html Predicates =====*/
+  private get isHtmlCommentStart(): boolean {
+    return (
+      this.peek() === this.lessThan &&
+      this.peekAtOffset(1) === this.exclamationMark &&
+      this.peekAtOffset(2) === this.minus &&
+      this.peekAtOffset(3) === this.minus
+    );
+  }
+
+  private get isHtmlCommentEnd(): boolean {
+    return (
+      this.peek() === this.minus &&
+      this.peekAtOffset(1) === this.minus &&
+      this.peekAtOffset(2) === this.greaterThan
+    );
+  }
+
+  private get isHtmlDoctypeStart(): boolean {
+    return this.source.slice(this.position, this.position + 9).toLowerCase() === "<!doctype";
+  }
+
+  protected get isHtmlClosingTagStart(): boolean {
+    return (
+      this.peek() === this.lessThan &&
+      this.peekAtOffset(1) === this.slash &&
+      this.isAlpha(this.peekAtOffset(2))
+    );
+  }
+
+  private get isHtmlOpeningTagStart(): boolean {
+    return this.peek() === this.lessThan && this.isAlpha(this.peekAtOffset(1));
+  }
+
+  private isHtmlTagNameChar(code: number): boolean {
+    return this.isAlpha(code) || (code >= this.zero && code <= this.nine) || code === this.minus;
+  }
+
+  private get isHtmlTagEnd(): boolean {
+    return (
+      this.peek() === this.greaterThan ||
+      (this.peek() === this.slash && this.peekAtOffset(1) === this.greaterThan)
+    );
+  }
+
+  private isHtmlAttributeNameChar(code: number): boolean {
+    return (
+      !Number.isNaN(code) &&
+      code !== this.space &&
+      code !== this.tab &&
+      code !== this.lineFeed &&
+      code !== this.carriageReturn &&
+      code !== this.equals &&
+      code !== this.greaterThan &&
+      code !== this.slash &&
+      code !== this.doubleQuote &&
+      code !== this.singleQuote
+    );
+  }
+
+  /*====  The Main Tokenize Loop Runner  ==== */
   tokenize() {
     while (!this.eof) {
       /*=== Consume Html Comment ===*/
@@ -11,16 +80,24 @@ export class Tokenizer extends CharacterScanner<Token> {
         this.consumeHtmlCommentEnd();
         continue;
       }
-
-      const isDoctype = this.isHtmlTagLike && this.isHtmlDoctypeStart;
-      if (isDoctype) {
+      /*=== Consume Doctype Tag ===*/
+      if (this.isHtmlDoctypeStart) {
         this.consumeDoctypeStart();
         this.consumeTagAttributes();
-        this.emitIf(!this.eof && this.peek() === this.greaterThan, this.makeTagEndToken());
+        this.consumeTagEndIfPresent();
         continue;
       }
 
-      this.advance();
+      /*=== Consume Opening/Closing Tag ===*/
+      if (this.isHtmlClosingTagStart || this.isHtmlOpeningTagStart) {
+        this.consumeTagStart();
+        this.consumeTagAttributes();
+        this.consumeTagEndIfPresent();
+        continue;
+      }
+
+      /*=== Everything else is plain text content ===*/
+      this.consumeText();
     }
 
     return this.getTokens();
@@ -65,10 +142,36 @@ export class Tokenizer extends CharacterScanner<Token> {
     });
   }
   /*===== Html Tag Consumers =====*/
-  private makeTagEndToken(): TagEndToken {
-    const start = this.position;
+  private consumeTagStart() {
     this.advance();
-    return { type: TokenType.TagEnd, start, end: this.position };
+    this.advanceIf(!this.eof && this.peek() === this.slash);
+    const tagNameStart = this.position;
+    while (!this.eof && this.isHtmlTagNameChar(this.peek())) {
+      this.advance();
+    }
+    this.emit({
+      type: TokenType.TagStart,
+      start: tagNameStart,
+      end: this.position,
+      content: this.getChars(tagNameStart),
+    });
+  }
+
+  private consumeTagEndIfPresent() {
+    if (this.eof || !this.isHtmlTagEnd) {
+      return;
+    }
+
+    const start = this.position;
+    const isSelfClosing = this.peek() === this.slash && this.peekAtOffset(1) === this.greaterThan;
+
+    if (isSelfClosing) {
+      this.advanceBy(2);
+    } else {
+      this.advance();
+    }
+
+    this.emit({ type: TokenType.TagEnd, start, end: this.position });
   }
 
   /*===== Html Doctype Consumer =====*/
@@ -126,7 +229,7 @@ export class Tokenizer extends CharacterScanner<Token> {
   private consumeAttributeValue() {
     const code = this.peek();
     const isExpression = code === this.openBrace;
-    const isQuoted = !isExpression && this.isQuote(code);
+    const isQuoted = !isExpression && this.isQuote;
     const isUnquoted = !isExpression && !isQuoted;
     if (isExpression) {
       this.consumeJsExpression();
@@ -177,6 +280,44 @@ export class Tokenizer extends CharacterScanner<Token> {
     });
   }
 
-  /*===== JavaScript Expression Consumer =====*/
-  private consumeJsExpression() {}
+  private consumeJsExpression() {
+    const start = this.position;
+    const outcome = this.jsResolver.resolve(start);
+    this.advanceTo(outcome.end);
+    if (outcome.status === JsInterpolationStatus.Closed) {
+      this.emit({
+        type: TokenType.JsExpression,
+        start,
+        end: outcome.end,
+        content: outcome.text,
+      });
+      return;
+    }
+
+    if (outcome.status === JsInterpolationStatus.UnterminatedLiteral) {
+      this.emit({ type: TokenType.UnterminatedJsLiteral, start, end: outcome.end });
+      return;
+    }
+    this.emit({ type: TokenType.UnterminatedJsExpression, start, end: outcome.end });
+  }
+
+  /*===== Text Consumer =====*/
+  private consumeText() {
+    const start = this.position;
+    while (
+      !this.eof &&
+      !this.isHtmlCommentStart &&
+      !this.isHtmlDoctypeStart &&
+      this.isHtmlClosingTagStart &&
+      this.isHtmlOpeningTagStart
+    ) {
+      this.advance();
+    }
+    this.emitIf(this.position > start, {
+      type: TokenType.Text,
+      start,
+      end: this.position,
+      content: this.getChars(start),
+    });
+  }
 }
