@@ -46,7 +46,12 @@
     "fmt:check": "oxfmt --check"
   },
   "dependencies": {
-    "typescript": "^5.9.3"
+    "@vscode/tree-sitter-wasm": "^0.3.1",
+    "acorn": "^8.18.0",
+    "acorn-loose": "^8.5.2",
+    "acorn-walk": "^8.3.5",
+    "typescript": "^5.9.3",
+    "web-tree-sitter": "^0.26.12"
   },
   "devDependencies": {
     "@types/node": "^22.10.2",

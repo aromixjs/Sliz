@@ -108,6 +108,17 @@ export class CharacterScanner<Token> {
   protected readonly pipe = 124;
   protected readonly closeBrace = 125;
   protected readonly tilde = 126;
+
+  protected readonly zero = 48;
+  protected readonly one = 49;
+  protected readonly two = 50;
+  protected readonly three = 51;
+  protected readonly four = 52;
+  protected readonly five = 53;
+  protected readonly six = 54;
+  protected readonly seven = 55;
+  protected readonly eight = 56;
+  protected readonly nine = 57;
   /*===== Token emission =====*/
   protected emit(token: Token): void {
     this.tokens.push(token);
@@ -196,10 +207,19 @@ export class CharacterScanner<Token> {
     return code === this.closeBrace;
   }
 
+  protected get isDigit() {
+    const code = this.peek();
+    return code >= this.zero && code <= this.nine;
+  }
+
   protected skipWhiteSpace() {
     while (!this.eof && !this.isWhitespace) {
       this.cursor.advance();
     }
+  }
+
+  protected get isSlash(): boolean {
+    return this.peek() === this.slash;
   }
 
   /*===== HTML checks =====*/

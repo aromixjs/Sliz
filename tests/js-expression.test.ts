@@ -1,12 +1,11 @@
 import { JsExprTokenizer } from "@/src";
-import { JsTokenType,RawJsToken } from "@/src/JsExpr/token";
+import { JsTokenType, RawJsToken } from "@/src/JsExpr/token";
 import { describe, expect, it } from "vitest";
 
 describe("closing brace (core behavior)", () => {
   it("closes an empty expression {}", () => {
     const result = new JsExprTokenizer("{}").tokenize(0);
-    console.log(result);
-    
+
     expect(result.closed).toBe(true);
     expect(result.tokens.map((token) => token.type)).toEqual([
       JsTokenType.ExpressionStart,
@@ -37,7 +36,7 @@ describe("closing brace (core behavior)", () => {
     expect(raw.content).toBe("a + b");
   });
 
-  it("closes the originally-provided example {userId+ /*\"name*/}", () => {
+  it('closes the originally-provided example {userId+ /*"name*/}', () => {
     const result = new JsExprTokenizer('{userId+ /*"name*/}').tokenize(0);
     expect(result.closed).toBe(true);
     expect(result.tokens.map((token) => token.type)).toEqual([
@@ -50,9 +49,9 @@ describe("closing brace (core behavior)", () => {
       content: string;
     };
     expect(raw.content).toBe("userId+");
-    const comment = result.tokens.find(
-      (token) => token.type === JsTokenType.BlockComment,
-    ) as { content: string };
+    const comment = result.tokens.find((token) => token.type === JsTokenType.BlockComment) as {
+      content: string;
+    };
     expect(comment.content).toBe('/*"name*/');
   });
 
@@ -103,75 +102,75 @@ describe("string literals", () => {
   it("closes a double-quoted string expression", () => {
     const result = new JsExprTokenizer('{ "hello" }').tokenize(0);
     expect(result.closed).toBe(true);
-    const str = result.tokens.find(
-      (token) => token.type === JsTokenType.StringLiteral,
-    ) as { content: string };
+    const str = result.tokens.find((token) => token.type === JsTokenType.StringLiteral) as {
+      content: string;
+    };
     expect(str.content).toBe('"hello"');
   });
 
   it("closes a single-quoted string expression", () => {
     const result = new JsExprTokenizer("{ 'hello' }").tokenize(0);
     expect(result.closed).toBe(true);
-    const str = result.tokens.find(
-      (token) => token.type === JsTokenType.StringLiteral,
-    ) as { content: string };
+    const str = result.tokens.find((token) => token.type === JsTokenType.StringLiteral) as {
+      content: string;
+    };
     expect(str.content).toBe("'hello'");
   });
 
   it("handles an escaped quote inside a double-quoted string", () => {
     const result = new JsExprTokenizer('{ "a\\"b" }').tokenize(0);
     expect(result.closed).toBe(true);
-    const str = result.tokens.find(
-      (token) => token.type === JsTokenType.StringLiteral,
-    ) as { content: string };
+    const str = result.tokens.find((token) => token.type === JsTokenType.StringLiteral) as {
+      content: string;
+    };
     expect(str.content).toBe('"a\\"b"');
   });
 
   it("handles an escaped quote inside a single-quoted string", () => {
     const result = new JsExprTokenizer("{ 'it\\'s' }").tokenize(0);
     expect(result.closed).toBe(true);
-    const str = result.tokens.find(
-      (token) => token.type === JsTokenType.StringLiteral,
-    ) as { content: string };
+    const str = result.tokens.find((token) => token.type === JsTokenType.StringLiteral) as {
+      content: string;
+    };
     expect(str.content).toBe("'it\\'s'");
   });
 
   it("handles a doubled backslash before the closing quote", () => {
     const result = new JsExprTokenizer('{ "a\\\\" }').tokenize(0);
     expect(result.closed).toBe(true);
-    const str = result.tokens.find(
-      (token) => token.type === JsTokenType.StringLiteral,
-    ) as { content: string };
+    const str = result.tokens.find((token) => token.type === JsTokenType.StringLiteral) as {
+      content: string;
+    };
     expect(str.content).toBe('"a\\\\"');
   });
 
   it("keeps a } that lives inside the string as string content", () => {
     const result = new JsExprTokenizer('{ "}" }').tokenize(0);
     expect(result.closed).toBe(true);
-    const str = result.tokens.find(
-      (token) => token.type === JsTokenType.StringLiteral,
-    ) as { content: string };
+    const str = result.tokens.find((token) => token.type === JsTokenType.StringLiteral) as {
+      content: string;
+    };
     expect(str.content).toBe('"}"');
   });
 
   it("emits UnterminatedString when the closing quote is missing", () => {
     const result = new JsExprTokenizer('{ "abc }').tokenize(0);
     expect(result.closed).toBe(false);
-    const str = result.tokens.find(
-      (token) => token.type === JsTokenType.UnterminatedString,
-    ) as { content: string };
+    const str = result.tokens.find((token) => token.type === JsTokenType.UnterminatedString) as {
+      content: string;
+    };
     expect(str.content).toBe('"abc }');
-    expect(
-      result.tokens.some((token) => token.type === JsTokenType.UnterminatedExpression),
-    ).toBe(true);
+    expect(result.tokens.some((token) => token.type === JsTokenType.UnterminatedExpression)).toBe(
+      true,
+    );
   });
 
   it("terminates a string at a literal newline (malformed input, graceful)", () => {
     const result = new JsExprTokenizer('{ "abc\ndef" }').tokenize(0);
     expect(result.closed).toBe(false);
-    const str = result.tokens.find(
-      (token) => token.type === JsTokenType.UnterminatedString,
-    ) as { content: string };
+    const str = result.tokens.find((token) => token.type === JsTokenType.UnterminatedString) as {
+      content: string;
+    };
     expect(str.content.startsWith('"abc')).toBe(true);
   });
 });
@@ -180,45 +179,45 @@ describe("template literals", () => {
   it("closes a plain template literal", () => {
     const result = new JsExprTokenizer("{ `hi` }").tokenize(0);
     expect(result.closed).toBe(true);
-    const template = result.tokens.find(
-      (token) => token.type === JsTokenType.TemplateLiteral,
-    ) as { content: string };
+    const template = result.tokens.find((token) => token.type === JsTokenType.TemplateLiteral) as {
+      content: string;
+    };
     expect(template.content).toBe("`hi`");
   });
 
   it("closes a template literal that spans a newline", () => {
     const result = new JsExprTokenizer("{ `a\nb` }").tokenize(0);
     expect(result.closed).toBe(true);
-    const template = result.tokens.find(
-      (token) => token.type === JsTokenType.TemplateLiteral,
-    ) as { content: string };
+    const template = result.tokens.find((token) => token.type === JsTokenType.TemplateLiteral) as {
+      content: string;
+    };
     expect(template.content).toBe("`a\nb`");
   });
 
   it("keeps an escaped backtick inside a template literal", () => {
     const result = new JsExprTokenizer("{ `a\\`b` }").tokenize(0);
     expect(result.closed).toBe(true);
-    const template = result.tokens.find(
-      (token) => token.type === JsTokenType.TemplateLiteral,
-    ) as { content: string };
+    const template = result.tokens.find((token) => token.type === JsTokenType.TemplateLiteral) as {
+      content: string;
+    };
     expect(template.content).toBe("`a\\`b`");
   });
 
   it("captures the whole template (including ${...}) as one TemplateLiteral token", () => {
     const result = new JsExprTokenizer("{ `a${b}c` }").tokenize(0);
     expect(result.closed).toBe(true);
-    const found = result.tokens.find(
-      (token) => token.type === JsTokenType.TemplateLiteral,
-    ) as { content: string };
+    const found = result.tokens.find((token) => token.type === JsTokenType.TemplateLiteral) as {
+      content: string;
+    };
     expect(found.content).toBe("`a${b}c`");
   });
 
   it("resolves a nested interpolation object literal inside a template", () => {
     const result = new JsExprTokenizer("{ `x${ {y: 1} }z` }").tokenize(0);
     expect(result.closed).toBe(true);
-    const found = result.tokens.find(
-      (token) => token.type === JsTokenType.TemplateLiteral,
-    ) as { content: string };
+    const found = result.tokens.find((token) => token.type === JsTokenType.TemplateLiteral) as {
+      content: string;
+    };
     expect(found.content).toBe("`x${ {y: 1} }z`");
   });
 
@@ -244,34 +243,30 @@ describe("comments", () => {
   it("closes after a line comment", () => {
     const result = new JsExprTokenizer("{ a // note\n b }").tokenize(0);
     expect(result.closed).toBe(true);
-    const comment = result.tokens.find(
-      (token) => token.type === JsTokenType.LineComment,
-    ) as { content: string };
+    const comment = result.tokens.find((token) => token.type === JsTokenType.LineComment) as {
+      content: string;
+    };
     expect(comment.content).toBe("// note");
-    expect(
-      result.tokens.some((token) => token.type === JsTokenType.ExpressionEnd),
-    ).toBe(true);
+    expect(result.tokens.some((token) => token.type === JsTokenType.ExpressionEnd)).toBe(true);
   });
 
   it("closes after a block comment", () => {
     const result = new JsExprTokenizer("{ /* c */ }").tokenize(0);
     expect(result.closed).toBe(true);
-    const comment = result.tokens.find(
-      (token) => token.type === JsTokenType.BlockComment,
-    ) as { content: string };
+    const comment = result.tokens.find((token) => token.type === JsTokenType.BlockComment) as {
+      content: string;
+    };
     expect(comment.content).toBe("/* c */");
   });
 
   it("does not let a } inside a block comment terminate the expression", () => {
     const result = new JsExprTokenizer("{ /* } */ x }").tokenize(0);
     expect(result.closed).toBe(true);
-    const comment = result.tokens.find(
-      (token) => token.type === JsTokenType.BlockComment,
-    ) as { content: string };
+    const comment = result.tokens.find((token) => token.type === JsTokenType.BlockComment) as {
+      content: string;
+    };
     expect(comment.content).toBe("/* } */");
-    expect(
-      result.tokens.some((token) => token.type === JsTokenType.ExpressionEnd),
-    ).toBe(true);
+    expect(result.tokens.some((token) => token.type === JsTokenType.ExpressionEnd)).toBe(true);
   });
 
   it("emits UnterminatedBlockComment when the block comment is never closed", () => {
@@ -285,9 +280,9 @@ describe("comments", () => {
 
   it("does not treat a line comment as extending past the newline", () => {
     const result = new JsExprTokenizer("{ a // note\n b }").tokenize(0);
-    const comment = result.tokens.find(
-      (token) => token.type === JsTokenType.LineComment,
-    ) as { content: string };
+    const comment = result.tokens.find((token) => token.type === JsTokenType.LineComment) as {
+      content: string;
+    };
     expect(comment.content.includes("\n")).toBe(false);
   });
 });
@@ -314,9 +309,9 @@ describe("nested braces", () => {
   it("closes a nested group inside a template interpolation", () => {
     const result = new JsExprTokenizer("{ `a${ (b) }c` }").tokenize(0);
     expect(result.closed).toBe(true);
-    const found = result.tokens.find(
-      (token) => token.type === JsTokenType.TemplateLiteral,
-    ) as { content: string };
+    const found = result.tokens.find((token) => token.type === JsTokenType.TemplateLiteral) as {
+      content: string;
+    };
     expect(found.content).toBe("`a${ (b) }c`");
   });
 });
@@ -324,32 +319,24 @@ describe("nested braces", () => {
 describe("html tag-like boundaries", () => {
   it("should treat <div as TagLike and stop scanning", () => {
     const result = new JsExprTokenizer("{ <div }").tokenize(0);
-    expect(
-      result.tokens.some((token) => token.type === JsTokenType.TagLike),
-    ).toBe(true);
+    expect(result.tokens.some((token) => token.type === JsTokenType.TagLike)).toBe(true);
     expect(result.closed).toBe(false);
   });
 
   it("should treat </div as TagLike and stop scanning", () => {
     const result = new JsExprTokenizer("{ </div> }").tokenize(0);
-    expect(
-      result.tokens.some((token) => token.type === JsTokenType.TagLike),
-    ).toBe(true);
+    expect(result.tokens.some((token) => token.type === JsTokenType.TagLike)).toBe(true);
     expect(result.closed).toBe(false);
   });
 
   it("flags <identifier adjacency as TagLike (ambiguous JS comparison)", () => {
     const result = new JsExprTokenizer("{ a <b }").tokenize(0);
-    expect(
-      result.tokens.some((token) => token.type === JsTokenType.TagLike),
-    ).toBe(true);
+    expect(result.tokens.some((token) => token.type === JsTokenType.TagLike)).toBe(true);
   });
 
   it("does not flag < followed by a space as TagLike", () => {
     const result = new JsExprTokenizer("{ a < b }").tokenize(0);
-    expect(
-      result.tokens.some((token) => token.type === JsTokenType.TagLike),
-    ).toBe(false);
+    expect(result.tokens.some((token) => token.type === JsTokenType.TagLike)).toBe(false);
     expect(result.closed).toBe(true);
   });
 });
@@ -358,9 +345,9 @@ describe("malformed input / graceful degradation", () => {
   it("reports an unterminated expression when no } is present", () => {
     const result = new JsExprTokenizer("{ a + b").tokenize(0);
     expect(result.closed).toBe(false);
-    expect(
-      result.tokens.some((token) => token.type === JsTokenType.UnterminatedExpression),
-    ).toBe(true);
+    expect(result.tokens.some((token) => token.type === JsTokenType.UnterminatedExpression)).toBe(
+      true,
+    );
   });
 });
 
@@ -420,21 +407,21 @@ describe("guards", () => {
 
 describe("realistic multi-slot source with a single tokenizer instance", () => {
   const source =
-    '<script server>\n' +
+    "<script server>\n" +
     '  const name = "world";\n' +
-    '  const items = [1, 2, 3];\n' +
-    '  const ready = true;\n' +
+    "  const items = [1, 2, 3];\n" +
+    "  const ready = true;\n" +
     '  const kind = "primary";\n' +
-    '</script>\n\n' +
+    "</script>\n\n" +
     '<div class="card-{kind}">\n' +
     '  <main class="{container}">\n' +
-    '    <h1>{greeting + name}</h1>\n' +
-    '    <ul>\n' +
+    "    <h1>{greeting + name}</h1>\n" +
+    "    <ul>\n" +
     '      {items.map((item) => `<li class="{row}">{item}</li>`)}\n' +
-    '    </ul>\n' +
+    "    </ul>\n" +
     '    <button .when="{ready}">{submitLabel}</button>\n' +
-    '  </main>\n' +
-    '</div>';
+    "  </main>\n" +
+    "</div>";
 
   const tokenizer = new JsExprTokenizer(source);
 
@@ -448,7 +435,7 @@ describe("realistic multi-slot source with a single tokenizer instance", () => {
   it("tokenizes the {container} class expression slot", () => {
     const result = tokenizer.tokenize(source.indexOf("{container}"));
     expect(result.closed).toBe(true);
-    const raw = result.tokens.find((token) => token.type === JsTokenType.RawJs) as RawJsToken
+    const raw = result.tokens.find((token) => token.type === JsTokenType.RawJs) as RawJsToken;
     expect(raw.content).toBe("container");
   });
 
@@ -469,7 +456,7 @@ describe("realistic multi-slot source with a single tokenizer instance", () => {
   it("tokenizes the {submitLabel} slot", () => {
     const result = tokenizer.tokenize(source.indexOf("{submitLabel}"));
     expect(result.closed).toBe(true);
-    const raw = result.tokens.find((token) => token.type === JsTokenType.RawJs) as RawJsToken
+    const raw = result.tokens.find((token) => token.type === JsTokenType.RawJs) as RawJsToken;
     expect(raw.content).toBe("submitLabel");
   });
 
@@ -479,9 +466,9 @@ describe("realistic multi-slot source with a single tokenizer instance", () => {
     const raws = result.tokens.filter((token) => token.type === JsTokenType.RawJs) as RawJsToken[];
     expect(raws[0].content).toBe("items.map((item) =>");
     expect(raws[raws.length - 1].content).toBe(")");
-    const template = result.tokens.find(
-      (token) => token.type === JsTokenType.TemplateLiteral,
-    ) as { content: string };
+    const template = result.tokens.find((token) => token.type === JsTokenType.TemplateLiteral) as {
+      content: string;
+    };
     expect(template.content).toBe('`<li class="{row}">{item}</li>`');
   });
 
@@ -491,9 +478,9 @@ describe("realistic multi-slot source with a single tokenizer instance", () => {
       (token) => token.type === JsTokenType.ExpressionStart,
     ).length;
     expect(startCount).toBe(1);
-    const template = result.tokens.find(
-      (token) => token.type === JsTokenType.TemplateLiteral,
-    ) as { content: string };
+    const template = result.tokens.find((token) => token.type === JsTokenType.TemplateLiteral) as {
+      content: string;
+    };
     expect(template.content).toContain("{row}");
     expect(template.content).toContain("{item}");
   });
@@ -508,8 +495,7 @@ describe("realistic multi-slot source with a single tokenizer instance", () => {
     tokenizer.tokenize(source.indexOf("{kind}"));
     const afterContainer = tokenizer.tokenize(source.indexOf("{container}"));
     const hasKind = afterContainer.tokens.some(
-      (token) =>
-        "content" in token && (token as { content: string }).content.includes("kind"),
+      (token) => "content" in token && (token as { content: string }).content.includes("kind"),
     );
     expect(hasKind).toBe(false);
     expect(afterContainer.closed).toBe(true);
