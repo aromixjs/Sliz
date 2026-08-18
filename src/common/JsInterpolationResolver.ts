@@ -42,12 +42,21 @@ const TriviaKinds = new Set<ts.SyntaxKind>([
 ]);
 
 
-export type JsInterpolationOutcome =
-  | { status: "closed"; end: number }
-  | { status: "unterminated-literal"; end: number; tokenStart: number }
-  | { status: "unterminated-eof"; end: number };
+export enum JsInterpolationStatus {
+  Closed = "Closed",
+  UnterminatedLiteral = "UnterminatedLiteral",
+  UnterminatedEof = "UnterminatedEof",
+}
+
+export interface JsInterpolationOutcome {
+  status: JsInterpolationStatus;
+  start: number;
+  end: number;
+  text: string;
+}
 
 
+// See docs/JsInterpolationResolver.md for the full algorithm and outcome reference.
 export class JsInterpolationResolver {
   private readonly source: string;
   private readonly scanner: ts.Scanner;
@@ -84,15 +93,23 @@ export class JsInterpolationResolver {
       }
 
       if (this.scanner.isUnterminated()) {
+        const end = this.scanner.getTokenEnd();
         return {
-          status: "unterminated-literal",
-          end: this.scanner.getTokenEnd(),
-          tokenStart: this.scanner.getTokenStart(),
+          status: JsInterpolationStatus.UnterminatedLiteral,
+          start: openBraceIndex,
+          end,
+          text: this.source.slice(openBraceIndex, end),
         };
       }
 
       if (kind === ts.SyntaxKind.EndOfFileToken) {
-        return { status: "unterminated-eof", end: this.scanner.getTokenEnd() };
+        const end = this.scanner.getTokenEnd();
+        return {
+          status: JsInterpolationStatus.UnterminatedEof,
+          start: openBraceIndex,
+          end,
+          text: this.source.slice(openBraceIndex, end),
+        };
       }
 
       if (kind === ts.SyntaxKind.OpenBraceToken) {
@@ -106,7 +123,13 @@ export class JsInterpolationResolver {
       if (kind === ts.SyntaxKind.CloseBraceToken || kind === ts.SyntaxKind.TemplateTail) {
         stack.pop();
         if (stack.length === 0) {
-          return { status: "closed", end: this.scanner.getTokenEnd() };
+          const end = this.scanner.getTokenEnd();
+          return {
+            status: JsInterpolationStatus.Closed,
+            start: openBraceIndex,
+            end,
+            text: this.source.slice(openBraceIndex, end),
+          };
         }
       }
 

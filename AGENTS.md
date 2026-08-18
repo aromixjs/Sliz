@@ -237,6 +237,8 @@ ESM-only (`"type": "module"`). Target: `ESNext` / `ES2022`. DTS via tsup (`dts: 
 
 - Tests live in `tests/**/*.test.ts`.
 - New grammar additions need a test covering at least one well-formed input and one malformed input.
+- Tests must call the exported API directly — no wrapper helpers, no extracted test utilities. Use `compile`, `JsInterpolationResolver`, `Tokenizer`, etc. exactly as a consumer would; inline any setup/assertions rather than hiding the API behind a test-only helper.
+- **Never bend a test to make it pass.** A test encodes the intended/specified behavior; if the implementation is wrong, the test must fail so the bug is visible. Do not weaken assertions, add `KNOWN GAP`/`TODO` tests that assert buggy output, or clamp/skip inputs just to get green. When a test reveals a bug, report it — never alter the test to hide it. Tests are written a certain way for a reason; leave them as the specification of correct behavior.
 
 ---
 
