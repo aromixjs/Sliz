@@ -41,7 +41,6 @@ const TriviaKinds = new Set<ts.SyntaxKind>([
   ts.SyntaxKind.ConflictMarkerTrivia,
 ]);
 
-
 export enum JsInterpolationStatus {
   Closed = "Closed",
   UnterminatedLiteral = "UnterminatedLiteral",
@@ -55,7 +54,6 @@ export interface JsInterpolationOutcome {
   text: string;
 }
 
-
 // See docs/JsInterpolationResolver.md for the full algorithm and outcome reference.
 export class JsInterpolationResolver {
   private readonly source: string;
@@ -66,7 +64,16 @@ export class JsInterpolationResolver {
     this.scanner = ts.createScanner(ts.ScriptTarget.Latest, /*skipTrivia*/ false);
   }
 
-  resolve(openBraceIndex: number):JsInterpolationOutcome {
+  resolve(openBraceIndex: number): JsInterpolationOutcome {
+    if (!Number.isFinite(openBraceIndex) || openBraceIndex < 0) {
+      return {
+        status: JsInterpolationStatus.UnterminatedEof,
+        start: openBraceIndex,
+        end: openBraceIndex,
+        text: "",
+      };
+    }
+
     this.scanner.setText(this.source);
     this.scanner.resetTokenState(openBraceIndex + 1);
     const stack: FrameKind[] = [FrameKind.Brace];
