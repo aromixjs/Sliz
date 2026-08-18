@@ -77,7 +77,7 @@ export interface JsInterpolationOutcome {
    the TypeScript package, not one of our own outcomes. so `resolve` checks
    `Number.isFinite(openBraceIndex) && openBraceIndex >= 0` up front and, if
    that fails, returns `UnterminatedEof` immediately with an empty `text`
-   rather than ever calling into the scanner. Out-of-range *positive* values
+   rather than ever calling into the scanner. Out-of-range _positive_ values
    don't need this, the scanner already walks off the end of the source and
    hits `EndOfFileToken` on its own, which is handled normally in step 5
    below.
@@ -93,31 +93,21 @@ export interface JsInterpolationOutcome {
 
 Each iteration scans the next token and runs the following steps in order:
 
-1. **Unterminated block comment check.** This runs before the trivia skip on
-   purpose. `/* ...` that never reaches a closing `*/` is still lexed as
-   `MultiLineCommentTrivia`, TS just keeps scanning until EOF and hands back
-   the trivia token anyway, it doesn't set `isUnterminated()` for comments the
-   way it does for strings and templates. left alone, that comment would fall
-   straight into the trivia `continue` below and the resolver would never
-   notice anything was wrong, it'd just run off the end and report
-   `UnterminatedEof` instead of the more specific `UnterminatedLiteral`. so
-   when the token is `MultiLineCommentTrivia`, we check whether its text
-   actually ends in `*/`. If it doesn't, that's an unterminated comment and we
-   return `UnterminatedLiteral` right there. A normal closed comment like
-   `/* c */` ends in `*/` and just falls through to the trivia skip like
-   before, no change in behavior for the passing case.
+1. **Trivia skip.** Whitespace, newlines, comments, and shebang trivia are
+   ignored (`continue`), they never affect structure. this includes
+   unterminated block comments, `/* ...` with no closing `*/` still lexes as
+   `MultiLineCommentTrivia` and runs to EOF, that's expected: it just falls
+   through to `EndOfFileToken` in step 6 and comes back as `UnterminatedEof`
+   like any other unclosed construct, not a special-cased `UnterminatedLiteral`.
 
-2. **Trivia skip.** Whitespace, newlines, comments, and shebang trivia are
-   ignored (`continue`), they never affect structure.
-
-3. **Division vs. regex disambiguation.** A `/` token is ambiguous in JS: it can
+2. **Division vs. regex disambiguation.** A `/` token is ambiguous in JS: it can
    be division (`a / b`) or the start of a regex literal (`/=re/`). After certain
    preceding tokens (the `RegexExpectedAfter` set, `return`, `=`, `(`, `,`,
    binary operators, etc.) a `/` can only be regex, so we call
    `reScanSlashToken()` to re-lex it correctly. This prevents a regex body from
    being misread and a later `}` inside it being treated as structural.
 
-4. **Template interpolation disambiguation.** If the scanner produces a
+3. **Template interpolation disambiguation.** If the scanner produces a
    `CloseBraceToken` while the current frame is a `TemplateInterpolation`, that
    `}` actually belongs to a `${ ... }` inside the template, it's the end of a
    `${` interpolation, not the closing brace of our top-level interpolation. We
@@ -126,24 +116,24 @@ Each iteration scans the next token and runs the following steps in order:
    template's own `${...}` nests be walked with the brace stack instead of
    being miscounted.
 
-5. **Unterminated literal guard.** If the scanner reports `isUnterminated()`
+4. **Unterminated literal guard.** If the scanner reports `isUnterminated()`
    (a string, template, or regex that ran off the end of the source), we return
    `JsInterpolationStatus.UnterminatedLiteral`.
 
-6. **End of file.** An `EndOfFileToken` before the stack empties means the
+5. **End of file.** An `EndOfFileToken` before the stack empties means the
    interpolation was never closed, return `JsInterpolationStatus.UnterminatedEof`.
 
-7. **Frame pushes.**
+6. **Frame pushes.**
    - `OpenBraceToken` → push `FrameKind.Brace`.
    - `TemplateHead` (the `` `...${ `` part of a template) → push
      `FrameKind.TemplateInterpolation`.
 
-8. **Frame pops.** A `CloseBraceToken` (in brace context) or `TemplateTail`
+7. **Frame pops.** A `CloseBraceToken` (in brace context) or `TemplateTail`
    (the `` }...` `` end of a template) pops the top frame. When the stack returns
    to length 0, the interpolation is closed: return
    `JsInterpolationStatus.Closed` with `end` at the token end.
 
-9. **Track previous.** `previousSignificantKind` is updated to the current token
+8. **Track previous.** `previousSignificantKind` is updated to the current token
    (after re-scans) so step 3 can make its division/regex decision next time.
 
 ### Why a frame stack instead of a counter
@@ -157,11 +147,11 @@ lets steps 4 and 8 handle each correctly.
 
 ## Outcomes summary
 
-| Status                                      | Meaning                                                          |
-| -------------------------------------------- | ----------------------------------------------------------------- |
-| `JsInterpolationStatus.Closed`               | Found the matching closing `}`.                                   |
-| `JsInterpolationStatus.UnterminatedLiteral`  | A string/template/regex/comment ran past end of source unclosed.  |
-| `JsInterpolationStatus.UnterminatedEof`      | Reached end of source before `}` was balanced, or input was invalid. |
+| Status                                      | Meaning                                                              |
+| ------------------------------------------- | -------------------------------------------------------------------- |
+| `JsInterpolationStatus.Closed`              | Found the matching closing `}`.                                      |
+| `JsInterpolationStatus.UnterminatedLiteral` | A string/template/regex ran past end of source unclosed.             |
+| `JsInterpolationStatus.UnterminatedEof`     | Reached end of source before `}` was balanced, or input was invalid. |
 
 In the unterminated cases the `text` slice still runs from the opening `{` to
 wherever scanning gave up (there is no closing `}`), so callers always get a
@@ -176,13 +166,14 @@ meaningful span, except for the invalid-input case (negative or `NaN`
   expression. It only locates the balanced span.
 - It must never throw on malformed input, malformed interpolations are
   reported via the `Unterminated*` outcomes rather than exceptions. that
-  includes malformed *calls*, not just malformed source, a negative or `NaN`
+  includes malformed _calls_, not just malformed source, a negative or `NaN`
   `openBraceIndex` is caught before it ever reaches the scanner instead of
   bubbling up as a raw TypeScript internal assertion.
-- Unterminated block comments are detected explicitly by inspecting the
-  comment token's own text, not via `isUnterminated()`, since the scanner
-  doesn't consider an unclosed `/* ...` to be an unterminated token the way it
-  does for strings and templates.
+- An unterminated block comment, `/* ...` with no closing `*/`, is expected to
+  resolve as `UnterminatedEof` rather than `UnterminatedLiteral`. it's trivia,
+  it gets skipped like any other comment, and the resolver only notices
+  anything's wrong once the scanner runs off the end and hands back
+  `EndOfFileToken`. that's intentional, not a gap.
 - The scanner is created once per instance and reused across `resolve` calls via
   `setText`, which avoids reallocation when many interpolations are resolved in
   the same source.

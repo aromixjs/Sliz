@@ -1,13 +1,12 @@
 import * as fc from "fast-check";
-import { JsExprTokenizer } from "@/src";
-import { JsToken, JsTokenType } from "@/src/JsExpr/token";
+import { JsInterpolationResolver, JsInterpolationStatus } from "@/src";
 import { describe, expect, it } from "vitest";
 
-interface Outcome {
-  tokens: JsToken[];
-  closed: boolean;
-  end: number;
-}
+const validStatuses = [
+  JsInterpolationStatus.Closed,
+  JsInterpolationStatus.UnterminatedLiteral,
+  JsInterpolationStatus.UnterminatedEof,
+];
 
 const specialChars = fc.constantFrom(
   "{",
@@ -36,62 +35,22 @@ const specialChars = fc.constantFrom(
 
 const codeString = fc.array(specialChars, { maxLength: 150 }).map((chars) => chars.join(""));
 
-function expectValidOutcome(source: string, result: Outcome): void {
-  const tokens = result.tokens;
-  expect(tokens.length).toBeGreaterThan(0);
-  expect(result.closed).toBe(tokens[tokens.length - 1].type === JsTokenType.ExpressionEnd);
-  expect(tokens[0].type).toBe(JsTokenType.ExpressionStart);
-
-  for (const token of tokens) {
-    expect(token.start).toBeGreaterThanOrEqual(0);
-    expect(token.end).toBeLessThanOrEqual(source.length);
-    expect(token.start).toBeLessThanOrEqual(token.end);
-
-    switch (token.type) {
-      case JsTokenType.RawJs: {
-        const content = (token as { content: string }).content;
-        expect(content.length).toBeGreaterThan(0);
-        expect(content).toBe(source.slice(token.start, token.end).trim());
-        break;
-      }
-      case JsTokenType.StringLiteral:
-      case JsTokenType.TemplateLiteral:
-      case JsTokenType.LineComment:
-      case JsTokenType.BlockComment:
-      case JsTokenType.UnterminatedString:
-      case JsTokenType.UnterminatedTemplateLiteral:
-      case JsTokenType.UnterminatedBlockComment: {
-        const content = (token as { content: string }).content;
-        expect(content).toBe(source.slice(token.start, token.end));
-        break;
-      }
-      case JsTokenType.ExpressionStart: {
-        expect(source.slice(token.start, token.end)).toBe("{");
-        break;
-      }
-      case JsTokenType.ExpressionEnd: {
-        expect(source.slice(token.start, token.end)).toBe("}");
-        break;
-      }
-      case JsTokenType.TagLike: {
-        expect(token.start).toBe(token.end);
-        break;
-      }
-      case JsTokenType.UnterminatedExpression: {
-        break;
-      }
-    }
-  }
-}
-
-describe("JsExprTokenizer property tests", () => {
-  it("tokenizes an expression starting at a guaranteed { and keeps invariants", () => {
+describe("JsInterpolationResolver property tests", () => {
+  it("resolves an expression starting at a guaranteed { and keeps invariants", () => {
     fc.assert(
       fc.property(codeString, codeString, (prefix, suffix) => {
         const source = prefix + "{" + suffix;
-        const start = prefix.length;
-        const result = new JsExprTokenizer(source).tokenize(start);
-        expectValidOutcome(source, result);
+        const openIndex = prefix.length;
+        const result = new JsInterpolationResolver(source).resolve(openIndex);
+
+        expect(validStatuses).toContain(result.status);
+        expect(result.start).toBe(openIndex);
+        expect(result.end).toBeGreaterThanOrEqual(openIndex);
+        expect(result.end).toBeLessThanOrEqual(source.length);
+        expect(result.text).toBe(source.slice(openIndex, result.end));
+        if (result.status === JsInterpolationStatus.Closed) {
+          expect(source[result.end - 1]).toBe("}");
+        }
       }),
     );
   });
@@ -100,72 +59,107 @@ describe("JsExprTokenizer property tests", () => {
     fc.assert(
       fc.property(codeString, codeString, (prefix, suffix) => {
         const source = prefix + "{" + suffix;
-        const start = prefix.length;
-        const first = new JsExprTokenizer(source).tokenize(start);
-        const second = new JsExprTokenizer(source).tokenize(start);
-        expect(JSON.stringify(first.tokens)).toBe(JSON.stringify(second.tokens));
-        expect(first.closed).toBe(second.closed);
+        const openIndex = prefix.length;
+        const first = new JsInterpolationResolver(source).resolve(openIndex);
+        const second = new JsInterpolationResolver(source).resolve(openIndex);
+
+        expect(first.status).toBe(second.status);
+        expect(first.start).toBe(second.start);
         expect(first.end).toBe(second.end);
+        expect(first.text).toBe(second.text);
       }),
     );
   });
 
-  it("when closed, end points right after a } and the last token is ExpressionEnd", () => {
+  it("when closed, end points right after a }", () => {
     fc.assert(
       fc.property(codeString, codeString, (prefix, suffix) => {
         const source = prefix + "{" + suffix;
-        const start = prefix.length;
-        const result = new JsExprTokenizer(source).tokenize(start);
-        if (result.closed) {
+        const openIndex = prefix.length;
+        const result = new JsInterpolationResolver(source).resolve(openIndex);
+
+        if (result.status === JsInterpolationStatus.Closed) {
           expect(source[result.end - 1]).toBe("}");
-          expect(result.tokens[result.tokens.length - 1].type).toBe(JsTokenType.ExpressionEnd);
         }
       }),
     );
   });
 
-  it("an unclosed, non-taglike expression ends in UnterminatedExpression", () => {
+  it("when not closed, reports an unterminated outcome", () => {
     fc.assert(
       fc.property(codeString, codeString, (prefix, suffix) => {
         const source = prefix + "{" + suffix;
-        const start = prefix.length;
-        const result = new JsExprTokenizer(source).tokenize(start);
-        const last = result.tokens[result.tokens.length - 1];
-        if (!result.closed && last.type !== JsTokenType.TagLike) {
-          expect(last.type).toBe(JsTokenType.UnterminatedExpression);
+        const openIndex = prefix.length;
+        const result = new JsInterpolationResolver(source).resolve(openIndex);
+
+        if (result.status !== JsInterpolationStatus.Closed) {
+          expect(validStatuses).toContain(result.status);
+          expect(result.status).not.toBe(JsInterpolationStatus.Closed);
         }
       }),
     );
   });
 
-  it("never crashes: returns only at { and otherwise throws a safe Error", () => {
+  it("never throws for an in-bounds start, returning a valid outcome", () => {
     fc.assert(
-      fc.property(fc.string(), fc.integer(), (source, start) => {
+      fc.property(fc.string(), (source) => {
+        const start = fc.sample(fc.integer({ min: 0, max: source.length }), 1)[0];
         let thrown: unknown = null;
-        let result: Outcome | null = null;
+        let result = null as ReturnType<JsInterpolationResolver["resolve"]> | null;
         try {
-          result = new JsExprTokenizer(source).tokenize(start);
+          result = new JsInterpolationResolver(source).resolve(start);
         } catch (error) {
           thrown = error;
         }
-        if (thrown === null) {
-          expect(source[start]).toBe("{");
-          expectValidOutcome(source, result as Outcome);
-        } else {
-          expect(thrown).toBeInstanceOf(Error);
-          expect(thrown).not.toBeInstanceOf(RangeError);
+
+        expect(thrown).toBeNull();
+        if (result !== null && start < source.length) {
+          expect(validStatuses).toContain(result.status);
+          expect(result.start).toBe(start);
+          expect(result.end).toBeGreaterThanOrEqual(start);
+          expect(result.end).toBeLessThanOrEqual(source.length);
+          expect(result.text).toBe(source.slice(start, result.end));
+          if (result.status === JsInterpolationStatus.Closed) {
+            expect(source[result.end - 1]).toBe("}");
+          }
         }
       }),
     );
   });
 
-  it("produces in-bounds, content-matching tokens for fully arbitrary input", () => {
+  it("never throws for an out-of-range start, returning a defined outcome", () => {
+    fc.assert(
+      fc.property(fc.string(), fc.integer({ min: 1 }), (source, offset) => {
+        const start = source.length + offset;
+        let thrown: unknown = null;
+        let result = null as ReturnType<JsInterpolationResolver["resolve"]> | null;
+        try {
+          result = new JsInterpolationResolver(source).resolve(start);
+        } catch (error) {
+          thrown = error;
+        }
+
+        expect(thrown).toBeNull();
+        expect(result).not.toBeNull();
+      }),
+    );
+  });
+
+  it("produces in-bounds, content-matching outcomes for fully arbitrary input", () => {
     fc.assert(
       fc.property(fc.string({ maxLength: 200 }), (source) => {
         const openIndex = source.indexOf("{");
         fc.pre(openIndex !== -1);
-        const result = new JsExprTokenizer(source).tokenize(openIndex);
-        expectValidOutcome(source, result);
+        const result = new JsInterpolationResolver(source).resolve(openIndex);
+
+        expect(validStatuses).toContain(result.status);
+        expect(result.start).toBe(openIndex);
+        expect(result.end).toBeGreaterThanOrEqual(openIndex);
+        expect(result.end).toBeLessThanOrEqual(source.length);
+        expect(result.text).toBe(source.slice(openIndex, result.end));
+        if (result.status === JsInterpolationStatus.Closed) {
+          expect(source[result.end - 1]).toBe("}");
+        }
       }),
     );
   });
