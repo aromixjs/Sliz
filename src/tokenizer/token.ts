@@ -118,10 +118,12 @@ export interface JsInterpolationToken extends BaseToken {
 
 export interface UnterminatedJsLiteralToken extends BaseToken {
   type: TokenType.UnterminatedJsLiteral;
+  value: string;
 }
 
 export interface UnterminatedJsInterpolationToken extends BaseToken {
   type: TokenType.UnterminatedJsInterpolation;
+  value: string;
 }
 
 /*=== Content Tokens ===*/

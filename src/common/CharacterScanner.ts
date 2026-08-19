@@ -178,6 +178,7 @@ export class CharacterScanner<Token = unknown> {
     const code = this.peek();
     return code === this.carriageReturn || code === this.lineFeed;
   }
+
   /*===== Token emission =====*/
   protected emit(token: Token): void {
     this.tokens.push(token);
