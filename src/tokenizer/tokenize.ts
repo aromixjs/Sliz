@@ -125,6 +125,7 @@ export class SlizTokenizer extends CharacterScanner<Token> {
 
   private consumeOpeningTagStart() {
     const start = this.position;
+    this.advance();
     this.emit({
       type: TokenType.OpeningTagStart,
       start,
@@ -189,22 +190,23 @@ export class SlizTokenizer extends CharacterScanner<Token> {
   }
 
   /*===== Attributes =====*/
+
   private get isAttributeName(): boolean {
     const code = this.peek();
 
     return (
-      !Number.isNaN(code) &&
+      code !== this.null &&
       code !== this.space &&
       code !== this.tab &&
       code !== this.lineFeed &&
       code !== this.carriageReturn &&
-      code !== this.equals &&
-      code !== this.greaterThan &&
-      code !== this.lessThan &&
+      code !== this.formFeed &&
       code !== this.slash &&
-      code !== this.backslash &&
+      code !== this.greaterThan &&
+      code !== this.equals &&
       code !== this.doubleQuote &&
-      code !== this.singleQuote
+      code !== this.singleQuote &&
+      code !== this.lessThan
     );
   }
 
@@ -436,6 +438,11 @@ export class SlizTokenizer extends CharacterScanner<Token> {
       this.consumeText();
     }
 
+    this.emit({
+      type: TokenType.Eof,
+      start: this.position,
+      end: this.position,
+    });
     return this.getTokens();
   }
 }

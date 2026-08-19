@@ -161,11 +161,14 @@ export class CharacterScanner<Token = unknown> {
   /*===== Generic character-class checks =====*/
   protected get isWhitespace(): boolean {
     const code = this.peek();
+
     return (
       code === this.space ||
       code === this.tab ||
       code === this.lineFeed ||
-      code === this.carriageReturn
+      code === this.formFeed ||
+      code === this.carriageReturn ||
+      code === this.verticalTab
     );
   }
 
