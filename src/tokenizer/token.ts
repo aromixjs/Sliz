@@ -1,56 +1,75 @@
 export enum TokenType {
-  /*=== Html Comment ===*/
-  HtmlCommentStart = "HtmlCommentStart",
-  HtmlCommentEnd = "HtmlCommentEnd",
-  HtmlCommentContent = "HtmlCommentContent",
-  UnterminatedHtmlComment = "UnterminatedHtmlComment",
-  /*=== Html Tags ===*/
-  DoctypeStart = "DoctypeStart",
+  OpeningTagStart = "OpeningTagStart",
+  OpeningDeclarationStart = "OpeningDeclarationStart",
+  TagName = "TagName",
+  ClosingTagStart = "ClosingTagStart",
+  NormalTagEnd = "NormalTagEnd",
+  SelfClosingTagEnd = "SelfClosingTagEnd",
+  UnsupportedTagName = "UnsupportedTagName",
+
   AttributeName = "AttributeName",
   Equals = "Equals",
   QuotedAttributeValue = "QuotedAttributeValue",
   UnterminatedQuotedAttributeValue = "UnterminatedQuotedAttributeValue",
   UnQuotedAttributeValue = "UnQuotedAttributeValue",
-  TagStart = "TagStart",
-  TagEnd = "TagEnd",
-  /*=== Js Expression ===*/
-  JsExpression = "JsExpression",
+
+  CommentStart = "CommentStart",
+  CommentEnd = "CommentEnd",
+  CommentContent = "CommentContent",
+  UnterminatedComment = "UnterminatedComment",
+
+  JsInterpolation = "JsInterpolation",
   UnterminatedJsLiteral = "UnterminatedJsLiteral",
-  UnterminatedJsExpression = "UnterminatedJsExpression",
-  /*=== Text ===*/
+  UnterminatedJsInterpolation = "UnterminatedJsInterpolation",
+
   Text = "Text",
+
+  Unknown = "Unknown",
+  Eof = "Eof",
 }
 
-/*===== Tokens =====*/
+/*===== Base =====*/
+
 export interface BaseToken {
   type: TokenType;
   start: number;
   end: number;
 }
-/*=== Html Comment Tokens  ===*/
-export interface HtmlCommentStartToken extends BaseToken {
-  type: TokenType.HtmlCommentStart;
+
+/*=== Tag Tokens ===*/
+export interface OpeningTagStartToken extends BaseToken {
+  type: TokenType.OpeningTagStart;
+}
+export interface OpeningDeclarationStartToken extends BaseToken {
+  type: TokenType.OpeningDeclarationStart;
+}
+export interface TagNameToken extends BaseToken {
+  type: TokenType.TagName;
+  value: string;
 }
 
-export interface HtmlCommentEndToken extends BaseToken {
-  type: TokenType.HtmlCommentEnd;
-}
-export interface HtmlCommentContentToken extends BaseToken {
-  type: TokenType.HtmlCommentContent;
-  content: string;
+export interface ClosingTagStartToken extends BaseToken {
+  type: TokenType.ClosingTagStart;
 }
 
-export interface UnterminatedHtmlComment extends BaseToken {
-  type: TokenType.UnterminatedHtmlComment;
+export interface NormalTagEndToken extends BaseToken {
+  type: TokenType.NormalTagEnd;
 }
 
-/*=== Html Tag Tokens ===*/
-export interface DoctypeStartToken extends BaseToken {
-  type: TokenType.DoctypeStart;
+export interface SelfClosingTagEndToken extends BaseToken {
+  type: TokenType.SelfClosingTagEnd;
 }
+
+export interface UnsupportedTagNameToken extends BaseToken {
+  type: TokenType.UnsupportedTagName;
+  value: string;
+}
+
+/*=== Html Attribute Tokens ===*/
+
 export interface AttributeNameToken extends BaseToken {
   type: TokenType.AttributeName;
-  content: string;
+  value: string;
 }
 
 export interface EqualsToken extends BaseToken {
@@ -59,7 +78,7 @@ export interface EqualsToken extends BaseToken {
 
 export interface QuotedAttributeValueToken extends BaseToken {
   type: TokenType.QuotedAttributeValue;
-  content: string;
+  value: string;
 }
 
 export interface UnterminatedQuotedAttributeValueToken extends BaseToken {
@@ -68,53 +87,82 @@ export interface UnterminatedQuotedAttributeValueToken extends BaseToken {
 
 export interface UnQuotedAttributeValueToken extends BaseToken {
   type: TokenType.UnQuotedAttributeValue;
-  content: string;
+  value: string;
 }
 
-export interface TagStartToken extends BaseToken {
-  type: TokenType.TagStart;
-  content: string;
+/*=== Html Comment Tokens ===*/
+
+export interface CommentStartToken extends BaseToken {
+  type: TokenType.CommentStart;
 }
 
-export interface TagEndToken extends BaseToken {
-  type: TokenType.TagEnd;
+export interface CommentEndToken extends BaseToken {
+  type: TokenType.CommentEnd;
 }
 
-/*=== Js Expression ===*/
-export interface JsExpressionToken extends BaseToken {
-  type: TokenType.JsExpression;
-  content: string;
+export interface CommentContentToken extends BaseToken {
+  type: TokenType.CommentContent;
+  value: string;
 }
 
-export interface UnterminatedJsExpressionToken extends BaseToken {
-  type: TokenType.UnterminatedJsExpression;
+export interface UnterminatedCommentToken extends BaseToken {
+  type: TokenType.UnterminatedComment;
+}
+
+/*=== Js Expression Tokens ===*/
+
+export interface JsInterpolationToken extends BaseToken {
+  type: TokenType.JsInterpolation;
+  value: string;
 }
 
 export interface UnterminatedJsLiteralToken extends BaseToken {
   type: TokenType.UnterminatedJsLiteral;
 }
 
-/*=== Text ===*/
+export interface UnterminatedJsInterpolationToken extends BaseToken {
+  type: TokenType.UnterminatedJsInterpolation;
+}
+
+/*=== Content Tokens ===*/
 
 export interface TextToken extends BaseToken {
   type: TokenType.Text;
-  content: string;
+  value: string;
 }
 
+/*=== Fallback Tokens ===*/
+
+export interface UnknownToken extends BaseToken {
+  type: TokenType.Unknown;
+  value: string;
+}
+
+export interface EofToken extends BaseToken {
+  type: TokenType.Eof;
+}
+
+/*=== Token ===*/
 export type Token =
-  | HtmlCommentStartToken
-  | HtmlCommentEndToken
-  | HtmlCommentContentToken
-  | UnterminatedHtmlComment
-  | DoctypeStartToken
+  | OpeningTagStartToken
+  | OpeningDeclarationStartToken
+  | TagNameToken
+  | ClosingTagStartToken
+  | NormalTagEndToken
+  | SelfClosingTagEndToken
+  | UnsupportedTagNameToken
   | AttributeNameToken
   | EqualsToken
   | QuotedAttributeValueToken
   | UnterminatedQuotedAttributeValueToken
   | UnQuotedAttributeValueToken
-  | JsExpressionToken
-  | UnterminatedJsExpressionToken
+  | CommentStartToken
+  | CommentEndToken
+  | CommentContentToken
+  | UnterminatedCommentToken
+  | JsInterpolationToken
   | UnterminatedJsLiteralToken
-  | TagStartToken
-  | TagEndToken
-  | TextToken;
+  | UnterminatedJsInterpolationToken
+  | TextToken
+  | UnknownToken
+  | EofToken;

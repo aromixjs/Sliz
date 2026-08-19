@@ -7,7 +7,7 @@ export class CharacterScanner<Token = unknown> {
     this.source = source;
   }
 
-  /*===== Character codes :: [shared across every language] =====*/
+  /*===== Character codes =====*/
   protected readonly null = 0;
   protected readonly backspace = 8;
   protected readonly tab = 9;
@@ -120,52 +120,46 @@ export class CharacterScanner<Token = unknown> {
   protected readonly nine = 57;
 
   /*===== Position =====*/
-  get position(): number {
+  protected get position(): number {
     return this.index;
   }
 
-  get eof(): boolean {
+  protected get eof(): boolean {
     return this.index >= this.source.length;
   }
 
-  peek(): number {
+  protected peek(): number {
     return this.source.charCodeAt(this.index);
   }
 
-  peekAtOffset(offset: number): number {
+  protected peekAtOffset(offset: number): number {
     return this.source.charCodeAt(this.index + offset);
   }
 
-  advance(): void {
+  protected advance(): void {
     this.index++;
   }
 
-  advanceBy(offset: number): void {
+  protected advanceBy(offset: number): void {
     this.index = Math.max(0, Math.min(this.index + offset, this.source.length));
   }
 
-  advanceIf(condition: boolean): void {
+  protected advanceIf(condition: boolean): void {
     if (condition) {
       this.index++;
     }
   }
 
-  advanceTo(position: number): void {
+  protected advanceTo(position: number): void {
     this.index = position;
   }
 
-  getChars(start: number): string {
+  protected getChars(start: number): string {
     return this.source.slice(start, this.index);
   }
 
-  /*===== Generic character-class checks :: [language-specific checks live in their own prefixed modules] =====*/
-  isAlpha(code: number): boolean {
-    return (
-      (code >= this.lowerA && code <= this.lowerZ) || (code >= this.upperA && code <= this.upperZ)
-    );
-  }
-
-  get isWhitespace(): boolean {
+  /*===== Generic character-class checks =====*/
+  protected get isWhitespace(): boolean {
     const code = this.peek();
     return (
       code === this.space ||
@@ -175,32 +169,12 @@ export class CharacterScanner<Token = unknown> {
     );
   }
 
-  get isQuote(): boolean {
+  protected get isQuote(): boolean {
     const code = this.peek();
     return code === this.singleQuote || code === this.doubleQuote;
   }
 
-  get isBacktick(): boolean {
-    return this.peek() === this.backtick;
-  }
-
-  get isOpenBrace(): boolean {
-    return this.peek() === this.openBrace;
-  }
-
-  get isCloseBrace(): boolean {
-    return this.peek() === this.closeBrace;
-  }
-
-  get isDigit(): boolean {
-    return this.peek() >= this.zero && this.peek() <= this.nine;
-  }
-
-  get isSlash(): boolean {
-    return this.peek() === this.slash;
-  }
-
-  get isLineBreak(): boolean {
+  protected get isLineBreak(): boolean {
     const code = this.peek();
     return code === this.carriageReturn || code === this.lineFeed;
   }
