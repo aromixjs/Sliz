@@ -6,6 +6,7 @@ export enum TokenType {
   NormalTagEnd = "NormalTagEnd",
   SelfClosingTagEnd = "SelfClosingTagEnd",
   UnsupportedTagName = "UnsupportedTagName",
+  UnterminatedTag = "UnterminatedTag",
 
   AttributeName = "AttributeName",
   Equals = "Equals",
@@ -63,6 +64,10 @@ export interface SelfClosingTagEndToken extends BaseToken {
 export interface UnsupportedTagNameToken extends BaseToken {
   type: TokenType.UnsupportedTagName;
   value: string;
+}
+
+export interface UnterminatedTag extends BaseToken {
+  type: TokenType.UnterminatedTag
 }
 
 /*=== Html Attribute Tokens ===*/
@@ -153,6 +158,7 @@ export type Token =
   | NormalTagEndToken
   | SelfClosingTagEndToken
   | UnsupportedTagNameToken
+  | UnterminatedTag
   | AttributeNameToken
   | EqualsToken
   | QuotedAttributeValueToken

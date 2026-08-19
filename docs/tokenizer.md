@@ -1,210 +1,54 @@
-# Tokenizer Internals
+# Sliz Tokenizer
 
-The tokenizer converts raw Sliz source text into a flat array of tokens. It is a single-pass, character-by-character scanner that never throws on malformed input — instead it emits diagnostics and emits partial tokens, then continues scanning from the next sync point.
+The tokenizer's job is to take raw `sliz` source and turn it into a flat list of tokens the parser can walk.
 
----
-
-## File Layout
-
-```
-src/tokenizer/
-  cursor.ts       CharacterCursor — index-based read cursor over source string
-  token.ts        SyntaxKind enum + Token interface + TokenizerContext
-  tokenize.ts     Entry point: tokenize() + dispatch()
-  consumer.ts     All token consumption logic (the bulk of the tokenizer)
-
-src/scanner/
-  char.ts         Char code constants (char.lessThan = 60, etc.)
-  is.ts           Predicates — is.whitespace(), is.tagEnd(), is.commentOpen(), etc.
-  skip.ts         Skip functions — skip.whiteSpace(), skip.string(), skip.braceExpression(), etc.
-```
-
----
-
-## Entry Point
+Here is the api definition:
 
 ```ts
-tokenize(context: CompilerContext) → Token[]
+const tokens = new SlizTokenizer(source).tokenize();
 ```
 
-1. Creates a `CharacterCursor` from `context.source`.
-2. Creates a `TokenizerContext` (cursor, token list, diagnostics array).
-3. Loops calling `dispatch(ctx)` until `cursor.eof`.
-4. Returns the token array.
+That's the whole entry point. `tokenize()` loops over the source once, character by character, dispatching based on what it sees next, until it runs out of input, then emits a final `Eof` token.
 
-Diagnostics are pushed into `context.diagnostics` (shared reference).
+## How dispatch works
 
----
-
-## dispatch
+At any point in the source, the tokenizer is looking at one of a handful of things: the start of a comment, a declaration like `<!DOCTYPE html>`, a closing tag, an opening tag, or, if none of those match, plain text. The main loop just checks for each of these in order and hands off to the matching consumer:
 
 ```ts
-function dispatch(ctx) {
-  switch (cursor.peek()) {
-    case "<":
-      consume.markup(ctx);
-      break;
-    case "{":
-      consume.expression(ctx);
-      break;
-    default:
-      consume.text(ctx);
-      break;
-  }
-}
+if (this.isComment) { ... }
+if (this.isCommentEndSymbol) { ... }
+if (this.isDeclaration) { ... }
+if (this.isClosingTag) { ... }
+if (this.isOpeningTag) { ... }
+this.consumeText();
 ```
 
-Three entry points based on the current character:
+Every one of those `is*` checks is a plain lookahead, it peeks at the current character and a few ahead of it, and never advances the cursor. Once a branch matches, the corresponding `consume*` method takes over and does the actual advancing.
 
-- `<` → markup (tags, comments, doctypes)
-- `{` → expressions
-- anything else → plain text
+## Tags
 
----
+Opening and closing tags go through the same shape: consume the `<` (or `</`), consume the tag name, and for opening tags, consume attributes, then consume whatever ends the tag, `>` or `/>`.
 
-## Sync Points
+Tag names are checked against a small unsupported set, currently just `script` and `style`. Sliz doesn't try to understand what's inside those tags the way HTML parsers do. It just tokenizes them like any other tag, emits an `UnsupportedTagName` token alongside the normal `TagName` token, and moves on. The parser is the one that actually rejects them. This mirrors how JSX treats these tags too, there's no special raw-text mode, the author just isn't meant to put arbitrary script/style content there.
 
-Every consumer stops scanning when it hits one of these characters:
+If a tag never actually closes, whitespace and attributes run out and neither `>` nor `/>` shows up, the tokenizer emits an `UnterminatedTag` token at that position instead of just silently stopping. Every construct that can run off the end of the source without closing properly gets a token like this, so the parser never has to infer failure just from the shape of the surrounding tokens.
 
-| Character  | Meaning                                   |
-| ---------- | ----------------------------------------- |
-| `<`        | Start of a tag or comment                 |
-| `{`        | Start of an expression                    |
-| `>`        | End of a tag                              |
-| `/`        | Potential self-closing tag or closing tag |
-| whitespace | Delimiter between tokens                  |
-| EOF        | End of source                             |
+## Attributes
 
-When a consumer encounters a sync point it can't handle, it returns immediately. The outer `dispatch` loop picks up from there. This keeps error scope minimal — a malformed expression doesn't eat a closing tag, and a malformed tag doesn't eat the next element.
+Attribute scanning loops: skip whitespace, check for the tag end, and if neither, read a name. If the name is followed by `=`, read a value. A value can be quoted (`"..."` or `'...'`), unquoted, or a `{...}` expression.
 
----
+Attribute names can't be JS expressions, only values and text content can be. If a stray `{` shows up somewhere a name is expected, it just falls through to being an `Unknown` token, and the parser is left to flag it as an error.
 
-## Consumer Functions
+## Text and interpolation
 
-### Top-level
+Text is everything that isn't a tag, comment, or declaration. The tokenizer walks forward emitting one `Text` token per run of plain characters, but the moment it hits a `{`, it stops, closes off whatever text was accumulated, and hands off to interpolation resolution.
 
-| Function     | Input                       | Produces                                                  |
-| ------------ | --------------------------- | --------------------------------------------------------- |
-| `text`       | plain text until `<` or `{` | `Text` token                                              |
-| `expression` | `{ ... }`                   | `OpenBrace` + `JsExpression` + `CloseBrace` tokens        |
-| `markup`     | `<...`                      | dispatches to comment / doctype / closingTag / openingTag |
+Resolving `{...}` isn't a naive brace-count. It's backed by `JsInterpolationResolver`, which runs the real TypeScript scanner over the source starting at the brace. That's what lets it correctly handle nested braces, template literals with their own `${}` interpolations inside, strings, and regex vs division ambiguity, all inside a single `{expr}`, without the tokenizer needing to know anything about JS syntax itself. It just asks the resolver "where does this expression actually end," and gets back one of three outcomes: closed cleanly, unterminated because of an open string/template literal, or unterminated because the source just ran out. Each maps to its own token type, so an unclosed `{` never gets treated the same as one that closed properly.
 
-### Tag consumers
+## Comments
 
-| Function         | Input                                        | Produces                                           |
-| ---------------- | -------------------------------------------- | -------------------------------------------------- |
-| `openingTag`     | `<div class="x">`                            | `LessThan` + `TagName` + attributes + tag end      |
-| `closingTag`     | `</div>`                                     | `LessThan` + `Slash` + `TagName` + tag end         |
-| `tagEnd`         | `>` or `/>`                                  | `GreaterThan` or `SlashGreaterThan`                |
-| `attributes`     | loops calling `attribute`                    | multiple `AttributeName` + `AttributeValue` tokens |
-| `attribute`      | `name="value"`                               | `AttributeName` + optionally `Equals` + value      |
-| `attributeValue` | dispatches to expression / quoted / unquoted | value tokens                                       |
+`<!--` starts a comment, `-->` ends one. HTML comments can't really nest, but if a `<!--` shows up again while already inside a comment, the tokenizer emits a zero-width `CommentStart` marker at that point and keeps going, rather than pretending it didn't see it. If the comment never closes, it emits `UnterminatedComment` at EOF. This is intentional, the tokenizer flags it and moves on; deciding what a stray nested comment actually means is left to the parser.
 
-### Special content
+## The rule underneath all of it
 
-| Function      | Input                         | Produces            |
-| ------------- | ----------------------------- | ------------------- |
-| `doctype`     | `<!DOCTYPE ...>`              | `Doctype` token     |
-| `htmlComment` | `<!-- ... -->`                | `HtmlComment` token |
-| `script`      | raw content until `</script>` | `Script` token      |
-| `style`       | raw content until `</style>`  | `Style` token       |
-
----
-
-## Token Types (SyntaxKind)
-
-```
-Doctype, Text, LessThan, Slash, OpenBrace, JsExpression, CloseBrace,
-TagName, AttributeName, AttributeValue, GreaterThan, SlashGreaterThan,
-Script, Style, HtmlComment, EndOfFile
-```
-
-Each token has: `kind`, `start` (inclusive), `end` (exclusive), `value` (source text, `undefined` for EOF).
-
-The `EndOfFile` token is always emitted as the last token, with `start === end === source.length` and `value === undefined`. The parser can use it as a sentinel to stop reading.
-
----
-
-## Scanner Layer
-
-### is.* (predicates)
-
-Pure checks — never advance the cursor.
-
-```
-is.whitespace(code)       space, tab, \n, \r
-is.alpha(code)            a-z, A-Z
-is.quote(code)            ' or "
-is.tagEnd(ctx)            > or />
-is.closingTagStart(ctx)   </
-is.lineCommentStart(ctx)  //
-is.blockCommentStart(ctx) /*
-is.doctype(ctx)           <!DOCTYPE
-is.commentOpen(ctx)       <!--
-is.commentClose(ctx)      -->
-is.scriptClosingTag(ctx)  </script>
-is.styleClosingTag(ctx)   </style>
-```
-
-### skip.* (advancers)
-
-Advance the cursor past a syntactic construct, ignoring its content.
-
-```
-skip.whiteSpace(ctx)       whitespace characters
-skip.string(ctx)           '...' or "..." (handles \ escapes)
-skip.template(ctx)         `...` (handles ${} interpolation)
-skip.braceExpression(ctx)  { ... } (tracks nesting, skips strings)
-skip.lineComment(ctx)      // ... until \n
-skip.blockComment(ctx)     /* ... */
-```
-
-Key rule: `skip.*` functions are void. They advance and the caller checks where the cursor ended up (eof, specific character, etc.).
-
----
-
-## Error Recovery
-
-The tokenizer never throws. When it encounters malformed input:
-
-1. **Emit a diagnostic** with position range and descriptive message.
-2. **Emit partial tokens** for whatever was successfully read.
-3. **Stop at the next sync point** — cursor stays at `<`, `{`, `>`, etc.
-4. **Return** — the outer `dispatch` loop takes over.
-
-Example:
-
-```
-<div>{unclosed expression</div>
-```
-
-- `expression` scans `{unclosed expression`
-- Hits `</` → emits `UnterminatedExpression` error + partial tokens
-- Cursor stays at `<`
-- `dispatch` sees `<` → `markup` → `closingTag` handles `</div>` normally
-
----
-
-## Diagnostic Codes
-
-| Code    | Meaning                        |
-| ------- | ------------------------------ |
-| SLIZ001 | Unterminated expression        |
-| SLIZ002 | Unterminated doctype           |
-| SLIZ003 | Expected tag name              |
-| SLIZ004 | Unterminated attribute value   |
-| SLIZ005 | Expected tag end (`>` or `/>`) |
-| SLIZ006 | Unterminated comment           |
-| SLIZ007 | Nested comment                 |
-| SLIZ008 | Unterminated script            |
-| SLIZ009 | Unterminated style             |
-
----
-
-## Design Principles
-
-1. **Single pass** — no backtracking, no multi-lookahead.
-2. **Never throw** — emit diagnostic, emit partial tokens, continue.
-3. **Minimal error scope** — sync points prevent one malformed construct from consuming another.
-4. **Character codes, not strings** — all comparisons use numeric char codes for speed.
-5. **Namespace grouping** — `is.*`, `skip.*`, `consume.*` keep related logic together.
+Nothing in the tokenizer throws, and nothing silently drops information. Every place input could go wrong, an unclosed tag, an unclosed comment, an unclosed expression, an unclosed quoted value, has a dedicated token type for it, emitted at the exact position things broke. That's what lets the parser build real diagnostics later, instead of the tokenizer just giving up and taking the rest of the compile pipeline down with it.

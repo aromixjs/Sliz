@@ -11,6 +11,27 @@ export class SlizTokenizer extends CharacterScanner<Token> {
     this.jsResolver = new JsInterpolationResolver(source);
   }
 
+
+  private isHtmlIdentifier(code: number): boolean {
+    return (
+      !Number.isNaN(code) &&
+      code !== this.null &&
+      code !== this.space &&
+      code !== this.tab &&
+      code !== this.lineFeed &&
+      code !== this.carriageReturn &&
+      code !== this.formFeed &&
+      code !== this.slash &&
+      code !== this.greaterThan &&
+      code !== this.equals &&
+      code !== this.doubleQuote &&
+      code !== this.singleQuote &&
+      code !== this.lessThan &&
+      code !== this.openBrace  &&
+      code !== this.closeBrace 
+    );
+  }
+
   /*===== Comments =====*/
   private get isComment(): boolean {
     return (
@@ -72,7 +93,7 @@ export class SlizTokenizer extends CharacterScanner<Token> {
     return (
       this.peek() === this.lessThan &&
       this.peekAtOffset(1) === this.exclamationMark &&
-      this.isSlizTagName(this.peekAtOffset(2))
+      this.isHtmlIdentifier(this.peekAtOffset(2))
     );
   }
 
@@ -87,23 +108,6 @@ export class SlizTokenizer extends CharacterScanner<Token> {
   }
 
   /*===== Tag =====*/
-  private isSlizTagName(code: number): boolean {
-    // Sliz Tag Name is a merge of Js Identifier + html Tag rule
-    const lowercaseChar = code >= this.lowerA && code <= this.lowerZ;
-    const upperCaseChar = code >= this.upperA && code <= this.upperZ;
-    const numberChar = code >= this.zero && code <= this.nine;
-    return (
-      lowercaseChar ||
-      upperCaseChar ||
-      numberChar ||
-      code === this.underscore ||
-      code === this.dollar ||
-      code === this.dot ||
-      code === this.minus ||
-      code === this.colon
-    );
-  }
-
   private get isTagEnd(): boolean {
     return (
       this.peek() === this.greaterThan ||
@@ -115,12 +119,12 @@ export class SlizTokenizer extends CharacterScanner<Token> {
     return (
       this.peek() === this.lessThan &&
       this.peekAtOffset(1) === this.slash &&
-      this.isSlizTagName(this.peekAtOffset(2))
+      this.isHtmlIdentifier(this.peekAtOffset(2))
     );
   }
 
   private get isOpeningTag() {
-    return this.peek() === this.lessThan && this.isSlizTagName(this.peekAtOffset(1));
+    return this.peek() === this.lessThan && this.isHtmlIdentifier(this.peekAtOffset(1));
   }
 
   private consumeOpeningTagStart() {
@@ -146,7 +150,7 @@ export class SlizTokenizer extends CharacterScanner<Token> {
   private consumeTagName() {
     const nameStart = this.position;
 
-    while (!this.eof && this.isSlizTagName(this.peek())) {
+    while (!this.eof && this.isHtmlIdentifier(this.peek())) {
       this.advance();
     }
 
@@ -167,7 +171,14 @@ export class SlizTokenizer extends CharacterScanner<Token> {
   }
 
   private consumeTagEndIfPresent() {
+    this.skipWhiteSpace()
     if (this.eof || !this.isTagEnd) {
+      this.emit({
+        type: TokenType.UnterminatedTag,
+        start: this.position,
+        end: this.position
+      })
+
       return;
     }
     const start = this.position;
@@ -191,24 +202,6 @@ export class SlizTokenizer extends CharacterScanner<Token> {
 
   /*===== Attributes =====*/
 
-  private get isAttributeName(): boolean {
-    const code = this.peek();
-
-    return (
-      code !== this.null &&
-      code !== this.space &&
-      code !== this.tab &&
-      code !== this.lineFeed &&
-      code !== this.carriageReturn &&
-      code !== this.formFeed &&
-      code !== this.slash &&
-      code !== this.greaterThan &&
-      code !== this.equals &&
-      code !== this.doubleQuote &&
-      code !== this.singleQuote &&
-      code !== this.lessThan
-    );
-  }
 
   private consumeTagAttributesIfPresent() {
     while (!this.eof) {
@@ -218,7 +211,7 @@ export class SlizTokenizer extends CharacterScanner<Token> {
         break;
       }
 
-      if (this.isAttributeName) {
+      if (this.isHtmlIdentifier(this.peek())) {
         this.consumeAttributeName();
         this.skipWhiteSpace();
 
@@ -235,7 +228,7 @@ export class SlizTokenizer extends CharacterScanner<Token> {
 
   private consumeAttributeName() {
     const start = this.position;
-    while (!this.eof && this.isAttributeName) {
+    while (!this.eof && this.isHtmlIdentifier(this.peek())) {
       this.advance();
     }
     this.emit({
@@ -351,7 +344,7 @@ export class SlizTokenizer extends CharacterScanner<Token> {
   private consumeUnknown() {
     const start = this.position;
 
-    while (!this.eof && !this.isWhitespace && !this.isTagEnd && !this.isAttributeName) {
+    while (!this.eof && !this.isWhitespace && !this.isTagEnd && !this.isHtmlIdentifier(this.peek())) {
       this.advance();
     }
 
@@ -372,7 +365,8 @@ export class SlizTokenizer extends CharacterScanner<Token> {
       !this.isComment &&
       !this.isCommentEndSymbol &&
       !this.isOpeningTag &&
-      !this.isClosingTag
+      !this.isClosingTag &&
+      !this.isDeclaration
     ) {
       if (this.peek() === this.openBrace) {
         this.emitIf(this.position > segmentStart, {
