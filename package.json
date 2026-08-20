@@ -46,16 +46,10 @@
     "fmt:check": "oxfmt --check"
   },
   "dependencies": {
-    "@vscode/tree-sitter-wasm": "^0.3.1",
-    "acorn": "^8.18.0",
-    "acorn-loose": "^8.5.2",
-    "acorn-walk": "^8.3.5",
-    "typescript": "^5.9.3",
-    "web-tree-sitter": "^0.26.12"
+    "typescript": "^5.9.3"
   },
   "devDependencies": {
     "@types/node": "^22.10.2",
-    "@vue/compiler-core": "^3.5.41",
     "beachball": "^2.65.5",
     "fast-check": "^4.9.0",
     "htmlparser2": "^12.0.0",
