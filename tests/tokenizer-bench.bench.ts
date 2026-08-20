@@ -1,5 +1,5 @@
 import { SlizTokenizer } from "@/src";
-import HtmlParser2Tokenizer from "../node_modules/htmlparser2/dist/Tokenizer.js";
+import {Tokenizer} from "htmlparser2";
 import { bench, describe } from "vitest";
 
 const smallMarkup =
@@ -75,7 +75,7 @@ const noopCallbacks = {
 };
 
 function runHtmlParser2(source: string): void {
-  const tokenizer = new HtmlParser2Tokenizer(
+  const tokenizer = new Tokenizer(
     { xmlMode: false, decodeEntities: false, recognizeSelfClosing: true },
     noopCallbacks,
   );

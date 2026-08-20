@@ -39,6 +39,7 @@
     "dev": "tsup --watch",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
+    "bench": "vitest bench",
     "change": "beachball change",
     "bump": "beachball bump",
     "release": "beachball publish --yes --access public",
