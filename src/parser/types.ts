@@ -22,16 +22,13 @@ export interface DoctypeNode {
   value: string;
 }
 
-export const isElement = (node: Node): node is ElementNode =>
-  node.type === "element";
+export const isElement = (node: Node): node is ElementNode => node.type === "element";
 
 export const isText = (node: Node): node is TextNode => node.type === "text";
 
-export const isComment = (node: Node): node is CommentNode =>
-  node.type === "comment";
+export const isComment = (node: Node): node is CommentNode => node.type === "comment";
 
-export const isDoctype = (node: Node): node is DoctypeNode =>
-  node.type === "doctype";
+export const isDoctype = (node: Node): node is DoctypeNode => node.type === "doctype";
 
 export interface HtmlAstParser {
   write(chunk: string): void;

@@ -1,16 +1,7 @@
-import { dir } from "console";
-import { tokenize } from "../src/index";
-import { readFileSync } from "fs";
-import { join } from "path";
-
-
-const content = readFileSync(
-
-  join(import.meta.dirname, 't.html')
-
-)
-
-
-const result = tokenize(content.toString());
-
-dir({result}, { depth: null });
+import { SlizTokenizer } from "@/src";
+console.time();
+const output = new SlizTokenizer(
+  `<!doctype class="userdata-10" .for={user in users }   >my name is {username}</div    >`,
+).tokenize();
+console.log(output);
+console.timeEnd();

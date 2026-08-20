@@ -60,5 +60,7 @@ for (const r of results) {
   }
 }
 
-console.log(`Results: ${results.length} cases, ${totalTokens} total tokens, ${diagnosticCount} with diagnostics, ${crashCount} crashes`);
+console.log(
+  `Results: ${results.length} cases, ${totalTokens} total tokens, ${diagnosticCount} with diagnostics, ${crashCount} crashes`,
+);
 console.log("Output written to tokenizer-output.json");

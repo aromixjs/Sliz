@@ -2,28 +2,28 @@
   "name": "sliz",
   "version": "0.0.1",
   "description": "Sliz Compiler",
-  "type": "module",
-  "license": "MIT",
+  "keywords": [
+    "aromix",
+    "core",
+    "framework",
+    "node",
+    "rpc",
+    "server"
+  ],
   "homepage": "https://aromixjs.github.io/aromix",
+  "bugs": {
+    "url": "https://github.com/aromixjs/aromix/issues"
+  },
+  "license": "MIT",
   "repository": {
     "type": "git",
     "url": "https://github.com/aromixjs/aromix.git",
     "directory": "packages/core"
   },
-  "bugs": {
-    "url": "https://github.com/aromixjs/aromix/issues"
-  },
-  "keywords": [
-    "aromix",
-    "core",
-    "server",
-    "framework",
-    "node",
-    "rpc"
-  ],
   "files": [
     "dist"
   ],
+  "type": "module",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -38,24 +38,25 @@
     "build": "tsup",
     "dev": "tsup --watch",
     "typecheck": "tsc --noEmit",
-    "format": "biome format --write .",
     "test": "vitest run",
+    "bench": "vitest bench",
     "change": "beachball change",
     "bump": "beachball bump",
-    "release": "beachball publish --yes --access public"
-  },
-  "devDependencies": {
-    "@types/node": "^22.10.2",
-    "@vue/compiler-core": "^3.5.41",
-    "beachball": "^2.65.5",
-    "biome": "^0.3.3",
-    "fast-check": "^4.9.0",
-    "htmlparser2": "^12.0.0",
-    "tsup": "^8.3.5",
-    "tsx": "^4.23.11",
-    "vitest": "^4.1.6"
+    "release": "beachball publish --yes --access public",
+    "fmt": "oxfmt",
+    "fmt:check": "oxfmt --check"
   },
   "dependencies": {
     "typescript": "^5.9.3"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "beachball": "^2.65.5",
+    "fast-check": "^4.9.0",
+    "htmlparser2": "^12.0.0",
+    "oxfmt": "^0.63.0",
+    "tsup": "^8.3.5",
+    "tsx": "^4.23.11",
+    "vitest": "^4.1.6"
   }
 }
