@@ -1,5 +1,5 @@
 import { CharacterScanner } from "../common/CharacterScanner";
-import { JsInterpolationResolver, JsInterpolationStatus } from "../common/JsInterpolationResolver";
+import { JsInterpolationResolver, JsInterpolationStatus } from "../common/captureInterpolation";
 import { Token, TokenType } from "./token";
 
 export class SlizTokenizer extends CharacterScanner<Token> {
