@@ -13,6 +13,5 @@ const tokens = new SlizTokenizer(`
 
 
 
-const ast = new SlizParser(tokens).parse()
 
-console.dir(ast, { depth: null });
+console.dir(tokens, { depth: null });
