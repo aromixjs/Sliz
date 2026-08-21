@@ -1,5 +1,5 @@
 import ts from "typescript"
-import { captureInterpolation } from "../src/common/captureInterpolation"
+import { captureInterpolation } from "../src/tokenizer/interpolation"
 
 
 

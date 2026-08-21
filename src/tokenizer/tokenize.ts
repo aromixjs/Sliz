@@ -1,6 +1,6 @@
 import ts from "typescript";
-import { CharacterScanner } from "../common/CharacterScanner";
-import { captureInterpolation, InterpolationStatus } from "../common/captureInterpolation";
+import { CharacterScanner } from "./CharacterScanner";
+import { captureInterpolation, InterpolationStatus } from "./interpolation";
 import { Token, TokenType } from "./token";
 
 export class SlizTokenizer extends CharacterScanner<Token> {
@@ -9,8 +9,7 @@ export class SlizTokenizer extends CharacterScanner<Token> {
 
   constructor(source: string) {
     super(source);
-    this.scanner = ts.createScanner(ts.ScriptTarget.Latest, false, ts.LanguageVariant.Standard)
-    this.scanner.setText(source)
+    this.scanner = ts.createScanner(ts.ScriptTarget.Latest, false, ts.LanguageVariant.Standard,source)
   }
 
 

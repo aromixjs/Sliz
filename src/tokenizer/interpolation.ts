@@ -45,6 +45,7 @@ export enum InterpolationStatus {
   Closed = "Closed",
   UnterminatedLiteral = "UnterminatedLiteral",
   UnterminatedEof = "UnterminatedEof",
+  InvalidStart = "InvalidStart"
 }
 
 export interface InterpolationOutcome {
@@ -58,7 +59,11 @@ export function captureInterpolation(scanner: ts.Scanner): InterpolationOutcome 
 
   let kind = scanner.scan();
   if (kind !== ts.SyntaxKind.OpenBraceToken) {
-    throw new Error("Expected opening brace");
+    return {
+      status: InterpolationStatus.InvalidStart,
+      start,
+      end: start
+    }
   }
 
 
